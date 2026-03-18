@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Zine Log - Photo Zine Editor</title>
+<!-- Tailwind CSS v3 with Plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Font: Inter -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<style data-purpose="base-typography">
+    body {
+      font-family: 'Inter', sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+  </style>
+<style data-purpose="layout-customization">
+    /* Custom scrollbar for library and toolbars */
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #e2e8f0;
+      border-radius: 10px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #cbd5e1;
+    }
+
+    /* Page Canvas Aspect Ratio (Standard Zine/Letter) */
+    .zine-canvas {
+      aspect-ratio: 1 / 1.414; /* A-series ratio */
+      box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    }
+  </style>
+</head>
+<body class="bg-[#F8F9FA] h-screen flex flex-col overflow-hidden text-slate-900">
+<!-- BEGIN: MainHeader -->
+<header class="h-16 border-b border-slate-200 bg-white flex items-center justify-between px-6 shrink-0 z-30" data-purpose="top-navigation">
+<div class="flex items-center gap-3">
+<!-- Brand Identity -->
+<div class="w-8 h-8 bg-black rounded flex items-center justify-center">
+<div class="w-4 h-4 border-2 border-white rotate-45"></div>
+</div>
+<h1 class="font-bold text-lg tracking-tight">Zine Log</h1>
+<span class="text-slate-400 text-xs font-medium uppercase tracking-widest ml-2 px-2 py-1 bg-slate-100 rounded">Beta</span>
+</div>
+<div class="flex items-center gap-4">
+<div class="text-sm text-slate-500 mr-4">Project: <span class="text-slate-900 font-medium">Summer 2024 Collection</span></div>
+<button class="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">Preview</button>
+<button class="bg-black text-white px-5 py-2 rounded-lg text-sm font-semibold shadow-sm hover:bg-slate-800 transition-all flex items-center gap-2">
+<svg fill="currentColor" height="16" viewbox="0 0 256 256" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M224,144v64a8,8,0,0,1-8,8H40a8,8,0,0,1-8-8V144a8,8,0,0,1,16,0v56H208V144a8,8,0,0,1,16,0Zm-101.66,5.66a8,8,0,0,0,11.32,0l40-40a8,8,0,0,0-11.32-11.32L136,124.69V40a8,8,0,0,0-16,0v84.69L93.66,98.34a8,8,0,0,0-11.32,11.32Z"></path></svg>
+        Export &amp; Download
+      </button>
+</div>
+</header>
+<!-- END: MainHeader -->
+<main class="flex flex-1 overflow-hidden" data-purpose="app-workspace">
+<!-- BEGIN: LeftColumn (Library) -->
+<aside class="w-72 border-r border-slate-200 bg-white flex flex-col shrink-0" data-purpose="library-panel">
+<div class="p-6">
+<h2 class="text-sm font-bold text-slate-900 mb-4">Library</h2>
+<!-- Upload Trigger -->
+<button class="w-full border-2 border-dashed border-slate-200 rounded-xl p-6 flex flex-col items-center justify-center gap-2 hover:border-slate-400 hover:bg-slate-50 transition-all group">
+<div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center group-hover:scale-110 transition-transform">
+<svg fill="#64748b" height="20" viewbox="0 0 256 256" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M216,40H40A16,16,0,0,0,24,56V200a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V56A16,16,0,0,0,216,40ZM216,56V158.83l-20.69-20.69a16,16,0,0,0-22.62,0L144,166.83l-44.69-44.69a16,16,0,0,0-22.62,0L24,174.83V56ZM216,200H40v-4.69l52.69-52.68a8,8,0,0,1,11.31,0L152,190.69a8,8,0,0,0,11.31,0L192,162l24,24Zm-64-80a12,12,0,1,1,12,12A12,12,0,0,1,152,120Z"></path></svg>
+</div>
+<span class="text-xs font-semibold text-slate-500">Upload Photos</span>
+</button>
+</div>
+<!-- Photo Grid Scrollable Area -->
+<div class="flex-1 overflow-y-auto px-6 pb-6 custom-scrollbar">
+<div class="grid grid-cols-2 gap-3">
+<!-- Sample Library Item 1 -->
+<div class="relative group aspect-square rounded-lg overflow-hidden bg-slate-100 border border-slate-100 cursor-grab active:cursor-grabbing">
+<img alt="Thumbnail" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBhwYKQDEIqhuvOaK4AlGeJEOkQVH83Mr_FYcUD-83IsqqbQsfuDV4Ra_nE8fQSc0XcwJn34MRvpK9MWtPCR0mA6KsQJOozz4rkeYUvJBWHCwnmFp0xcqh7TKA3b1s-k-r6OHaCVm4UN1GSwo4OitxE9cDEvo-bcmaavhAg6FcVYVIK9novqn5trEZE9HIFo4tKwQsvBuTlArny9QW7F5oFWQBi028TwAqryag9Q7J3KOiHQsKFYtwByjEVZeKxA6bV-55oAR0tsSE_"/>
+<div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all"></div>
+<button class="absolute top-1 right-1 p-1 bg-white/90 rounded shadow-sm opacity-0 group-hover:opacity-100 transition-opacity hover:text-red-500">
+<svg fill="currentColor" height="14" viewbox="0 0 256 256" width="14" xmlns="http://www.w3.org/2000/svg"><path d="M216,48H176V40a24,24,0,0,0-24-24H104A24,24,0,0,0,80,40v8H40a8,8,0,0,0,0,16h8V208a16,16,0,0,0,16,16H192a16,16,0,0,0,16-16V64h8a8,8,0,0,0,0-16ZM96,40a8,8,0,0,1,8-8h48a8,8,0,0,1,8,8v8H96Zm96,168H64V64H192ZM112,104v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Zm48,0v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Z"></path></svg>
+</button>
+</div>
+<!-- Sample Library Item 2 -->
+<div class="relative group aspect-square rounded-lg overflow-hidden bg-slate-100 border border-slate-100 cursor-grab active:cursor-grabbing">
+<img alt="Thumbnail" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBHwhJTsTOQuRJ95tSq0xNy2tPCLCubL7lFpBZcP07FdJFyjLdZu-b9mxi7i1qLMlM6bvBK52BoEFcSTYU47Gr4eci_Onb8ONhAoZklQ69AvG83TmLw7NfD0_Q2kA1-sj_KZ3W4t_-4wc3h5rD26coZkAuTShe9E6mtP_EAybO0pxyjUIVNXqk38-d3SeWIgNKmFBKY_MS4D4Gis3yyo5zSi0e6gm4vM1hhM03XJ4IAQNEW_ASSt6gp6oXeKGx87e-Ruv99cqSjpFIL"/>
+<div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all"></div>
+<button class="absolute top-1 right-1 p-1 bg-white/90 rounded shadow-sm opacity-0 group-hover:opacity-100 transition-opacity hover:text-red-500">
+<svg fill="currentColor" height="14" viewbox="0 0 256 256" width="14" xmlns="http://www.w3.org/2000/svg"><path d="M216,48H176V40a24,24,0,0,0-24-24H104A24,24,0,0,0,80,40v8H40a8,8,0,0,0,0,16h8V208a16,16,0,0,0,16,16H192a16,16,0,0,0,16-16V64h8a8,8,0,0,0,0-16ZM96,40a8,8,0,0,1,8-8h48a8,8,0,0,1,8,8v8H96Zm96,168H64V64H192ZM112,104v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Zm48,0v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Z"></path></svg>
+</button>
+</div>
+<!-- Empty Skeletons for UI Mockup -->
+<div class="aspect-square rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center">
+<span class="text-[10px] text-slate-300 font-medium">Empty</span>
+</div>
+<div class="aspect-square rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center">
+<span class="text-[10px] text-slate-300 font-medium">Empty</span>
+</div>
+</div>
+</div>
+</aside>
+<!-- END: LeftColumn -->
+<!-- BEGIN: MiddleColumn (Canvas) -->
+<section class="flex-1 flex flex-col relative overflow-hidden" data-purpose="editor-canvas-view">
+<!-- Canvas Toolbar -->
+<div class="h-12 bg-white/80 backdrop-blur-sm border-b border-slate-200 flex items-center justify-between px-6 shrink-0">
+<div class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Page 1 - Editor</div>
+<div class="flex items-center gap-2 bg-slate-100 p-1 rounded-lg">
+<button class="p-1.5 hover:bg-white rounded transition-colors" title="Zoom Out">
+<svg fill="currentColor" height="16" viewbox="0 0 256 256" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Zm120,0a8,8,0,0,1-8,8H72a8,8,0,0,1,0-16h88A8,8,0,0,1,160,112Z"></path></svg>
+</button>
+<span class="text-[10px] font-bold px-2 text-slate-600">85%</span>
+<button class="p-1.5 hover:bg-white rounded transition-colors" title="Zoom In">
+<svg fill="currentColor" height="16" viewbox="0 0 256 256" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Zm120,0a8,8,0,0,1-8,8H120v32a8,8,0,0,1-16,0V120H72a8,8,0,0,1,0-16h32V72a8,8,0,0,1,16,0v32h32A8,8,0,0,1,160,112Z"></path></svg>
+</button>
+<div class="w-px h-4 bg-slate-200 mx-1"></div>
+<button class="text-[10px] font-bold px-2 hover:bg-white rounded transition-colors">Fit</button>
+</div>
+</div>
+<!-- Main Canvas Scroll Area -->
+<div class="flex-1 overflow-auto p-12 flex flex-col items-center custom-scrollbar">
+<!-- The Zine Page -->
+<div class="zine-canvas bg-white w-full max-w-lg mb-12 p-8 grid grid-cols-2 grid-rows-2 gap-4" id="canvas-grid-display">
+<!-- Drop Zone 1 -->
+<div class="border-2 border-dashed border-slate-100 bg-slate-50/50 rounded flex flex-col items-center justify-center group hover:border-blue-400 hover:bg-blue-50/30 transition-all cursor-pointer">
+<svg class="group-hover:fill-blue-400 transition-colors" fill="#cbd5e1" height="24" viewbox="0 0 256 256" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M224,128a8,8,0,0,1-8,8H136v80a8,8,0,0,1-16,0V136H40a8,8,0,0,1,0-16h80V40a8,8,0,0,1,16,0v80h80A8,8,0,0,1,224,128Z"></path></svg>
+<span class="text-[10px] text-slate-400 mt-2 font-medium opacity-0 group-hover:opacity-100">Drop Photo</span>
+</div>
+<!-- Drop Zone 2 -->
+<div class="border-2 border-dashed border-slate-100 bg-slate-50/50 rounded flex flex-col items-center justify-center group hover:border-blue-400 hover:bg-blue-50/30 transition-all cursor-pointer">
+<svg class="group-hover:fill-blue-400 transition-colors" fill="#cbd5e1" height="24" viewbox="0 0 256 256" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M224,128a8,8,0,0,1-8,8H136v80a8,8,0,0,1-16,0V136H40a8,8,0,0,1,0-16h80V40a8,8,0,0,1,16,0v80h80A8,8,0,0,1,224,128Z"></path></svg>
+</div>
+<!-- Drop Zone 3 -->
+<div class="border-2 border-dashed border-slate-100 bg-slate-50/50 rounded flex flex-col items-center justify-center group hover:border-blue-400 hover:bg-blue-50/30 transition-all cursor-pointer">
+<svg class="group-hover:fill-blue-400 transition-colors" fill="#cbd5e1" height="24" viewbox="0 0 256 256" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M224,128a8,8,0,0,1-8,8H136v80a8,8,0,0,1-16,0V136H40a8,8,0,0,1,0-16h80V40a8,8,0,0,1,16,0v80h80A8,8,0,0,1,224,128Z"></path></svg>
+</div>
+<!-- Drop Zone 4 -->
+<div class="border-2 border-dashed border-slate-100 bg-slate-50/50 rounded flex flex-col items-center justify-center group hover:border-blue-400 hover:bg-blue-50/30 transition-all cursor-pointer">
+<svg class="group-hover:fill-blue-400 transition-colors" fill="#cbd5e1" height="24" viewbox="0 0 256 256" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M224,128a8,8,0,0,1-8,8H136v80a8,8,0,0,1-16,0V136H40a8,8,0,0,1,0-16h80V40a8,8,0,0,1,16,0v80h80A8,8,0,0,1,224,128Z"></path></svg>
+</div>
+</div>
+<!-- Add Page Interaction -->
+<button class="flex items-center gap-2 text-slate-400 hover:text-slate-900 transition-colors py-4 px-8 rounded-full border border-slate-200 bg-white shadow-sm hover:shadow-md">
+<svg fill="currentColor" height="20" viewbox="0 0 256 256" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M200,32H56A16,16,0,0,0,40,48V208a16,16,0,0,0,16,16H200a16,16,0,0,0,16-16V48A16,16,0,0,0,200,32Zm0,176H56V48H200V208Zm-32-80a8,8,0,0,1-8,8H136v24a8,8,0,0,1-16,0V136H96a8,8,0,0,1,0-16h24V96a8,8,0,0,1,16,0v24h24A8,8,0,0,1,168,128Z"></path></svg>
+<span class="text-sm font-semibold">Add New Page</span>
+</button>
+</div>
+</section>
+<!-- END: MiddleColumn -->
+<!-- BEGIN: RightColumn (Tools) -->
+<aside class="w-80 border-l border-slate-200 bg-white flex flex-col shrink-0 overflow-y-auto custom-scrollbar" data-purpose="tools-panel">
+<div class="p-6">
+<h2 class="text-sm font-bold text-slate-900 mb-6">Tools &amp; Layouts</h2>
+<!-- Section: Grid Templates -->
+<div class="mb-8" data-purpose="section-templates">
+<label class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-4 block">Grid Templates</label>
+<div class="grid grid-cols-2 gap-3">
+<button class="p-3 border-2 border-black rounded-xl bg-slate-50 flex flex-col gap-2 transition-all">
+<div class="grid grid-cols-2 gap-1 w-full aspect-square">
+<div class="bg-black/80 rounded-sm"></div>
+<div class="bg-black/80 rounded-sm"></div>
+<div class="bg-black/80 rounded-sm"></div>
+<div class="bg-black/80 rounded-sm"></div>
+</div>
+<span class="text-[10px] font-bold text-center">2 x 2</span>
+</button>
+<button class="p-3 border-2 border-transparent hover:border-slate-200 rounded-xl bg-slate-50 flex flex-col gap-2 transition-all">
+<div class="grid grid-cols-3 gap-0.5 w-full aspect-square">
+<div class="bg-slate-300 rounded-sm"></div><div class="bg-slate-300 rounded-sm"></div><div class="bg-slate-300 rounded-sm"></div>
+<div class="bg-slate-300 rounded-sm"></div><div class="bg-slate-300 rounded-sm"></div><div class="bg-slate-300 rounded-sm"></div>
+<div class="bg-slate-300 rounded-sm"></div><div class="bg-slate-300 rounded-sm"></div><div class="bg-slate-300 rounded-sm"></div>
+</div>
+<span class="text-[10px] font-bold text-center text-slate-500">3 x 3</span>
+</button>
+<button class="p-3 border-2 border-transparent hover:border-slate-200 rounded-xl bg-slate-50 flex flex-col gap-2 transition-all">
+<div class="grid grid-cols-3 grid-rows-3 gap-1 w-full aspect-square">
+<div class="bg-slate-300 rounded-sm col-span-2 row-span-2"></div>
+<div class="bg-slate-300 rounded-sm"></div>
+<div class="bg-slate-300 rounded-sm"></div>
+<div class="bg-slate-300 rounded-sm col-span-3"></div>
+</div>
+<span class="text-[10px] font-bold text-center text-slate-500">Mosaic</span>
+</button>
+<button class="p-3 border-2 border-transparent hover:border-slate-200 rounded-xl bg-slate-50 flex flex-col gap-2 transition-all">
+<div class="flex items-center justify-center w-full aspect-square border-2 border-dashed border-slate-300 rounded-sm">
+<svg fill="#94a3b8" height="16" viewbox="0 0 256 256" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M224,128a8,8,0,0,1-8,8H136v80a8,8,0,0,1-16,0V136H40a8,8,0,0,1,0-16h80V40a8,8,0,0,1,16,0v80h80A8,8,0,0,1,224,128Z"></path></svg>
+</div>
+<span class="text-[10px] font-bold text-center text-slate-500">Custom</span>
+</button>
+</div>
+</div>
+<!-- Section: Spacing -->
+<div class="mb-8" data-purpose="section-spacing">
+<div class="flex justify-between items-center mb-4">
+<label class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Spacing</label>
+<span class="text-xs font-mono text-slate-600">16px</span>
+</div>
+<input class="w-full h-1.5 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-black" max="100" min="0" type="range" value="16"/>
+<div class="flex justify-between mt-2">
+<span class="text-[10px] text-slate-300">0</span>
+<span class="text-[10px] text-slate-300">Gutter Width</span>
+<span class="text-[10px] text-slate-300">100</span>
+</div>
+</div>
+<!-- Section: Border Controls -->
+<div class="mb-8" data-purpose="section-borders">
+<label class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-4 block">Borders</label>
+<div class="flex items-center justify-between p-3 bg-slate-50 rounded-lg mb-3">
+<span class="text-xs font-medium">Enable Border</span>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox" value=""/>
+<div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-black"></div>
+</label>
+</div>
+<div class="space-y-4 px-1">
+<div class="flex items-center justify-between">
+<span class="text-[11px] text-slate-500">Stroke Color</span>
+<div class="flex gap-2">
+<button class="w-5 h-5 rounded-full border border-slate-200 bg-black ring-2 ring-slate-200 ring-offset-1"></button>
+<button class="w-5 h-5 rounded-full border border-slate-200 bg-white"></button>
+<button class="w-5 h-5 rounded-full border border-slate-200 bg-red-500"></button>
+<button class="w-5 h-5 rounded-full border border-slate-200 bg-slate-300 flex items-center justify-center">
+<span class="text-[8px]">+</span>
+</button>
+</div>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-[11px] text-slate-500">Corner Radius</span>
+<div class="flex items-center gap-2">
+<input class="w-12 text-[11px] p-1 border-slate-200 rounded text-center focus:ring-0 focus:border-black" type="number" value="4"/>
+<span class="text-[10px] text-slate-400">px</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Section: Page Info -->
+<div class="pt-6 border-t border-slate-100" data-purpose="section-info">
+<div class="flex flex-col gap-2 text-slate-400">
+<div class="flex justify-between items-center">
+<span class="text-[10px]">Canvas Size</span>
+<span class="text-[10px] text-slate-600 font-medium">210 x 297 mm</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-[10px]">Photos Used</span>
+<span class="text-[10px] text-slate-600 font-medium">0 / 4</span>
+</div>
+</div>
+</div>
+</div>
+</aside>
+<!-- END: RightColumn -->
+</main>
+<!-- BEGIN: BottomStatus (Optional) -->
+<footer class="h-8 bg-slate-900 text-white flex items-center px-6 text-[10px] shrink-0" data-purpose="status-bar">
+<div class="flex gap-6 items-center">
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-green-400"></div>
+<span>All changes saved to cloud</span>
+</div>
+<div class="opacity-50">|</div>
+<div>Layer: Page 1 Base</div>
+</div>
+<div class="ml-auto opacity-50">
+      Zine Log v0.1.2-alpha
+    </div>
+</footer>
+<!-- END: BottomStatus -->
+<script data-purpose="ui-interactions">
+    // Mock interaction for range slider label update
+    const spacingSlider = document.querySelector('input[type="range"]');
+    const spacingValue = document.querySelector('span.font-mono');
+    
+    if (spacingSlider && spacingValue) {
+      spacingSlider.addEventListener('input', (e) => {
+        spacingValue.textContent = `${e.target.value}px`;
+        const grid = document.getElementById('canvas-grid-display');
+        if (grid) {
+          grid.style.gap = `${e.target.value / 4}px`; // Simplified mapping for preview
+        }
+      });
+    }
+
+    // Toggle template selection UI
+    const templates = document.querySelectorAll('[data-purpose="section-templates"] button');
+    templates.forEach(btn => {
+      btn.addEventListener('click', () => {
+        templates.forEach(b => b.classList.remove('border-black'));
+        templates.forEach(b => b.classList.add('border-transparent'));
+        btn.classList.add('border-black');
+        btn.classList.remove('border-transparent');
+      });
+    });
+  </script>
+</body></html>
