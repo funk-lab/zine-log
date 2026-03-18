@@ -1,0 +1,136 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="1000" viewBox="0 0 900 1000">
+<rect width="100%" height="100%" fill="#02113d"/><rect x="10" y="10" width="880" height="980" fill="none" stroke="#109cff" stroke-width="2"/><rect x="20" y="20" width="80" height="80" fill="none" stroke="#109cff" stroke-width="2"/>
+    <line x1="20" y1="20" x2="100" y2="100" stroke="#109cff" stroke-width="2"/>
+    <line x1="100" y1="20" x2="20" y2="100" stroke="#109cff" stroke-width="2"/><rect x="100" y="20" width="80" height="80" fill="none" stroke="#109cff" stroke-width="2"/>
+    <line x1="100" y1="20" x2="180" y2="100" stroke="#109cff" stroke-width="2"/>
+    <line x1="180" y1="20" x2="100" y2="100" stroke="#109cff" stroke-width="2"/><rect x="180" y="20" width="80" height="80" fill="none" stroke="#109cff" stroke-width="2"/>
+    <line x1="180" y1="20" x2="260" y2="100" stroke="#109cff" stroke-width="2"/>
+    <line x1="260" y1="20" x2="180" y2="100" stroke="#109cff" stroke-width="2"/><rect x="260" y="20" width="80" height="80" fill="none" stroke="#109cff" stroke-width="2"/>
+    <line x1="260" y1="20" x2="340" y2="100" stroke="#109cff" stroke-width="2"/>
+    <line x1="340" y1="20" x2="260" y2="100" stroke="#109cff" stroke-width="2"/><rect x="340" y="20" width="80" height="80" fill="none" stroke="#109cff" stroke-width="2"/>
+    <line x1="340" y1="20" x2="420" y2="100" stroke="#109cff" stroke-width="2"/>
+    <line x1="420" y1="20" x2="340" y2="100" stroke="#109cff" stroke-width="2"/><rect x="420" y="20" width="80" height="80" fill="none" stroke="#109cff" stroke-width="2"/>
+    <line x1="420" y1="20" x2="500" y2="100" stroke="#109cff" stroke-width="2"/>
+    <line x1="500" y1="20" x2="420" y2="100" stroke="#109cff" stroke-width="2"/><rect x="520" y="20" width="80" height="80" fill="none" stroke="#109cff" stroke-width="2"/>
+    <line x1="520" y1="20" x2="600" y2="100" stroke="#109cff" stroke-width="2"/>
+    <line x1="600" y1="20" x2="520" y2="100" stroke="#109cff" stroke-width="2"/><rect x="600" y="20" width="80" height="80" fill="none" stroke="#109cff" stroke-width="2"/>
+    <line x1="600" y1="20" x2="680" y2="100" stroke="#109cff" stroke-width="2"/>
+    <line x1="680" y1="20" x2="600" y2="100" stroke="#109cff" stroke-width="2"/><rect x="680" y="20" width="80" height="80" fill="white" stroke="#109cff" stroke-width="2"/>
+    <line x1="680" y1="20" x2="760" y2="100" stroke="#109cff" stroke-width="2"/>
+    <line x1="760" y1="20" x2="680" y2="100" stroke="#109cff" stroke-width="2"/><rect x="20" y="100" width="80" height="80" fill="none" stroke="#109cff" stroke-width="2"/>
+    <line x1="20" y1="100" x2="100" y2="180" stroke="#109cff" stroke-width="2"/>
+    <line x1="100" y1="100" x2="20" y2="180" stroke="#109cff" stroke-width="2"/><rect x="20" y="180" width="80" height="80" fill="none" stroke="#109cff" stroke-width="2"/>
+    <line x1="20" y1="180" x2="100" y2="260" stroke="#109cff" stroke-width="2"/>
+    <line x1="100" y1="180" x2="20" y2="260" stroke="#109cff" stroke-width="2"/><rect x="20" y="260" width="80" height="80" fill="none" stroke="#109cff" stroke-width="2"/>
+    <line x1="20" y1="260" x2="100" y2="340" stroke="#109cff" stroke-width="2"/>
+    <line x1="100" y1="260" x2="20" y2="340" stroke="#109cff" stroke-width="2"/><rect x="20" y="340" width="80" height="80" fill="none" stroke="#109cff" stroke-width="2"/>
+    <line x1="20" y1="340" x2="100" y2="420" stroke="#109cff" stroke-width="2"/>
+    <line x1="100" y1="340" x2="20" y2="420" stroke="#109cff" stroke-width="2"/><rect x="20" y="420" width="80" height="80" fill="none" stroke="#109cff" stroke-width="2"/>
+    <line x1="20" y1="420" x2="100" y2="500" stroke="#109cff" stroke-width="2"/>
+    <line x1="100" y1="420" x2="20" y2="500" stroke="#109cff" stroke-width="2"/><rect x="20" y="500" width="80" height="80" fill="none" stroke="#109cff" stroke-width="2"/>
+    <line x1="20" y1="500" x2="100" y2="580" stroke="#109cff" stroke-width="2"/>
+    <line x1="100" y1="500" x2="20" y2="580" stroke="#109cff" stroke-width="2"/><rect x="20" y="580" width="80" height="80" fill="none" stroke="#109cff" stroke-width="2"/>
+    <line x1="20" y1="580" x2="100" y2="660" stroke="#109cff" stroke-width="2"/>
+    <line x1="100" y1="580" x2="20" y2="660" stroke="#109cff" stroke-width="2"/><rect x="20" y="660" width="80" height="80" fill="none" stroke="#109cff" stroke-width="2"/>
+    <line x1="20" y1="660" x2="100" y2="740" stroke="#109cff" stroke-width="2"/>
+    <line x1="100" y1="660" x2="20" y2="740" stroke="#109cff" stroke-width="2"/><rect x="20" y="740" width="80" height="80" fill="none" stroke="#109cff" stroke-width="2"/>
+    <line x1="20" y1="740" x2="100" y2="820" stroke="#109cff" stroke-width="2"/>
+    <line x1="100" y1="740" x2="20" y2="820" stroke="#109cff" stroke-width="2"/><rect x="20" y="820" width="80" height="80" fill="none" stroke="#109cff" stroke-width="2"/>
+    <line x1="20" y1="820" x2="100" y2="900" stroke="#109cff" stroke-width="2"/>
+    <line x1="100" y1="820" x2="20" y2="900" stroke="#109cff" stroke-width="2"/><rect x="100" y="900" width="80" height="80" fill="none" stroke="#109cff" stroke-width="2"/>
+    <line x1="100" y1="900" x2="180" y2="980" stroke="#109cff" stroke-width="2"/>
+    <line x1="180" y1="900" x2="100" y2="980" stroke="#109cff" stroke-width="2"/><rect x="180" y="900" width="80" height="80" fill="none" stroke="#109cff" stroke-width="2"/>
+    <line x1="180" y1="900" x2="260" y2="980" stroke="#109cff" stroke-width="2"/>
+    <line x1="260" y1="900" x2="180" y2="980" stroke="#109cff" stroke-width="2"/><rect x="260" y="900" width="80" height="80" fill="none" stroke="#109cff" stroke-width="2"/>
+    <line x1="260" y1="900" x2="340" y2="980" stroke="#109cff" stroke-width="2"/>
+    <line x1="340" y1="900" x2="260" y2="980" stroke="#109cff" stroke-width="2"/><rect x="340" y="900" width="80" height="80" fill="none" stroke="#109cff" stroke-width="2"/>
+    <line x1="340" y1="900" x2="420" y2="980" stroke="#109cff" stroke-width="2"/>
+    <line x1="420" y1="900" x2="340" y2="980" stroke="#109cff" stroke-width="2"/><rect x="420" y="900" width="80" height="80" fill="none" stroke="#109cff" stroke-width="2"/>
+    <line x1="420" y1="900" x2="500" y2="980" stroke="#109cff" stroke-width="2"/>
+    <line x1="500" y1="900" x2="420" y2="980" stroke="#109cff" stroke-width="2"/><rect x="500" y="900" width="80" height="80" fill="none" stroke="#109cff" stroke-width="2"/>
+    <line x1="500" y1="900" x2="580" y2="980" stroke="#109cff" stroke-width="2"/>
+    <line x1="580" y1="900" x2="500" y2="980" stroke="#109cff" stroke-width="2"/><rect x="580" y="900" width="80" height="80" fill="none" stroke="#109cff" stroke-width="2"/>
+    <line x1="580" y1="900" x2="660" y2="980" stroke="#109cff" stroke-width="2"/>
+    <line x1="660" y1="900" x2="580" y2="980" stroke="#109cff" stroke-width="2"/><rect x="660" y="900" width="80" height="80" fill="none" stroke="#109cff" stroke-width="2"/>
+    <line x1="660" y1="900" x2="740" y2="980" stroke="#109cff" stroke-width="2"/>
+    <line x1="740" y1="900" x2="660" y2="980" stroke="#109cff" stroke-width="2"/><rect x="760" y="180" width="80" height="80" fill="none" stroke="#109cff" stroke-width="2"/>
+    <line x1="760" y1="180" x2="840" y2="260" stroke="#109cff" stroke-width="2"/>
+    <line x1="840" y1="180" x2="760" y2="260" stroke="#109cff" stroke-width="2"/><rect x="760" y="260" width="80" height="80" fill="none" stroke="#109cff" stroke-width="2"/>
+    <line x1="760" y1="260" x2="840" y2="340" stroke="#109cff" stroke-width="2"/>
+    <line x1="840" y1="260" x2="760" y2="340" stroke="#109cff" stroke-width="2"/><rect x="760" y="340" width="80" height="80" fill="none" stroke="#109cff" stroke-width="2"/>
+    <line x1="760" y1="340" x2="840" y2="420" stroke="#109cff" stroke-width="2"/>
+    <line x1="840" y1="340" x2="760" y2="420" stroke="#109cff" stroke-width="2"/><rect x="760" y="420" width="80" height="80" fill="none" stroke="#109cff" stroke-width="2"/>
+    <line x1="760" y1="420" x2="840" y2="500" stroke="#109cff" stroke-width="2"/>
+    <line x1="840" y1="420" x2="760" y2="500" stroke="#109cff" stroke-width="2"/><rect x="760" y="500" width="80" height="80" fill="none" stroke="#109cff" stroke-width="2"/>
+    <line x1="760" y1="500" x2="840" y2="580" stroke="#109cff" stroke-width="2"/>
+    <line x1="840" y1="500" x2="760" y2="580" stroke="#109cff" stroke-width="2"/><rect x="760" y="580" width="80" height="80" fill="none" stroke="#109cff" stroke-width="2"/>
+    <line x1="760" y1="580" x2="840" y2="660" stroke="#109cff" stroke-width="2"/>
+    <line x1="840" y1="580" x2="760" y2="660" stroke="#109cff" stroke-width="2"/><rect x="760" y="660" width="80" height="80" fill="none" stroke="#109cff" stroke-width="2"/>
+    <line x1="760" y1="660" x2="840" y2="740" stroke="#109cff" stroke-width="2"/>
+    <line x1="840" y1="660" x2="760" y2="740" stroke="#109cff" stroke-width="2"/><rect x="760" y="740" width="80" height="80" fill="none" stroke="#109cff" stroke-width="2"/>
+    <line x1="760" y1="740" x2="840" y2="820" stroke="#109cff" stroke-width="2"/>
+    <line x1="840" y1="740" x2="760" y2="820" stroke="#109cff" stroke-width="2"/><rect x="760" y="820" width="80" height="80" fill="none" stroke="#109cff" stroke-width="2"/>
+    <line x1="760" y1="820" x2="840" y2="900" stroke="#109cff" stroke-width="2"/>
+    <line x1="840" y1="820" x2="760" y2="900" stroke="#109cff" stroke-width="2"/><rect x="180" y="180" width="80" height="80" fill="none" stroke="#109cff" stroke-width="2"/>
+    <line x1="180" y1="180" x2="260" y2="260" stroke="#109cff" stroke-width="2"/>
+    <line x1="260" y1="180" x2="180" y2="260" stroke="#109cff" stroke-width="2"/><rect x="260" y="180" width="80" height="80" fill="none" stroke="#109cff" stroke-width="2"/>
+    <line x1="260" y1="180" x2="340" y2="260" stroke="#109cff" stroke-width="2"/>
+    <line x1="340" y1="180" x2="260" y2="260" stroke="#109cff" stroke-width="2"/><rect x="340" y="180" width="80" height="80" fill="none" stroke="#109cff" stroke-width="2"/>
+    <line x1="340" y1="180" x2="420" y2="260" stroke="#109cff" stroke-width="2"/>
+    <line x1="420" y1="180" x2="340" y2="260" stroke="#109cff" stroke-width="2"/><rect x="420" y="180" width="80" height="80" fill="none" stroke="#109cff" stroke-width="2"/>
+    <line x1="420" y1="180" x2="500" y2="260" stroke="#109cff" stroke-width="2"/>
+    <line x1="500" y1="180" x2="420" y2="260" stroke="#109cff" stroke-width="2"/><rect x="500" y="180" width="80" height="80" fill="none" stroke="#109cff" stroke-width="2"/>
+    <line x1="500" y1="180" x2="580" y2="260" stroke="#109cff" stroke-width="2"/>
+    <line x1="580" y1="180" x2="500" y2="260" stroke="#109cff" stroke-width="2"/><rect x="580" y="180" width="80" height="80" fill="none" stroke="#109cff" stroke-width="2"/>
+    <line x1="580" y1="180" x2="660" y2="260" stroke="#109cff" stroke-width="2"/>
+    <line x1="660" y1="180" x2="580" y2="260" stroke="#109cff" stroke-width="2"/><rect x="660" y="180" width="80" height="80" fill="none" stroke="#109cff" stroke-width="2"/>
+    <line x1="660" y1="180" x2="740" y2="260" stroke="#109cff" stroke-width="2"/>
+    <line x1="740" y1="180" x2="660" y2="260" stroke="#109cff" stroke-width="2"/><rect x="180" y="340" width="80" height="80" fill="none" stroke="#109cff" stroke-width="2"/>
+    <line x1="180" y1="340" x2="260" y2="420" stroke="#109cff" stroke-width="2"/>
+    <line x1="260" y1="340" x2="180" y2="420" stroke="#109cff" stroke-width="2"/><rect x="180" y="420" width="80" height="80" fill="none" stroke="#109cff" stroke-width="2"/>
+    <line x1="180" y1="420" x2="260" y2="500" stroke="#109cff" stroke-width="2"/>
+    <line x1="260" y1="420" x2="180" y2="500" stroke="#109cff" stroke-width="2"/><rect x="180" y="500" width="80" height="80" fill="none" stroke="#109cff" stroke-width="2"/>
+    <line x1="180" y1="500" x2="260" y2="580" stroke="#109cff" stroke-width="2"/>
+    <line x1="260" y1="500" x2="180" y2="580" stroke="#109cff" stroke-width="2"/><rect x="180" y="580" width="80" height="80" fill="none" stroke="#109cff" stroke-width="2"/>
+    <line x1="180" y1="580" x2="260" y2="660" stroke="#109cff" stroke-width="2"/>
+    <line x1="260" y1="580" x2="180" y2="660" stroke="#109cff" stroke-width="2"/><rect x="180" y="660" width="80" height="80" fill="none" stroke="#109cff" stroke-width="2"/>
+    <line x1="180" y1="660" x2="260" y2="740" stroke="#109cff" stroke-width="2"/>
+    <line x1="260" y1="660" x2="180" y2="740" stroke="#109cff" stroke-width="2"/><rect x="260" y="740" width="80" height="80" fill="none" stroke="#109cff" stroke-width="2"/>
+    <line x1="260" y1="740" x2="340" y2="820" stroke="#109cff" stroke-width="2"/>
+    <line x1="340" y1="740" x2="260" y2="820" stroke="#109cff" stroke-width="2"/><rect x="340" y="740" width="80" height="80" fill="none" stroke="#109cff" stroke-width="2"/>
+    <line x1="340" y1="740" x2="420" y2="820" stroke="#109cff" stroke-width="2"/>
+    <line x1="420" y1="740" x2="340" y2="820" stroke="#109cff" stroke-width="2"/><rect x="420" y="740" width="80" height="80" fill="none" stroke="#109cff" stroke-width="2"/>
+    <line x1="420" y1="740" x2="500" y2="820" stroke="#109cff" stroke-width="2"/>
+    <line x1="500" y1="740" x2="420" y2="820" stroke="#109cff" stroke-width="2"/><rect x="500" y="740" width="80" height="80" fill="none" stroke="#109cff" stroke-width="2"/>
+    <line x1="500" y1="740" x2="580" y2="820" stroke="#109cff" stroke-width="2"/>
+    <line x1="580" y1="740" x2="500" y2="820" stroke="#109cff" stroke-width="2"/><rect x="580" y="340" width="80" height="80" fill="none" stroke="#109cff" stroke-width="2"/>
+    <line x1="580" y1="340" x2="660" y2="420" stroke="#109cff" stroke-width="2"/>
+    <line x1="660" y1="340" x2="580" y2="420" stroke="#109cff" stroke-width="2"/><rect x="580" y="420" width="80" height="80" fill="none" stroke="#109cff" stroke-width="2"/>
+    <line x1="580" y1="420" x2="660" y2="500" stroke="#109cff" stroke-width="2"/>
+    <line x1="660" y1="420" x2="580" y2="500" stroke="#109cff" stroke-width="2"/><rect x="580" y="500" width="80" height="80" fill="none" stroke="#109cff" stroke-width="2"/>
+    <line x1="580" y1="500" x2="660" y2="580" stroke="#109cff" stroke-width="2"/>
+    <line x1="660" y1="500" x2="580" y2="580" stroke="#109cff" stroke-width="2"/><rect x="580" y="580" width="80" height="80" fill="none" stroke="#109cff" stroke-width="2"/>
+    <line x1="580" y1="580" x2="660" y2="660" stroke="#109cff" stroke-width="2"/>
+    <line x1="660" y1="580" x2="580" y2="660" stroke="#109cff" stroke-width="2"/><rect x="340" y="340" width="80" height="80" fill="none" stroke="#109cff" stroke-width="2"/>
+    <line x1="340" y1="340" x2="420" y2="420" stroke="#109cff" stroke-width="2"/>
+    <line x1="420" y1="340" x2="340" y2="420" stroke="#109cff" stroke-width="2"/><rect x="420" y="340" width="80" height="80" fill="none" stroke="#109cff" stroke-width="2"/>
+    <line x1="420" y1="340" x2="500" y2="420" stroke="#109cff" stroke-width="2"/>
+    <line x1="500" y1="340" x2="420" y2="420" stroke="#109cff" stroke-width="2"/><rect x="500" y="340" width="80" height="80" fill="none" stroke="#109cff" stroke-width="2"/>
+    <line x1="500" y1="340" x2="580" y2="420" stroke="#109cff" stroke-width="2"/>
+    <line x1="580" y1="340" x2="500" y2="420" stroke="#109cff" stroke-width="2"/><rect x="340" y="420" width="80" height="80" fill="none" stroke="#109cff" stroke-width="2"/>
+    <line x1="340" y1="420" x2="420" y2="500" stroke="#109cff" stroke-width="2"/>
+    <line x1="420" y1="420" x2="340" y2="500" stroke="#109cff" stroke-width="2"/><rect x="340" y="500" width="80" height="80" fill="none" stroke="#109cff" stroke-width="2"/>
+    <line x1="340" y1="500" x2="420" y2="580" stroke="#109cff" stroke-width="2"/>
+    <line x1="420" y1="500" x2="340" y2="580" stroke="#109cff" stroke-width="2"/><rect x="340" y="580" width="80" height="80" fill="none" stroke="#109cff" stroke-width="2"/>
+    <line x1="340" y1="580" x2="420" y2="660" stroke="#109cff" stroke-width="2"/>
+    <line x1="420" y1="580" x2="340" y2="660" stroke="#109cff" stroke-width="2"/><rect x="500" y="420" width="80" height="80" fill="none" stroke="#109cff" stroke-width="2"/>
+    <line x1="500" y1="420" x2="580" y2="500" stroke="#109cff" stroke-width="2"/>
+    <line x1="580" y1="420" x2="500" y2="500" stroke="#109cff" stroke-width="2"/><rect x="500" y="500" width="80" height="80" fill="none" stroke="#109cff" stroke-width="2"/>
+    <line x1="500" y1="500" x2="580" y2="580" stroke="#109cff" stroke-width="2"/>
+    <line x1="580" y1="500" x2="500" y2="580" stroke="#109cff" stroke-width="2"/><rect x="500" y="580" width="80" height="80" fill="none" stroke="#109cff" stroke-width="2"/>
+    <line x1="500" y1="580" x2="580" y2="660" stroke="#109cff" stroke-width="2"/>
+    <line x1="580" y1="580" x2="500" y2="660" stroke="#109cff" stroke-width="2"/><rect x="340" y="580" width="80" height="80" fill="none" stroke="#109cff" stroke-width="2"/>
+    <line x1="340" y1="580" x2="420" y2="660" stroke="#109cff" stroke-width="2"/>
+    <line x1="420" y1="580" x2="340" y2="660" stroke="#109cff" stroke-width="2"/><rect x="420" y="580" width="80" height="80" fill="none" stroke="#109cff" stroke-width="2"/>
+    <line x1="420" y1="580" x2="500" y2="660" stroke="#109cff" stroke-width="2"/>
+    <line x1="500" y1="580" x2="420" y2="660" stroke="#109cff" stroke-width="2"/><polyline points="100,100 820,100 760,180" fill="none" stroke="#109cff" stroke-width="2"/><polyline points="100,100 180,180 760,180" fill="none" stroke="#109cff" stroke-width="2"/><polyline points="180,260 260,340 580,340" fill="none" stroke="#109cff" stroke-width="2"/><polyline points="180,740 260,660 340,580 500,580" fill="none" stroke="#109cff" stroke-width="2"/><polyline points="580,740 660,820 760,900 880,1020" fill="none" stroke="#109cff" stroke-width="2"/><polyline points="760,180 580,340 420,500" fill="none" stroke="#109cff" stroke-width="2"/><polyline points="20,900 180,740" fill="none" stroke="#109cff" stroke-width="2"/></svg>

@@ -6,6 +6,8 @@ const titleInput = document.querySelector("#title-input");
 const metaInput = document.querySelector("#meta-input");
 const bodyInput = document.querySelector("#body-input");
 const accentInput = document.querySelector("#accent-input");
+const ringSizeInput = document.querySelector("#ring-size-input");
+const ringSizeValue = document.querySelector("#ring-size-value");
 const templateSelect = document.querySelector("#template-select");
 const templateButtons = document.querySelectorAll(".template-pill");
 const downloadPngButton = document.querySelector("#download-png");
@@ -19,11 +21,16 @@ const state = {
   meta: "",
   body: "",
   accent: "#b36a3c",
+  ringScale: 1,
   imageDataUrls: [],
 };
 
 const ARTBOARD_WIDTH = 1200;
 const ARTBOARD_HEIGHT = 1600;
+const GRID_RING_WIDTH = 900;
+const GRID_RING_HEIGHT = 1000;
+const EXPORT_SCALE = 4;
+const MAX_EXPORT_PIXELS = 32000000;
 
 function escapeHtml(value) {
   return value
@@ -55,6 +62,10 @@ function hexToRgb(hex) {
 function rgba(hex, alpha) {
   const { r, g, b } = hexToRgb(hex);
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+function clamp(min, value, max) {
+  return Math.min(max, Math.max(min, value));
 }
 
 function wrapText(text, maxChars) {
@@ -94,7 +105,17 @@ function buildTextBlock(lines, x, y, size, lineHeight, color, weight = 400) {
   return `<text x="${x}" y="${y}" font-family="'Noto Sans SC', 'Microsoft YaHei', sans-serif" font-size="${size}" font-weight="${weight}" fill="${color}">${tspans}</text>`;
 }
 
-function imageMarkup({ href, x, y, width, height, clipId, radius = 0 }) {
+function imageMarkup({
+  href,
+  x,
+  y,
+  width,
+  height,
+  clipId,
+  radius = 0,
+  placeholderSize = 54,
+  placeholderLabel = "Upload Photo",
+}) {
   if (href) {
     const clipDefinition = radius
       ? `<clipPath id="${clipId}"><rect x="${x}" y="${y}" width="${width}" height="${height}" rx="${radius}" ry="${radius}" /></clipPath>`
@@ -112,12 +133,30 @@ function imageMarkup({ href, x, y, width, height, clipId, radius = 0 }) {
         radius - 8,
         0,
       )}" ry="${Math.max(radius - 8, 0)}" fill="none" stroke="${rgba(state.accent, 0.32)}" stroke-dasharray="18 14" />
-      <text x="${x + width / 2}" y="${y + height / 2}" text-anchor="middle" font-family="'Cormorant Garamond', serif" font-size="54" fill="${rgba(
+      <text x="${x + width / 2}" y="${y + height / 2}" text-anchor="middle" font-family="'Cormorant Garamond', serif" font-size="${placeholderSize}" fill="${rgba(
         state.accent,
         0.84,
-      )}">Upload Photo</text>
+      )}">${placeholderLabel}</text>
     </g>
   `;
+}
+
+function gridSlotMarkup({ href, x, y, size, slotId }) {
+  if (href) {
+    const innerInset = Math.min(2.5, Math.max(1.5, size * 0.02));
+    const imageX = x + innerInset;
+    const imageY = y + innerInset;
+    const imageSize = size - innerInset * 2;
+    return `
+      <clipPath id="${slotId}">
+        <rect x="${imageX}" y="${imageY}" width="${imageSize}" height="${imageSize}" />
+      </clipPath>
+      <rect x="${x}" y="${y}" width="${size}" height="${size}" fill="#fffaf4" />
+      <image href="${href}" x="${imageX}" y="${imageY}" width="${imageSize}" height="${imageSize}" preserveAspectRatio="xMidYMid slice" clip-path="url(#${slotId})" />
+    `;
+  }
+
+  return "";
 }
 
 function getImage(index) {
@@ -126,6 +165,41 @@ function getImage(index) {
   }
 
   return state.imageDataUrls[index] || state.imageDataUrls[index % state.imageDataUrls.length];
+}
+
+function generateSpiralPositions(count, gap = 1) {
+  if (count <= 0) {
+    return [];
+  }
+
+  const positions = [[0, 0]];
+  const directions = [
+    [0, 1],
+    [-1, 0],
+    [0, -1],
+    [1, 0],
+  ];
+
+  let x = 0;
+  let y = 0;
+  let directionIndex = 0;
+  let segmentIndex = 0;
+
+  while (positions.length < count) {
+    const segmentLength = 1 + 2 * gap * Math.floor(segmentIndex / 2);
+    const [dx, dy] = directions[directionIndex % directions.length];
+
+    for (let step = 0; step < segmentLength && positions.length < count; step += 1) {
+      x += dx;
+      y += dy;
+      positions.push([x, y]);
+    }
+
+    directionIndex += 1;
+    segmentIndex += 1;
+  }
+
+  return positions;
 }
 
 function renderThumbs() {
@@ -145,6 +219,20 @@ function renderThumbs() {
       `,
     )
     .join("");
+}
+
+function currentDimensions() {
+  if (state.template === "l-style") {
+    return {
+      width: GRID_RING_WIDTH,
+      height: GRID_RING_HEIGHT,
+    };
+  }
+
+  return {
+    width: ARTBOARD_WIDTH,
+    height: ARTBOARD_HEIGHT,
+  };
 }
 
 function buildLTemplate() {
@@ -312,7 +400,64 @@ function buildPosterTemplate() {
   `;
 }
 
+function buildLStyleTemplate() {
+  const width = GRID_RING_WIDTH;
+  const height = GRID_RING_HEIGHT;
+  const layerGap = 1;
+  const baseCell = 80;
+  const accentStroke = rgba(state.accent, 0.38);
+  const frameInset = 28;
+  const spiralPositions = generateSpiralPositions(state.imageDataUrls.length, layerGap);
+  const gridXs = spiralPositions.map(([gridX]) => gridX);
+  const gridYs = spiralPositions.map(([, gridY]) => gridY);
+  const minGridX = Math.min(...gridXs, 0);
+  const maxGridX = Math.max(...gridXs, 0);
+  const minGridY = Math.min(...gridYs, 0);
+  const maxGridY = Math.max(...gridYs, 0);
+  const spanCols = maxGridX - minGridX + 1;
+  const spanRows = maxGridY - minGridY + 1;
+  const fitCell = Math.min(
+    (width - frameInset * 2) / spanCols,
+    (height - frameInset * 2) / spanRows,
+  );
+  const scaledCell = Math.min(fitCell, baseCell * state.ringScale);
+  const offsetX = (width - spanCols * scaledCell) / 2;
+  const offsetY = (height - spanRows * scaledCell) / 2;
+  const slotMarkup = spiralPositions
+    .map(([gridX, gridY], index) => {
+      const x = offsetX + (gridX - minGridX) * scaledCell;
+      const y = offsetY + (gridY - minGridY) * scaledCell;
+
+      return gridSlotMarkup({
+        href: state.imageDataUrls[index] || "",
+        x: Math.round(x * 100) / 100,
+        y: Math.round(y * 100) / 100,
+        size: Math.round(scaledCell * 100) / 100,
+        slotId: `l-style-slot-${index}`,
+      });
+    })
+    .join("");
+
+  return `
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" role="img" aria-label="L Style 方格螺旋照片环">
+      <defs>
+        <linearGradient id="l-style-paper" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#fcf7f1" />
+          <stop offset="100%" stop-color="#f0e5d4" />
+        </linearGradient>
+      </defs>
+      <rect width="${width}" height="${height}" fill="url(#l-style-paper)" />
+      <rect x="${frameInset}" y="${frameInset}" width="${width - frameInset * 2}" height="${height - frameInset * 2}" fill="none" stroke="${accentStroke}" stroke-width="2" />
+      ${slotMarkup}
+    </svg>
+  `;
+}
+
 function currentSvgMarkup() {
+  if (state.template === "l-style") {
+    return buildLStyleTemplate();
+  }
+
   if (state.template === "editorial") {
     return buildEditorialTemplate();
   }
@@ -325,7 +470,10 @@ function currentSvgMarkup() {
 }
 
 function render() {
+  const { width, height } = currentDimensions();
   document.documentElement.style.setProperty("--accent", state.accent);
+  artboard.style.setProperty("--artboard-aspect", `${width} / ${height}`);
+  ringSizeValue.textContent = `${Math.round(state.ringScale * 100)}%`;
   artboard.innerHTML = currentSvgMarkup();
   renderThumbs();
 
@@ -339,6 +487,7 @@ function syncStateFromInputs() {
   state.meta = metaInput.value.trim();
   state.body = bodyInput.value.trim();
   state.accent = accentInput.value;
+  state.ringScale = Number(ringSizeInput.value) / 100;
   state.template = templateSelect.value;
   render();
 }
@@ -360,7 +509,10 @@ function svgBlob() {
   });
 }
 
-async function downloadPng() {
+async function renderCanvasFromCurrentSvg() {
+  const { width, height } = currentDimensions();
+  const safeScale = Math.min(EXPORT_SCALE, Math.sqrt(MAX_EXPORT_PIXELS / (width * height)));
+  const exportScale = Math.max(1, safeScale);
   const svgText = currentSvgMarkup();
   const blob = new Blob([svgText], {
     type: "image/svg+xml;charset=utf-8",
@@ -376,14 +528,22 @@ async function downloadPng() {
   });
 
   const canvas = document.createElement("canvas");
-  canvas.width = ARTBOARD_WIDTH;
-  canvas.height = ARTBOARD_HEIGHT;
+  canvas.width = Math.round(width * exportScale);
+  canvas.height = Math.round(height * exportScale);
   const context = canvas.getContext("2d");
+  context.imageSmoothingEnabled = true;
+  context.imageSmoothingQuality = "high";
   context.fillStyle = "#ffffff";
-  context.fillRect(0, 0, ARTBOARD_WIDTH, ARTBOARD_HEIGHT);
-  context.drawImage(image, 0, 0, ARTBOARD_WIDTH, ARTBOARD_HEIGHT);
+  context.fillRect(0, 0, canvas.width, canvas.height);
+  context.drawImage(image, 0, 0, canvas.width, canvas.height);
 
   URL.revokeObjectURL(url);
+
+  return canvas;
+}
+
+async function downloadPng() {
+  const canvas = await renderCanvasFromCurrentSvg();
 
   const dataUrl = canvas.toDataURL("image/png");
   const anchor = document.createElement("a");
@@ -394,50 +554,132 @@ async function downloadPng() {
   anchor.remove();
 }
 
-function printDesign() {
-  const printWindow = window.open("", "_blank", "noopener,noreferrer,width=960,height=1280");
-  if (!printWindow) {
-    window.alert("浏览器拦截了打印窗口，请允许弹窗后重试。");
-    return;
+function stringToBytes(value) {
+  return new TextEncoder().encode(value);
+}
+
+function base64ToBytes(base64) {
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+
+  for (let index = 0; index < binary.length; index += 1) {
+    bytes[index] = binary.charCodeAt(index);
   }
 
-  printWindow.document.write(`
-    <!DOCTYPE html>
-    <html lang="zh-CN">
-      <head>
-        <meta charset="UTF-8" />
-        <title>Zine Log PDF</title>
-        <style>
-          @page { size: A4 portrait; margin: 12mm; }
-          * { box-sizing: border-box; }
-          body {
-            margin: 0;
-            display: grid;
-            place-items: center;
-            min-height: 100vh;
-            background: white;
-          }
-          .sheet {
-            width: min(100%, 180mm);
-          }
-          svg {
-            width: 100%;
-            height: auto;
-            display: block;
-          }
-        </style>
-      </head>
-      <body>
-        <div class="sheet">${currentSvgMarkup()}</div>
-        <script>
-          window.onload = () => {
-            window.print();
-          };
-        </script>
-      </body>
-    </html>
-  `);
-  printWindow.document.close();
+  return bytes;
+}
+
+function concatBytes(chunks) {
+  const totalLength = chunks.reduce((sum, chunk) => sum + chunk.length, 0);
+  const merged = new Uint8Array(totalLength);
+  let offset = 0;
+
+  chunks.forEach((chunk) => {
+    merged.set(chunk, offset);
+    offset += chunk.length;
+  });
+
+  return merged;
+}
+
+function createPdfBytes({
+  imageBytes,
+  imageWidth,
+  imageHeight,
+  pageWidth,
+  pageHeight,
+  drawWidth,
+  drawHeight,
+  offsetX,
+  offsetY,
+}) {
+  const chunks = [];
+  const offsets = [0];
+  let cursor = 0;
+
+  const push = (bytes) => {
+    chunks.push(bytes);
+    cursor += bytes.length;
+  };
+
+  const pushString = (value) => {
+    push(stringToBytes(value));
+  };
+
+  pushString("%PDF-1.4\n%\xFF\xFF\xFF\xFF\n");
+
+  const addObject = (objectNumber, bodyBytes) => {
+    offsets[objectNumber] = cursor;
+    pushString(`${objectNumber} 0 obj\n`);
+    push(bodyBytes);
+    pushString("\nendobj\n");
+  };
+
+  addObject(1, stringToBytes("<< /Type /Catalog /Pages 2 0 R >>"));
+  addObject(2, stringToBytes("<< /Type /Pages /Kids [3 0 R] /Count 1 >>"));
+
+  addObject(
+    3,
+    stringToBytes(
+      `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${pageWidth.toFixed(2)} ${pageHeight.toFixed(2)}] /Resources << /XObject << /Im0 4 0 R >> /ProcSet [/PDF /ImageC] >> /Contents 5 0 R >>`,
+    ),
+  );
+
+  const imageObjectHeader = stringToBytes(
+    `<< /Type /XObject /Subtype /Image /Width ${imageWidth} /Height ${imageHeight} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${imageBytes.length} >>\nstream\n`,
+  );
+  const imageObjectFooter = stringToBytes("\nendstream");
+  addObject(4, concatBytes([imageObjectHeader, imageBytes, imageObjectFooter]));
+
+  const contentStream = stringToBytes(
+    `q\n${drawWidth.toFixed(2)} 0 0 ${drawHeight.toFixed(2)} ${offsetX.toFixed(2)} ${offsetY.toFixed(2)} cm\n/Im0 Do\nQ`,
+  );
+  const contentHeader = stringToBytes(`<< /Length ${contentStream.length} >>\nstream\n`);
+  const contentFooter = stringToBytes("\nendstream");
+  addObject(5, concatBytes([contentHeader, contentStream, contentFooter]));
+
+  const xrefOffset = cursor;
+  pushString("xref\n0 6\n");
+  pushString("0000000000 65535 f \n");
+
+  for (let objectNumber = 1; objectNumber <= 5; objectNumber += 1) {
+    pushString(`${String(offsets[objectNumber]).padStart(10, "0")} 00000 n \n`);
+  }
+
+  pushString(`trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n${xrefOffset}\n%%EOF`);
+
+  return concatBytes(chunks);
+}
+
+async function downloadPdf() {
+  const { width, height } = currentDimensions();
+  const canvas = await renderCanvasFromCurrentSvg();
+  const jpegDataUrl = canvas.toDataURL("image/jpeg", 1);
+  const [, base64] = jpegDataUrl.split(",");
+  const imageBytes = base64ToBytes(base64);
+  const pageWidth = width > height ? 841.89 : 595.28;
+  const pageHeight = width > height ? 595.28 : 841.89;
+  const margin = 24;
+  const maxWidth = pageWidth - margin * 2;
+  const maxHeight = pageHeight - margin * 2;
+  const scale = Math.min(maxWidth / width, maxHeight / height);
+  const renderWidth = width * scale;
+  const renderHeight = height * scale;
+  const offsetX = (pageWidth - renderWidth) / 2;
+  const offsetY = (pageHeight - renderHeight) / 2;
+  const pdfBytes = createPdfBytes({
+    imageBytes,
+    imageWidth: width,
+    imageHeight: height,
+    pageWidth,
+    pageHeight,
+    drawWidth: renderWidth,
+    drawHeight: renderHeight,
+    offsetX,
+    offsetY,
+  });
+
+  downloadBlob("zine-log-design.pdf", new Blob([pdfBytes], { type: "application/pdf" }));
 }
 
 function applyTemplate(template) {
@@ -452,6 +694,7 @@ function fillExample() {
   bodyInput.value =
     "风有点凉，树影被拉得很长。\n今天没有发生特别大的事，但光线很好，适合把照片留成一页。";
   accentInput.value = "#a55d35";
+  ringSizeInput.value = "100";
   templateSelect.value = "l-shape";
   syncStateFromInputs();
 }
@@ -460,6 +703,7 @@ titleInput.addEventListener("input", syncStateFromInputs);
 metaInput.addEventListener("input", syncStateFromInputs);
 bodyInput.addEventListener("input", syncStateFromInputs);
 accentInput.addEventListener("input", syncStateFromInputs);
+ringSizeInput.addEventListener("input", syncStateFromInputs);
 templateSelect.addEventListener("change", syncStateFromInputs);
 
 templateButtons.forEach((button) => {
@@ -490,7 +734,14 @@ downloadPngButton.addEventListener("click", async () => {
   }
 });
 
-printPdfButton.addEventListener("click", printDesign);
+printPdfButton.addEventListener("click", async () => {
+  try {
+    await downloadPdf();
+  } catch (error) {
+    console.error(error);
+    window.alert("PDF 导出失败，请刷新页面后重试。");
+  }
+});
 randomFillButton.addEventListener("click", fillExample);
 
 function fileToDataUrl(file) {
