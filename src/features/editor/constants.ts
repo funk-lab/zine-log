@@ -14,7 +14,7 @@ export const TEMPLATE_META: Record<TemplateId, TemplateMeta> = {
     hint: "更像海报，适合多图和大标题。",
   },
   "l-style": {
-    name: "照片环",
+    name: "螺纹",
     hint: "多张正方形图片从中心向外形成回环。",
   },
 };

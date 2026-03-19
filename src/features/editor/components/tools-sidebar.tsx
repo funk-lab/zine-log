@@ -1,6 +1,5 @@
-import type { ChangeEvent, ReactNode } from "react";
+import { memo, type ReactNode } from "react";
 
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -9,24 +8,23 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { TEMPLATE_META } from "@/features/editor/constants";
-import type { EditorState, TemplateId } from "@/features/editor/types";
+import { cn } from "@/lib/utils";
+import type { TemplateId } from "@/features/editor/types";
 
 interface ToolsSidebarProps {
-  state: EditorState;
+  template: TemplateId;
+  title: string;
+  meta: string;
+  body: string;
+  accent: string;
   onTemplateChange: (template: TemplateId) => void;
   onTitleChange: (value: string) => void;
   onMetaChange: (value: string) => void;
   onBodyChange: (value: string) => void;
   onAccentChange: (value: string) => void;
-  onRingScaleChange: (value: number) => void;
-  onFillExample: () => void;
-  onDownloadPng: () => void;
-  onDownloadSvg: () => void;
-  onDownloadPdf: () => void;
 }
 
 function ToolField({
@@ -44,57 +42,40 @@ function ToolField({
   );
 }
 
-export function ToolsSidebar({
-  state,
+const PRESET_ACCENTS = [
+  "#111827",
+  "#b36a3c",
+  "#c85c5c",
+  "#6b8f71",
+  "#4b6cb7",
+  "#8c6bb1",
+];
+
+function ToolsSidebarComponent({
+  template,
+  title,
+  meta,
+  body,
+  accent,
   onTemplateChange,
   onTitleChange,
   onMetaChange,
   onBodyChange,
   onAccentChange,
-  onRingScaleChange,
-  onFillExample,
-  onDownloadPng,
-  onDownloadSvg,
-  onDownloadPdf,
 }: ToolsSidebarProps) {
   return (
-    <aside className="flex min-w-0 flex-col border-l bg-card">
-      <div className="border-b p-6">
-        <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400">
-          Tools
-        </span>
-        <h2 className="mt-3 text-xl font-bold tracking-tight text-slate-950">工具栏</h2>
-        <p className="mt-2 text-sm leading-6 text-slate-500">
-          模板、文案、导出与后续功能统一放在这里。
-        </p>
+    <aside className="flex min-w-0 flex-col border-l bg-card xl:min-h-0">
+      <div className="border-b px-6 py-5 text-center">
+        <h2 className="text-xl font-bold tracking-tight text-slate-950">工具栏</h2>
       </div>
 
-      <ScrollArea className="min-h-0 flex-1 px-6 py-6">
+      <div className="px-6 py-6 xl:min-h-0 xl:flex-1 xl:overflow-y-auto scrollbar-thin">
         <div className="space-y-6 pb-4">
           <section className="space-y-4">
-            <div className="flex items-center justify-between gap-3">
-              <strong className="text-sm font-semibold text-slate-900">快捷操作</strong>
-              <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400">
-                Quick Fill
-              </span>
-            </div>
-            <Button className="w-full" variant="ghost" onClick={onFillExample}>
-              填入示例内容
-            </Button>
-          </section>
+            <strong className="block text-sm font-semibold text-slate-900">模板设置</strong>
 
-          <Separator />
-
-          <section className="space-y-4">
-            <div className="flex items-center justify-between gap-3">
-              <strong className="text-sm font-semibold text-slate-900">模板设置</strong>
-              <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400">
-                Layouts
-              </span>
-            </div>
-
-            <ToolField label="模板">
-              <Select value={state.template} onValueChange={(value) => onTemplateChange(value as TemplateId)}>
+            <div className="grid gap-2">
+              <Select value={template} onValueChange={(value) => onTemplateChange(value as TemplateId)}>
                 <SelectTrigger>
                   <SelectValue placeholder="选择模板" />
                 </SelectTrigger>
@@ -106,51 +87,62 @@ export function ToolsSidebar({
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+
+            <ToolField label="主题色">
+              <div className="flex flex-wrap items-center gap-2">
+                {PRESET_ACCENTS.map((presetAccent) => (
+                  <button
+                    key={presetAccent}
+                    type="button"
+                    className={cn(
+                      "h-8 w-8 rounded-lg border transition",
+                      accent === presetAccent
+                        ? "border-slate-950 ring-2 ring-slate-950/10"
+                        : "border-slate-200 hover:border-slate-400",
+                    )}
+                    style={{ backgroundColor: presetAccent }}
+                    onClick={() => onAccentChange(presetAccent)}
+                    aria-label={`选择主题色 ${presetAccent}`}
+                  />
+                ))}
+
+                <label className="relative inline-flex h-8 w-8 cursor-pointer items-center justify-center overflow-hidden rounded-full border border-slate-200 bg-white hover:border-slate-400">
+                  <span
+                    className="h-4 w-4 rounded-full border border-slate-300"
+                    style={{
+                      background:
+                        "conic-gradient(from 180deg, #ff6b6b, #ffd93d, #6bcB77, #4d96ff, #b892ff, #ff6b6b)",
+                    }}
+                  />
+                  <input
+                    type="color"
+                    value={accent}
+                    className="absolute inset-0 cursor-pointer opacity-0"
+                    onChange={(event) => onAccentChange(event.target.value)}
+                  />
+                </label>
+              </div>
             </ToolField>
 
-            {state.template === "l-style" ? (
-              <ToolField label="照片环大小">
-                <div className="grid gap-2">
-                  <div className="flex items-center justify-between text-sm text-slate-500">
-                    <span>当前大小</span>
-                    <strong className="text-slate-900">{Math.round(state.ringScale * 100)}%</strong>
-                  </div>
-                  <input
-                    type="range"
-                    min={80}
-                    max={125}
-                    value={Math.round(state.ringScale * 100)}
-                    className="accent-slate-950"
-                    onChange={(event: ChangeEvent<HTMLInputElement>) =>
-                      onRingScaleChange(Number(event.target.value) / 100)
-                    }
-                  />
-                </div>
-              </ToolField>
-            ) : null}
           </section>
 
           <Separator />
 
           <section className="space-y-4">
-            <div className="flex items-center justify-between gap-3">
-              <strong className="text-sm font-semibold text-slate-900">文字内容</strong>
-              <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400">
-                Typography
-              </span>
-            </div>
+            <strong className="block text-sm font-semibold text-slate-900">文字内容</strong>
 
             <div className="grid grid-cols-2 gap-3">
               <ToolField label="标题">
                 <Input
-                  value={state.title}
+                  value={title}
                   placeholder="例如：春天的午后散步"
                   onChange={(event) => onTitleChange(event.target.value)}
                 />
               </ToolField>
               <ToolField label="副标题">
                 <Input
-                  value={state.meta}
+                  value={meta}
                   placeholder="例如：2026.03.17 · 上海"
                   onChange={(event) => onMetaChange(event.target.value)}
                 />
@@ -159,71 +151,16 @@ export function ToolsSidebar({
 
             <ToolField label="正文">
               <Textarea
-                value={state.body}
+                value={body}
                 placeholder="写几句生活记录，也可以留空，只保留图片。"
                 onChange={(event) => onBodyChange(event.target.value)}
               />
             </ToolField>
-
-            <ToolField label="主题色">
-              <Input
-                type="color"
-                value={state.accent}
-                className="h-12 p-1"
-                onChange={(event) => onAccentChange(event.target.value)}
-              />
-            </ToolField>
-          </section>
-
-          <Separator />
-
-          <section className="space-y-4">
-            <div className="flex items-center justify-between gap-3">
-              <strong className="text-sm font-semibold text-slate-900">导出</strong>
-              <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400">
-                Export
-              </span>
-            </div>
-
-            <div className="grid gap-3">
-              <Button className="w-full" onClick={onDownloadPng}>
-                下载 PNG
-              </Button>
-              <Button className="w-full" variant="secondary" onClick={onDownloadSvg}>
-                下载 SVG
-              </Button>
-              <Button className="w-full" variant="ghost" onClick={onDownloadPdf}>
-                下载 PDF
-              </Button>
-            </div>
-          </section>
-
-          <Separator />
-
-          <section className="space-y-3">
-            <div className="flex items-center justify-between gap-3">
-              <strong className="text-sm font-semibold text-slate-900">后续能力</strong>
-              <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400">
-                Coming Next
-              </span>
-            </div>
-            <div className="space-y-3">
-              <article className="rounded-xl border bg-slate-50 p-4">
-                <strong className="block text-base font-semibold text-slate-950">图片编辑</strong>
-                <p className="mt-2 text-sm leading-6 text-slate-500">
-                  后续接入裁切、缩放、滤镜和局部调整。
-                </p>
-              </article>
-              <article className="rounded-xl border bg-slate-50 p-4">
-                <strong className="block text-base font-semibold text-slate-950">3D 预览</strong>
-                <p className="mt-2 text-sm leading-6 text-slate-500">
-                  后续在中间画布增加立体翻页和场景式预览。
-                </p>
-              </article>
-            </div>
           </section>
         </div>
-      </ScrollArea>
+      </div>
     </aside>
   );
 }
+
+export const ToolsSidebar = memo(ToolsSidebarComponent);

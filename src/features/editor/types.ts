@@ -25,11 +25,11 @@ export interface TemplateMeta {
 
 export function createInitialEditorState(): EditorState {
   return {
-    template: "l-shape",
+    template: "l-style",
     title: "",
     meta: "",
     body: "",
-    accent: "#b36a3c",
+    accent: "#d7c3ab",
     ringScale: 1,
     images: [],
     nextImageId: 1,

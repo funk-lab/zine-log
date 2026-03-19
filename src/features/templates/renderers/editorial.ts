@@ -57,9 +57,9 @@ export function buildEditorialTemplate(state: EditorState, selectedImages: Libra
       <text x="742" y="364" font-family="'Noto Sans SC', 'Inter', sans-serif" font-size="28" letter-spacing="6" fill="${accentMedium}">${meta}</text>
       ${bodyBlock}
       <rect x="742" y="1140" width="292" height="220" rx="26" fill="${accentSoft}" />
-      <text x="780" y="1228" font-family="'Inter', sans-serif" font-size="40" font-weight="700" fill="#2c1b12">memory</text>
+      <text x="780" y="1228" font-family="'Inter', sans-serif" font-size="40" font-weight="700" fill="#2c1b12">记忆</text>
       <text x="780" y="1290" font-family="'Noto Sans SC', 'Inter', sans-serif" font-size="26" fill="#5e483c">照片、短句、地点</text>
-      <text x="780" y="1338" font-family="'Noto Sans SC', 'Inter', sans-serif" font-size="26" fill="#5e483c">先做出一本小小的生活志</text>
+      <text x="780" y="1338" font-family="'Noto Sans SC', 'Inter', sans-serif" font-size="26" fill="#5e483c">把日常排成一页</text>
       <text x="1042" y="1454" text-anchor="end" font-family="'Inter', sans-serif" font-size="32" font-weight="700" fill="${accentMedium}">No. 01</text>
     </svg>
   `;

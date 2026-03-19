@@ -66,7 +66,7 @@ export function buildPosterTemplate(state: EditorState, selectedImages: LibraryI
       <text x="128" y="1000" font-family="'Noto Sans SC', 'Inter', sans-serif" font-size="28" letter-spacing="8" fill="${accentSoft}">${meta}</text>
       <text x="128" y="1154" font-family="'Inter', sans-serif" font-size="144" font-weight="700" fill="#fff7ef">${title}</text>
       ${bodyBlock}
-      <text x="1068" y="1470" text-anchor="end" font-family="'Inter', sans-serif" font-size="34" font-weight="700" fill="${accentSoft}">poster cut</text>
+      <text x="1068" y="1470" text-anchor="end" font-family="'Inter', sans-serif" font-size="34" font-weight="700" fill="${accentSoft}">城市剪贴</text>
     </svg>
   `;
 }

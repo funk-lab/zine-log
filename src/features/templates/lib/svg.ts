@@ -103,7 +103,7 @@ export function imageMarkup({
   accent,
   radius = 0,
   placeholderSize = 54,
-  placeholderLabel = "Upload Photo",
+  placeholderLabel = "上传图片",
 }: ImageMarkupOptions) {
   if (href) {
     const clipDefinition = radius

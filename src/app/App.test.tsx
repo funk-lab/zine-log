@@ -8,8 +8,8 @@ describe("App", () => {
     render(<App />);
 
     expect(screen.getByText("Zine Log")).toBeInTheDocument();
-    expect(screen.getByText("图库")).toBeInTheDocument();
-    expect(screen.getByText("工具栏")).toBeInTheDocument();
-    expect(screen.getByText("Editor Canvas")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "图库" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "工具栏" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "画布" })).toBeInTheDocument();
   });
 });
