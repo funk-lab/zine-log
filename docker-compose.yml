@@ -1,0 +1,9 @@
+services:
+  zinelog-frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: zinelog-frontend
+    ports:
+      - "127.0.0.1:4175:80"
+    restart: unless-stopped
