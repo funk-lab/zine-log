@@ -14,9 +14,10 @@ interface Preview3DProps {
   svgMarkup: string;
   width: number;
   height: number;
+  accent: string;
 }
 
-function Preview3DComponent({ svgMarkup, width, height }: Preview3DProps) {
+function Preview3DComponent({ svgMarkup, width, height, accent }: Preview3DProps) {
   const previewLayout = useMemo(() => extractImagePreviewLayout(svgMarkup), [svgMarkup]);
   const model = useMemo(
     () => buildStripModelFromRegions(width, height, previewLayout.regions),
@@ -41,9 +42,9 @@ function Preview3DComponent({ svgMarkup, width, height }: Preview3DProps) {
   }
 
   return (
-    <div className="h-full overflow-hidden rounded-[28px] border border-slate-200 bg-[radial-gradient(circle_at_top,_#ffffff,_#f2eee7_58%,_#e7e0d5)]">
+    <div className="h-full overflow-hidden rounded-[28px] border border-[#e2d7c8] bg-[#efe7db]">
       <Suspense fallback={<div className="h-full w-full bg-transparent" />}>
-        <PreviewSceneCanvas model={model} sourceCanvas={canvas} />
+        <PreviewSceneCanvas model={model} sourceCanvas={canvas} accent={accent} />
       </Suspense>
     </div>
   );

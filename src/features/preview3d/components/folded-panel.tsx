@@ -22,28 +22,27 @@ function applyUvRect(geometry: THREE.PlaneGeometry, uvRect: UvRect) {
 }
 
 function resolveCreaseTransform(panel: PreviewPanel) {
-  const creaseDepth = 0.016;
   const creaseWidth = Math.min(panel.width, panel.height) * 0.06;
 
   switch (panel.creaseEdge) {
     case "left":
       return {
-        position: [(-panel.width + creaseWidth) / 2, 0, creaseDepth] as [number, number, number],
+        position: [(-panel.width + creaseWidth) / 2, 0] as [number, number],
         size: [creaseWidth, panel.height] as [number, number],
       };
     case "right":
       return {
-        position: [(panel.width - creaseWidth) / 2, 0, creaseDepth] as [number, number, number],
+        position: [(panel.width - creaseWidth) / 2, 0] as [number, number],
         size: [creaseWidth, panel.height] as [number, number],
       };
     case "top":
       return {
-        position: [0, (panel.height - creaseWidth) / 2, creaseDepth] as [number, number, number],
+        position: [0, (panel.height - creaseWidth) / 2] as [number, number],
         size: [panel.width, creaseWidth] as [number, number],
       };
     case "bottom":
       return {
-        position: [0, (-panel.height + creaseWidth) / 2, creaseDepth] as [number, number, number],
+        position: [0, (-panel.height + creaseWidth) / 2] as [number, number],
         size: [panel.width, creaseWidth] as [number, number],
       };
     default:
@@ -51,13 +50,51 @@ function resolveCreaseTransform(panel: PreviewPanel) {
   }
 }
 
+function resolveSurfaceBleed(panel: PreviewPanel) {
+  const seamBleed = Math.min(panel.width, panel.height) * 0.045;
+
+  switch (panel.creaseEdge) {
+    case "left":
+      return {
+        width: panel.width + seamBleed,
+        height: panel.height,
+        offset: [-seamBleed / 2, 0, 0] as [number, number, number],
+      };
+    case "right":
+      return {
+        width: panel.width + seamBleed,
+        height: panel.height,
+        offset: [seamBleed / 2, 0, 0] as [number, number, number],
+      };
+    case "top":
+      return {
+        width: panel.width,
+        height: panel.height + seamBleed,
+        offset: [0, seamBleed / 2, 0] as [number, number, number],
+      };
+    case "bottom":
+      return {
+        width: panel.width,
+        height: panel.height + seamBleed,
+        offset: [0, -seamBleed / 2, 0] as [number, number, number],
+      };
+    default:
+      return {
+        width: panel.width,
+        height: panel.height,
+        offset: [0, 0, 0] as [number, number, number],
+      };
+  }
+}
+
 function FoldedPanelComponent({ panel, texture }: FoldedPanelProps) {
   const paperDepth = Math.min(panel.width, panel.height) * 0.028;
+  const surfaceBleed = useMemo(() => resolveSurfaceBleed(panel), [panel]);
   const frontGeometry = useMemo(() => {
-    const geometry = new THREE.PlaneGeometry(panel.width, panel.height, 1, 1);
+    const geometry = new THREE.PlaneGeometry(surfaceBleed.width, surfaceBleed.height, 1, 1);
     applyUvRect(geometry, panel.uvRect);
     return geometry;
-  }, [panel.height, panel.uvRect, panel.width]);
+  }, [panel.uvRect, surfaceBleed.height, surfaceBleed.width]);
 
   const bodyGeometry = useMemo(
     () => new THREE.BoxGeometry(panel.width, panel.height, paperDepth),
@@ -71,7 +108,7 @@ function FoldedPanelComponent({ panel, texture }: FoldedPanelProps) {
         color: "#fffdf8",
         transparent: true,
         alphaTest: 0.02,
-        roughness: 0.95,
+        roughness: 0.88,
         metalness: 0.02,
       }),
     [texture],
@@ -80,8 +117,8 @@ function FoldedPanelComponent({ panel, texture }: FoldedPanelProps) {
   const paperMaterial = useMemo(
     () =>
       new THREE.MeshStandardMaterial({
-        color: "#f4ecde",
-        roughness: 0.98,
+        color: "#f5eddf",
+        roughness: 0.94,
         metalness: 0.01,
       }),
     [],
@@ -100,18 +137,32 @@ function FoldedPanelComponent({ panel, texture }: FoldedPanelProps) {
 
   return (
     <group>
-      <mesh geometry={bodyGeometry} material={paperMaterial} castShadow receiveShadow />
+      <mesh
+        geometry={bodyGeometry}
+        material={paperMaterial}
+        position={[0, 0, paperDepth / 2]}
+        castShadow
+        receiveShadow
+      />
       <mesh
         geometry={frontGeometry}
         material={frontMaterial}
-        position={[0, 0, paperDepth / 2 + 0.001]}
+        position={[
+          surfaceBleed.offset[0],
+          surfaceBleed.offset[1],
+          paperDepth + 0.001 + surfaceBleed.offset[2],
+        ]}
         castShadow
         receiveShadow
       />
       {crease ? (
-        <mesh position={crease.position} castShadow={false} receiveShadow={false}>
+        <mesh
+          position={[crease.position[0], crease.position[1], paperDepth + 0.002]}
+          castShadow={false}
+          receiveShadow={false}
+        >
           <planeGeometry args={crease.size} />
-          <meshBasicMaterial color="#000000" transparent opacity={0.08} />
+          <meshBasicMaterial color="#000000" transparent opacity={0.11} />
         </mesh>
       ) : null}
     </group>

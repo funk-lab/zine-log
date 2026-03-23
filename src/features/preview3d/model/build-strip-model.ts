@@ -4,6 +4,7 @@ import type {
   PreviewHinge,
   PreviewPanel,
   PreviewStripModel,
+  PreviewTransform,
 } from "@/features/preview3d/model/types";
 import type { ImagePreviewRegion } from "@/features/preview3d/lib/extract-image-preview-layout";
 
@@ -125,6 +126,47 @@ function resolveFoldAngle(index: number, axis: FoldAxis) {
   return sign * baseAngle;
 }
 
+function createBaseTransform(
+  sourceRect: PreviewPanel["sourceRect"],
+  pageWidth: number,
+  pageHeight: number,
+  worldScale: number,
+): PreviewTransform {
+  const centerX = sourceRect.x + sourceRect.width / 2;
+  const centerY = sourceRect.y + sourceRect.height / 2;
+
+  return {
+    x: (centerX - pageWidth / 2) * worldScale,
+    y: (pageHeight / 2 - centerY) * worldScale,
+    z: 0,
+    rotationX: 0,
+    rotationY: 0,
+    rotationZ: 0,
+  };
+}
+
+function applyPanelFoldTransform(panel: PreviewPanel, hinge: PreviewHinge | undefined) {
+  if (!hinge) {
+    panel.transform.rotationX = -0.08;
+    panel.transform.rotationY = 0.04;
+    panel.transform.z = 0.05;
+    return;
+  }
+
+  const fold = hinge.angle * 0.72;
+
+  if (hinge.axis === "x") {
+    panel.transform.rotationX = fold;
+    panel.transform.rotationY = Math.sign(fold) * -0.025;
+  } else {
+    panel.transform.rotationX = Math.sign(fold) * -0.02;
+    panel.transform.rotationY = -fold;
+  }
+
+  panel.transform.rotationZ = Math.sign(fold) * 0.015;
+  panel.transform.z = 0.04 + Math.abs(fold) * 0.08;
+}
+
 function resolveDirectionalLink(fromRegion: ImagePreviewRegion, toRegion: ImagePreviewRegion) {
   const fromCenterX = fromRegion.x + fromRegion.width / 2;
   const fromCenterY = fromRegion.y + fromRegion.height / 2;
@@ -205,6 +247,17 @@ export function buildStripModelFromRegions(
       u1: (region.x + region.width) / pageWidth,
       v1: 1 - region.y / pageHeight,
     },
+    transform: createBaseTransform(
+      {
+        x: region.x,
+        y: region.y,
+        width: region.width,
+        height: region.height,
+      },
+      pageWidth,
+      pageHeight,
+      worldScale,
+    ),
   }));
 
   const hinges: PreviewHinge[] = panels.slice(1).map((panel, index) => {
@@ -224,6 +277,10 @@ export function buildStripModelFromRegions(
       axis: link.axis,
       angle: resolveFoldAngle(index, link.axis),
     };
+  });
+
+  panels.forEach((panel, index) => {
+    applyPanelFoldTransform(panel, index === 0 ? undefined : hinges[index - 1]);
   });
 
   return {
@@ -264,6 +321,17 @@ export function buildStripModel(pageWidth: number, pageHeight: number): PreviewS
       u1: (cell.col + 1) / cols,
       v1: 1 - cell.row / rows,
     },
+    transform: createBaseTransform(
+      {
+        x: cell.col * pixelPanelWidth,
+        y: cell.row * pixelPanelHeight,
+        width: pixelPanelWidth,
+        height: pixelPanelHeight,
+      },
+      pageWidth,
+      pageHeight,
+      worldScale,
+    ),
   }));
 
   const hinges: PreviewHinge[] = path.slice(1).map((cell, index) => {
@@ -283,6 +351,10 @@ export function buildStripModel(pageWidth: number, pageHeight: number): PreviewS
       axis: link.axis,
       angle: resolveFoldAngle(index, link.axis),
     };
+  });
+
+  panels.forEach((panel, index) => {
+    applyPanelFoldTransform(panel, index === 0 ? undefined : hinges[index - 1]);
   });
 
   return {

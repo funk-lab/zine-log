@@ -5,6 +5,7 @@ interface CanvasWorkspaceProps {
   svgMarkup: string;
   width: number;
   height: number;
+  accent: string;
 }
 
 const STAGE_PADDING = 48;
@@ -19,6 +20,7 @@ function CanvasWorkspaceComponent({
   svgMarkup,
   width,
   height,
+  accent,
 }: CanvasWorkspaceProps) {
   const viewportRef = useRef<HTMLDivElement | null>(null);
   const [activeTab, setActiveTab] = useState<ActiveTab>("canvas");
@@ -159,7 +161,7 @@ function CanvasWorkspaceComponent({
           </>
         ) : (
           <Suspense fallback={<div className="grid h-full place-items-center rounded-[28px] border border-slate-200 bg-white text-sm text-slate-500">正在载入 3D 预览…</div>}>
-            <Preview3D svgMarkup={svgMarkup} width={width} height={height} />
+            <Preview3D svgMarkup={svgMarkup} width={width} height={height} accent={accent} />
           </Suspense>
         )}
       </div>

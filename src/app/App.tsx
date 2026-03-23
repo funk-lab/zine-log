@@ -150,6 +150,7 @@ export function App() {
           svgMarkup={svgMarkup}
           width={dimensions.width}
           height={dimensions.height}
+          accent={state.accent}
         />
 
         <ToolsSidebar

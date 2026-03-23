@@ -8,6 +8,15 @@ export interface UvRect {
   v1: number;
 }
 
+export interface PreviewTransform {
+  x: number;
+  y: number;
+  z: number;
+  rotationX: number;
+  rotationY: number;
+  rotationZ: number;
+}
+
 export interface PreviewPanel {
   id: string;
   index: number;
@@ -23,6 +32,7 @@ export interface PreviewPanel {
   };
   uvRect: UvRect;
   creaseEdge?: PanelEdge;
+  transform: PreviewTransform;
 }
 
 export interface PreviewHinge {
