@@ -1,5 +1,5 @@
 export type PanelEdge = "top" | "right" | "bottom" | "left";
-export type FoldAxis = "x" | "y";
+export type FoldAxis = "x" | "y" | "xy" | "yx";
 
 export interface UvRect {
   u0: number;
@@ -32,7 +32,6 @@ export interface PreviewPanel {
   };
   uvRect: UvRect;
   creaseEdge?: PanelEdge;
-  transform: PreviewTransform;
 }
 
 export interface PreviewHinge {

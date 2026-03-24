@@ -4,7 +4,6 @@ import type {
   PreviewHinge,
   PreviewPanel,
   PreviewStripModel,
-  PreviewTransform,
 } from "@/features/preview3d/model/types";
 import type { ImagePreviewRegion } from "@/features/preview3d/lib/extract-image-preview-layout";
 
@@ -24,8 +23,16 @@ function clamp(value: number, min: number, max: number) {
 
 function resolveGridSize(pageWidth: number, pageHeight: number) {
   return {
-    cols: clamp(Math.round(pageWidth / TARGET_PANEL_PIXELS), MIN_GRID_DIMENSION, MAX_GRID_DIMENSION),
-    rows: clamp(Math.round(pageHeight / TARGET_PANEL_PIXELS), MIN_GRID_DIMENSION, MAX_GRID_DIMENSION),
+    cols: clamp(
+      Math.round(pageWidth / TARGET_PANEL_PIXELS),
+      MIN_GRID_DIMENSION,
+      MAX_GRID_DIMENSION,
+    ),
+    rows: clamp(
+      Math.round(pageHeight / TARGET_PANEL_PIXELS),
+      MIN_GRID_DIMENSION,
+      MAX_GRID_DIMENSION,
+    ),
   };
 }
 
@@ -122,52 +129,14 @@ function resolveEdgeLink(previous: GridCell, next: GridCell) {
 
 function resolveFoldAngle(index: number, axis: FoldAxis) {
   const sign = index % 2 === 0 ? 1 : -1;
-  const baseAngle = axis === "y" ? 0.24 : 0.18;
+  const baseAngle = axis === "y" ? 0.3 : 0.2;
   return sign * baseAngle;
 }
 
-function createBaseTransform(
-  sourceRect: PreviewPanel["sourceRect"],
-  pageWidth: number,
-  pageHeight: number,
-  worldScale: number,
-): PreviewTransform {
-  const centerX = sourceRect.x + sourceRect.width / 2;
-  const centerY = sourceRect.y + sourceRect.height / 2;
-
-  return {
-    x: (centerX - pageWidth / 2) * worldScale,
-    y: (pageHeight / 2 - centerY) * worldScale,
-    z: 0,
-    rotationX: 0,
-    rotationY: 0,
-    rotationZ: 0,
-  };
-}
-
-function applyPanelFoldTransform(panel: PreviewPanel, hinge: PreviewHinge | undefined) {
-  if (!hinge) {
-    panel.transform.rotationX = -0.08;
-    panel.transform.rotationY = 0.04;
-    panel.transform.z = 0.05;
-    return;
-  }
-
-  const fold = hinge.angle * 0.72;
-
-  if (hinge.axis === "x") {
-    panel.transform.rotationX = fold;
-    panel.transform.rotationY = Math.sign(fold) * -0.025;
-  } else {
-    panel.transform.rotationX = Math.sign(fold) * -0.02;
-    panel.transform.rotationY = -fold;
-  }
-
-  panel.transform.rotationZ = Math.sign(fold) * 0.015;
-  panel.transform.z = 0.04 + Math.abs(fold) * 0.08;
-}
-
-function resolveDirectionalLink(fromRegion: ImagePreviewRegion, toRegion: ImagePreviewRegion) {
+function resolveDirectionalLink(
+  fromRegion: ImagePreviewRegion,
+  toRegion: ImagePreviewRegion,
+) {
   const fromCenterX = fromRegion.x + fromRegion.width / 2;
   const fromCenterY = fromRegion.y + fromRegion.height / 2;
   const toCenterX = toRegion.x + toRegion.width / 2;
@@ -247,24 +216,27 @@ export function buildStripModelFromRegions(
       u1: (region.x + region.width) / pageWidth,
       v1: 1 - region.y / pageHeight,
     },
-    transform: createBaseTransform(
-      {
-        x: region.x,
-        y: region.y,
-        width: region.width,
-        height: region.height,
-      },
-      pageWidth,
-      pageHeight,
-      worldScale,
-    ),
   }));
-
-  const hinges: PreviewHinge[] = panels.slice(1).map((panel, index) => {
+  const links = panels.slice(1).map((panel, index) => {
     const previous = regions[index];
     const current = regions[index + 1];
-    const link = resolveDirectionalLink(previous, current);
+    return resolveDirectionalLink(previous, current);
+  });
+  let linkLength = 0;
+  const hinges: PreviewHinge[] = panels.slice(1).map((panel, index) => {
+    const previousLink = index > 0 ? links[index - 1] : null;
+    const currentLink = links[index];
+
+    const link = links[index];
     panel.creaseEdge = link.toEdge;
+
+    // 检查当前链接与前一个链接的轴是否不同
+    let finalAxis: FoldAxis = currentLink.axis;
+    if (previousLink && previousLink.axis !== currentLink.axis) {
+      finalAxis = (previousLink.axis + currentLink.axis) as FoldAxis; // 发生了轴的变化
+      linkLength = 0; // 重置链接长度
+    }
+    linkLength += 1;
 
     return {
       id: `hinge-${index}`,
@@ -274,13 +246,9 @@ export function buildStripModelFromRegions(
       toIndex: panel.index,
       fromEdge: link.fromEdge,
       toEdge: link.toEdge,
-      axis: link.axis,
-      angle: resolveFoldAngle(index, link.axis),
+      axis: finalAxis,
+      angle: resolveFoldAngle(linkLength, link.axis),
     };
-  });
-
-  panels.forEach((panel, index) => {
-    applyPanelFoldTransform(panel, index === 0 ? undefined : hinges[index - 1]);
   });
 
   return {
@@ -293,7 +261,10 @@ export function buildStripModelFromRegions(
   };
 }
 
-export function buildStripModel(pageWidth: number, pageHeight: number): PreviewStripModel {
+export function buildStripModel(
+  pageWidth: number,
+  pageHeight: number,
+): PreviewStripModel {
   const { rows, cols } = resolveGridSize(pageWidth, pageHeight);
   const path = buildSpiralPath(rows, cols);
   const pixelPanelWidth = pageWidth / cols;
@@ -321,17 +292,6 @@ export function buildStripModel(pageWidth: number, pageHeight: number): PreviewS
       u1: (cell.col + 1) / cols,
       v1: 1 - cell.row / rows,
     },
-    transform: createBaseTransform(
-      {
-        x: cell.col * pixelPanelWidth,
-        y: cell.row * pixelPanelHeight,
-        width: pixelPanelWidth,
-        height: pixelPanelHeight,
-      },
-      pageWidth,
-      pageHeight,
-      worldScale,
-    ),
   }));
 
   const hinges: PreviewHinge[] = path.slice(1).map((cell, index) => {
@@ -339,7 +299,6 @@ export function buildStripModel(pageWidth: number, pageHeight: number): PreviewS
     const next = cell;
     const link = resolveEdgeLink(previous, next);
     panels[index + 1].creaseEdge = link.toEdge;
-
     return {
       id: `hinge-${index}`,
       fromPanelId: panels[index].id,
@@ -351,10 +310,6 @@ export function buildStripModel(pageWidth: number, pageHeight: number): PreviewS
       axis: link.axis,
       angle: resolveFoldAngle(index, link.axis),
     };
-  });
-
-  panels.forEach((panel, index) => {
-    applyPanelFoldTransform(panel, index === 0 ? undefined : hinges[index - 1]);
   });
 
   return {
