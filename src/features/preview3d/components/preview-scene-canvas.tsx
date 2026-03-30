@@ -14,6 +14,7 @@ interface PreviewSceneCanvasProps {
 function PreviewSceneCanvasComponent({
   model,
   sourceCanvas,
+  accent,
 }: PreviewSceneCanvasProps) {
   return (
     <Canvas
@@ -22,7 +23,7 @@ function PreviewSceneCanvasComponent({
       camera={{ position: [0.4, 4.1, 8.8], fov: 24 }}
       gl={{ antialias: true, alpha: true }}
     >
-      <color attach="background" args={["#d7c3ab"]} />
+      <color attach="background" args={[accent]} />
       <ambientLight intensity={0.8} color="#fffaf4" />
       <directionalLight
         castShadow

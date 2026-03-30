@@ -5,9 +5,11 @@ import { buildStripModelFromRegions } from "@/features/preview3d/model/build-str
 import { usePreviewTextureSource } from "@/features/preview3d/lib/use-preview-texture-source";
 
 const PreviewSceneCanvas = lazy(async () =>
-  import("@/features/preview3d/components/preview-scene-canvas").then((module) => ({
-    default: module.PreviewSceneCanvas,
-  })),
+  import("@/features/preview3d/components/preview-scene-canvas").then(
+    (module) => ({
+      default: module.PreviewSceneCanvas,
+    })
+  )
 );
 
 interface Preview3DProps {
@@ -17,14 +19,33 @@ interface Preview3DProps {
   accent: string;
 }
 
-function Preview3DComponent({ svgMarkup, width, height, accent }: Preview3DProps) {
-  const previewLayout = useMemo(() => extractImagePreviewLayout(svgMarkup), [svgMarkup]);
+function Preview3DComponent({
+  svgMarkup,
+  width,
+  height,
+  accent,
+}: Preview3DProps) {
+  const previewLayout = useMemo(
+    () => extractImagePreviewLayout(svgMarkup),
+    [svgMarkup]
+  );
   const model = useMemo(
     () => buildStripModelFromRegions(width, height, previewLayout.regions),
-    [height, previewLayout.regions, width],
+    [height, previewLayout.regions, width]
   );
-  const { canvas, isLoading, error } = usePreviewTextureSource(previewLayout.svgMarkup, width, height);
 
+  const { canvas, isLoading, error } = usePreviewTextureSource(
+    previewLayout.svgMarkup,
+    width,
+    height
+  );
+  if (previewLayout.regions.length === 0) {
+    return (
+      <div className="grid h-full place-items-center rounded-[28px] border border-slate-200 bg-white text-sm text-slate-500">
+        请选择图片
+      </div>
+    );
+  }
   if (error) {
     return (
       <div className="grid h-full place-items-center rounded-[28px] border border-slate-200 bg-white text-sm text-slate-500">
@@ -42,9 +63,16 @@ function Preview3DComponent({ svgMarkup, width, height, accent }: Preview3DProps
   }
 
   return (
-    <div className="h-full overflow-hidden rounded-[28px] border border-[#e2d7c8] bg-[#efe7db]">
+    <div
+      className="h-full overflow-hidden rounded-[28px]"
+      style={{ backgroundColor: accent }}
+    >
       <Suspense fallback={<div className="h-full w-full bg-transparent" />}>
-        <PreviewSceneCanvas model={model} sourceCanvas={canvas} accent={accent} />
+        <PreviewSceneCanvas
+          model={model}
+          sourceCanvas={canvas}
+          accent={accent}
+        />
       </Suspense>
     </div>
   );

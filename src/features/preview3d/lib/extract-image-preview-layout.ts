@@ -30,6 +30,18 @@ function resolveRegion(image: SVGImageElement, sourceSvg: SVGSVGElement): ImageP
   const clipPathId = extractClipPathId(image.getAttribute("clip-path"));
 
   if (clipPathId) {
+    // 优先读带 data-slot 标记的白色背景 rect——它包含完整的格子尺寸（含 padding 白边）
+    const slotRect = sourceSvg.querySelector(`rect[data-slot="${clipPathId}"]`);
+    if (slotRect) {
+      return {
+        x: parseNumericAttribute(slotRect, "x"),
+        y: parseNumericAttribute(slotRect, "y"),
+        width: parseNumericAttribute(slotRect, "width"),
+        height: parseNumericAttribute(slotRect, "height"),
+      };
+    }
+
+    // 回退：clipPath 内的 rect（不含 padding 白边，兼容旧格式）
     const clipRect = sourceSvg.querySelector(`clipPath[id="${clipPathId}"] rect`);
     if (clipRect) {
       return {
@@ -96,6 +108,12 @@ export function extractImagePreviewLayout(svgMarkup: string): ImagePreviewLayout
   }
 
   const regions = images.map((imageNode) => resolveRegion(imageNode, sourceSvg));
+
+  // 先插入白色背景 rect（data-slot），保证白边在图片下层渲染
+  const slotRects = Array.from(sourceSvg.querySelectorAll("rect[data-slot]"));
+  slotRects.forEach((rect) => {
+    targetSvg.appendChild(targetDocument.importNode(rect, true));
+  });
 
   images.forEach((image) => {
     targetSvg.appendChild(targetDocument.importNode(image, true));

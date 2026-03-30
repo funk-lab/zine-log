@@ -26,12 +26,12 @@ function resolveGridSize(pageWidth: number, pageHeight: number) {
     cols: clamp(
       Math.round(pageWidth / TARGET_PANEL_PIXELS),
       MIN_GRID_DIMENSION,
-      MAX_GRID_DIMENSION,
+      MAX_GRID_DIMENSION
     ),
     rows: clamp(
       Math.round(pageHeight / TARGET_PANEL_PIXELS),
       MIN_GRID_DIMENSION,
-      MAX_GRID_DIMENSION,
+      MAX_GRID_DIMENSION
     ),
   };
 }
@@ -133,9 +133,47 @@ function resolveFoldAngle(index: number, axis: FoldAxis) {
   return sign * baseAngle;
 }
 
+/**
+ * 有状态折叠角度计算器。
+ *
+ * - 普通段：段内 index 从 0 开始，正常 ±θ，累积 acc。
+ * - 直线段最后一个（isLast=true）：angle = ±θ + (-accPrev)，把前面的累积一并抵消，
+ *   然后 acc reset、段内 index 清零。下一段从干净状态开始。
+ */
+function createFoldSolver(baseAngles = { x: 0.18, y: 0.2 }) {
+  let accX = 0;
+  let accY = 0;
+  let segIndex = 0; // 段内计数，每段开始清零
+
+  return function solve(axis: FoldAxis, isLast = false): number {
+    const sign = segIndex % 2 === 0 ? 1 : -1.6;
+    const θ = sign * (axis === "x" ? baseAngles.x : baseAngles.y);
+
+    if (isLast) {
+      // 补偿 = 本身的 ±θ，再加上把之前累积归零所需的量
+      const prevAcc = axis === "x" ? accX : accY;
+      const angle = -prevAcc; // 折完后 acc = prevAcc + angle = θ ≈ 0（抵消）
+      // reset
+      accX = 0;
+      accY = 0;
+      segIndex = 0;
+      return angle;
+    }
+
+    if (axis === "x") {
+      accX += θ;
+    } else {
+      accY += θ;
+    }
+    segIndex += 1;
+
+    return θ;
+  };
+}
+
 function resolveDirectionalLink(
   fromRegion: ImagePreviewRegion,
-  toRegion: ImagePreviewRegion,
+  toRegion: ImagePreviewRegion
 ) {
   const fromCenterX = fromRegion.x + fromRegion.width / 2;
   const fromCenterY = fromRegion.y + fromRegion.height / 2;
@@ -190,7 +228,7 @@ function resolveDirectionalLink(
 export function buildStripModelFromRegions(
   pageWidth: number,
   pageHeight: number,
-  regions: ImagePreviewRegion[],
+  regions: ImagePreviewRegion[]
 ): PreviewStripModel {
   if (!regions.length) {
     return buildStripModel(pageWidth, pageHeight);
@@ -222,21 +260,16 @@ export function buildStripModelFromRegions(
     const current = regions[index + 1];
     return resolveDirectionalLink(previous, current);
   });
-  let linkLength = 0;
+
+  const foldSolver = createFoldSolver();
   const hinges: PreviewHinge[] = panels.slice(1).map((panel, index) => {
-    const previousLink = index > 0 ? links[index - 1] : null;
     const currentLink = links[index];
+    const nextLink = index + 1 < links.length ? links[index + 1] : null;
 
-    const link = links[index];
-    panel.creaseEdge = link.toEdge;
+    panel.creaseEdge = currentLink.toEdge;
 
-    // 检查当前链接与前一个链接的轴是否不同
-    let finalAxis: FoldAxis = currentLink.axis;
-    if (previousLink && previousLink.axis !== currentLink.axis) {
-      finalAxis = (previousLink.axis + currentLink.axis) as FoldAxis; // 发生了轴的变化
-      linkLength = 0; // 重置链接长度
-    }
-    linkLength += 1;
+    // 下一段轴不同 → 当前是本段最后一个，需要补偿
+    const isLast = !!(nextLink && nextLink.axis !== currentLink.axis);
 
     return {
       id: `hinge-${index}`,
@@ -244,10 +277,10 @@ export function buildStripModelFromRegions(
       toPanelId: panel.id,
       fromIndex: index,
       toIndex: panel.index,
-      fromEdge: link.fromEdge,
-      toEdge: link.toEdge,
-      axis: finalAxis,
-      angle: resolveFoldAngle(linkLength, link.axis),
+      fromEdge: currentLink.fromEdge,
+      toEdge: currentLink.toEdge,
+      axis: currentLink.axis,
+      angle: foldSolver(currentLink.axis, isLast),
     };
   });
 
@@ -263,7 +296,7 @@ export function buildStripModelFromRegions(
 
 export function buildStripModel(
   pageWidth: number,
-  pageHeight: number,
+  pageHeight: number
 ): PreviewStripModel {
   const { rows, cols } = resolveGridSize(pageWidth, pageHeight);
   const path = buildSpiralPath(rows, cols);
@@ -294,11 +327,18 @@ export function buildStripModel(
     },
   }));
 
+  const foldSolver = createFoldSolver();
   const hinges: PreviewHinge[] = path.slice(1).map((cell, index) => {
     const previous = path[index];
     const next = cell;
     const link = resolveEdgeLink(previous, next);
     panels[index + 1].creaseEdge = link.toEdge;
+
+    // 下一段轴不同 → 当前是本段最后一个，需要补偿
+    const nextCell = path[index + 2];
+    const nextLink = nextCell ? resolveEdgeLink(next, nextCell) : null;
+    const isLast = !!(nextLink && nextLink.axis !== link.axis);
+
     return {
       id: `hinge-${index}`,
       fromPanelId: panels[index].id,
@@ -308,7 +348,7 @@ export function buildStripModel(
       fromEdge: link.fromEdge,
       toEdge: link.toEdge,
       axis: link.axis,
-      angle: resolveFoldAngle(index, link.axis),
+      angle: foldSolver(link.axis, isLast),
     };
   });
 

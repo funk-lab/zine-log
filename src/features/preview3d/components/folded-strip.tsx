@@ -75,11 +75,13 @@ function FoldedStripNode({
     if (!hinge) {
       return [0, 0, 0];
     }
+
     if (hinge.axis === "x") {
       return [hinge.angle, 0, 0];
     } else if (hinge.axis === "y") {
       return [0, hinge.angle, 0];
     }
+
     return [0, 0, 0];
   }, [hinge]);
 
@@ -94,7 +96,7 @@ function FoldedStripNode({
           position={resolveEdgePosition(
             panel.width,
             panel.height,
-            hinge.fromEdge,
+            hinge.fromEdge
           )}
           rotation={resolveRotation}
         >
@@ -102,7 +104,7 @@ function FoldedStripNode({
             position={resolvePanelOffset(
               model.panels[hinge.toIndex].width,
               model.panels[hinge.toIndex].height,
-              hinge.toEdge,
+              hinge.toEdge
             )}
           >
             <FoldedStripNode
@@ -135,7 +137,7 @@ function FoldedStripComponent({ model, sourceCanvas }: FoldedStripProps) {
 
   const hingesByFromIndex = useMemo(
     () => new Map(model.hinges.map((hinge) => [hinge.fromIndex, hinge])),
-    [model.hinges],
+    [model.hinges]
   );
 
   useFrame((_, delta) => {
@@ -147,19 +149,19 @@ function FoldedStripComponent({ model, sourceCanvas }: FoldedStripProps) {
       rootRef.current.rotation.x,
       -Math.PI / 2,
       3.5,
-      delta,
+      delta
     );
     rootRef.current.rotation.y = THREE.MathUtils.damp(
       rootRef.current.rotation.y,
       0,
       3.5,
-      delta,
+      delta
     );
     rootRef.current.rotation.z = THREE.MathUtils.damp(
       rootRef.current.rotation.z,
       0,
       3.5,
-      delta,
+      delta
     );
   });
 
