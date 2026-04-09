@@ -1,5 +1,6 @@
 import type { EditorState } from "@/features/editor/types";
 import { base64ToBytes, createPdfBytes } from "@/features/export/lib/pdf";
+import { rasterizeSvgToCanvas } from "@/features/rendering/lib/rasterize-svg";
 import { currentDimensions, renderTemplateSvg } from "@/features/templates/render-template";
 
 const EXPORT_SCALE = 4;
@@ -16,41 +17,6 @@ function downloadBlob(filename: string, blob: Blob) {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-async function renderCanvasFromSvg(svgMarkup: string, width: number, height: number) {
-  const safeScale = Math.min(EXPORT_SCALE, Math.sqrt(MAX_EXPORT_PIXELS / (width * height)));
-  const exportScale = Math.max(1, safeScale);
-  const blob = new Blob([svgMarkup], {
-    type: "image/svg+xml;charset=utf-8",
-  });
-  const url = URL.createObjectURL(blob);
-  const image = new Image();
-  image.decoding = "async";
-
-  await new Promise<void>((resolve, reject) => {
-    image.onload = () => resolve();
-    image.onerror = () => reject(new Error("SVG render failed"));
-    image.src = url;
-  });
-
-  const canvas = document.createElement("canvas");
-  canvas.width = Math.round(width * exportScale);
-  canvas.height = Math.round(height * exportScale);
-  const context = canvas.getContext("2d");
-
-  if (!context) {
-    throw new Error("Canvas context unavailable");
-  }
-
-  context.imageSmoothingEnabled = true;
-  context.imageSmoothingQuality = "high";
-  context.fillStyle = "#ffffff";
-  context.fillRect(0, 0, canvas.width, canvas.height);
-  context.drawImage(image, 0, 0, canvas.width, canvas.height);
-  URL.revokeObjectURL(url);
-
-  return canvas;
-}
-
 export function downloadSvg(state: EditorState) {
   const blob = new Blob([renderTemplateSvg(state)], {
     type: "image/svg+xml;charset=utf-8",
@@ -61,7 +27,11 @@ export function downloadSvg(state: EditorState) {
 
 export async function downloadPng(state: EditorState) {
   const { width, height } = currentDimensions(state.template);
-  const canvas = await renderCanvasFromSvg(renderTemplateSvg(state), width, height);
+  const canvas = await rasterizeSvgToCanvas(renderTemplateSvg(state), width, height, {
+    scale: EXPORT_SCALE,
+    maxPixels: MAX_EXPORT_PIXELS,
+    backgroundColor: "#ffffff",
+  });
   const dataUrl = canvas.toDataURL("image/png");
   const anchor = document.createElement("a");
   anchor.href = dataUrl;
@@ -73,7 +43,11 @@ export async function downloadPng(state: EditorState) {
 
 export async function downloadPdf(state: EditorState) {
   const { width, height } = currentDimensions(state.template);
-  const canvas = await renderCanvasFromSvg(renderTemplateSvg(state), width, height);
+  const canvas = await rasterizeSvgToCanvas(renderTemplateSvg(state), width, height, {
+    scale: EXPORT_SCALE,
+    maxPixels: MAX_EXPORT_PIXELS,
+    backgroundColor: "#ffffff",
+  });
   const jpegDataUrl = canvas.toDataURL("image/jpeg", 1);
   const [, base64] = jpegDataUrl.split(",");
   const imageBytes = base64ToBytes(base64);

@@ -64,7 +64,7 @@ export function buildTextBlock(
   size: number,
   lineHeight: number,
   color: string,
-  weight = 400,
+  weight = 400
 ) {
   if (!lines.length) {
     return "";
@@ -73,7 +73,9 @@ export function buildTextBlock(
   const tspans = lines
     .map((line, index) => {
       const safeLine = escapeHtml(line || " ");
-      return `<tspan x="${x}" dy="${index === 0 ? 0 : lineHeight}">${safeLine}</tspan>`;
+      return `<tspan x="${x}" dy="${
+        index === 0 ? 0 : lineHeight
+      }">${safeLine}</tspan>`;
     })
     .join("");
 
@@ -118,14 +120,18 @@ export function imageMarkup({
   return `
     <g>
       <rect x="${x}" y="${y}" width="${width}" height="${height}" rx="${radius}" ry="${radius}" fill="#f8fafc" />
-      <rect x="${x + 26}" y="${y + 26}" width="${width - 52}" height="${height - 52}" rx="${Math.max(
-        radius - 8,
-        0,
-      )}" ry="${Math.max(radius - 8, 0)}" fill="none" stroke="${rgba(accent, 0.24)}" stroke-dasharray="18 14" />
-      <text x="${x + width / 2}" y="${y + height / 2}" text-anchor="middle" font-family="'Inter', sans-serif" font-size="${placeholderSize}" fill="${rgba(
-        accent,
-        0.76,
-      )}">${placeholderLabel}</text>
+      <rect x="${x + 26}" y="${y + 26}" width="${width - 52}" height="${
+    height - 52
+  }" rx="${Math.max(radius - 8, 0)}" ry="${Math.max(
+    radius - 8,
+    0
+  )}" fill="none" stroke="${rgba(accent, 0.24)}" stroke-dasharray="18 14" />
+      <text x="${x + width / 2}" y="${
+    y + height / 2
+  }" text-anchor="middle" font-family="'Inter', sans-serif" font-size="${placeholderSize}" fill="${rgba(
+    accent,
+    0.76
+  )}">${placeholderLabel}</text>
     </g>
   `;
 }
@@ -136,56 +142,79 @@ interface GridSlotMarkupOptions {
   y: number;
   size: number;
   slotId: string;
+  /** 图片内边距（px），默认 2 */
+  padding?: number;
 }
 
-export function gridSlotMarkup({ href, x, y, size, slotId }: GridSlotMarkupOptions) {
+export function gridSlotMarkup({
+  href,
+  x,
+  y,
+  size,
+  slotId,
+  padding = 2,
+}: GridSlotMarkupOptions) {
   if (!href) {
     return "";
   }
 
-  const innerInset = Math.min(2.5, Math.max(1.5, size * 0.02));
-  const imageX = x + innerInset;
-  const imageY = y + innerInset;
-  const imageSize = size - innerInset * 2;
+  const imageX = x + padding;
+  const imageY = y + padding;
+  const imageSize = size - padding * 2;
   return `
     <clipPath id="${slotId}">
       <rect x="${imageX}" y="${imageY}" width="${imageSize}" height="${imageSize}" />
     </clipPath>
-    <rect x="${x}" y="${y}" width="${size}" height="${size}" fill="#ffffff" />
+    <rect x="${x}" y="${y}" width="${size}" height="${size}" fill="#ffffff" data-slot="${slotId}" />
     <image href="${href}" x="${imageX}" y="${imageY}" width="${imageSize}" height="${imageSize}" preserveAspectRatio="xMidYMid slice" clip-path="url(#${slotId})" />
   `;
 }
 
-export function generateSpiralPositions(count: number, gap = 1) {
-  if (count <= 0) {
-    return [];
-  }
+/**
+ * 生成方形螺旋坐标
+ * @param count 需要生成的坐标数量
+ * @param gap 螺旋的紧密程度（步长增长系数），默认为 1（最紧密）
+ */
+export function generateSpiralPositions(
+  count: number,
+  gap = 1
+): [number, number][] {
+  if (count <= 0) return [];
 
-  const positions: Array<[number, number]> = [[0, 0]];
-  const directions: Array<[number, number]> = [
+  const directions: [number, number][] = [
     [0, 1],
     [-1, 0],
     [0, -1],
     [1, 0],
   ];
 
+  const positions: [number, number][] = [[0, 0]];
+
   let x = 0;
   let y = 0;
   let directionIndex = 0;
-  let segmentIndex = 0;
+
+  let currentSegmentLength = gap;
 
   while (positions.length < count) {
-    const segmentLength = 1 + 2 * gap * Math.floor(segmentIndex / 2);
-    const [dx, dy] = directions[directionIndex % directions.length];
+    const [dx, dy] = directions[directionIndex % 4];
 
-    for (let step = 0; step < segmentLength && positions.length < count; step += 1) {
+    const stepsToTake = Math.min(
+      currentSegmentLength,
+      count - positions.length
+    );
+
+    for (let i = 0; i < stepsToTake; i++) {
       x += dx;
       y += dy;
       positions.push([x, y]);
     }
 
-    directionIndex += 1;
-    segmentIndex += 1;
+    directionIndex++;
+
+    if (directionIndex % 2 === 0) {
+      currentSegmentLength += gap;
+    }
   }
 
   return positions;

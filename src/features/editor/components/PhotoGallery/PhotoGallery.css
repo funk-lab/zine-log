@@ -1,0 +1,470 @@
+/* ==============================
+   PhotoGallery 组件样式
+   双区拖拽图库
+============================== */
+
+/* CSS 变量（可根据项目调整） */
+:root {
+  --pg-bg: #F7F6F3;
+  --pg-surface: #FFFFFF;
+  --pg-surface-2: #F0EEE9;
+  --pg-border: #E4E1DA;
+  --pg-border-2: #D0CBC0;
+  --pg-text-primary: #1A1714;
+  --pg-text-secondary: #6B6560;
+  --pg-text-muted: #9E9890;
+  --pg-accent: #2D2D2D;
+  --pg-accent-hover: #000000;
+  --pg-brand: #C8773A;
+  --pg-brand-light: #F5E8DA;
+  --pg-brand-hover: #B36830;
+  --pg-selected: #2D6BE4;
+  --pg-selected-bg: #EBF1FD;
+  --pg-danger: #e05555;
+  
+  --pg-radius-sm: 6px;
+  --pg-radius-md: 10px;
+  --pg-radius-lg: 14px;
+  --pg-radius-xl: 20px;
+  
+  --pg-shadow-sm: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+  --pg-shadow-md: 0 4px 12px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.05);
+  --pg-shadow-lg: 0 12px 32px rgba(0,0,0,.12), 0 4px 8px rgba(0,0,0,.06);
+  
+  --pg-transition-fast: 120ms ease;
+  --pg-transition-norm: 220ms ease;
+  --pg-transition-slow: 380ms cubic-bezier(.4,0,.2,1);
+  --pg-transition-bounce: 220ms cubic-bezier(.34,1.56,.64,1);
+}
+
+/* ==============================
+   面板容器
+============================== */
+.pg-panel-left {
+  width: 280px;
+  flex-shrink: 0;
+  background: var(--pg-surface);
+  border-right: 1px solid var(--pg-border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  font-family: 'PingFang SC', 'Microsoft YaHei', system-ui, -apple-system, sans-serif;
+  font-size: 13px;
+  color: var(--pg-text-primary);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 面板标题 */
+.pg-panel-header {
+  padding: 16px 16px 12px;
+  border-bottom: 1px solid var(--pg-border);
+  flex-shrink: 0;
+}
+
+.pg-panel-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--pg-text-muted);
+  letter-spacing: 0.2px;
+  text-transform: uppercase;
+}
+
+/* ==============================
+   上传区
+============================== */
+.pg-upload-area {
+  margin: 12px 12px 8px;
+  border: 1.5px dashed var(--pg-border-2);
+  border-radius: var(--pg-radius-lg);
+  padding: 12px 16px;
+  text-align: center;
+  cursor: pointer;
+  transition: all var(--pg-transition-norm);
+  background: transparent;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.pg-upload-area:hover {
+  border-color: var(--pg-brand);
+  background: var(--pg-brand-light);
+}
+
+.pg-upload-area:hover .pg-upload-icon {
+  color: var(--pg-brand);
+}
+
+.pg-upload-area:hover .pg-upload-text {
+  color: var(--pg-brand);
+}
+
+.pg-upload-icon {
+  color: var(--pg-text-muted);
+  transition: color var(--pg-transition-norm);
+  flex-shrink: 0;
+}
+
+.pg-upload-text {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--pg-text-secondary);
+  transition: color var(--pg-transition-norm);
+  text-align: left;
+}
+
+.pg-upload-hint {
+  font-size: 11px;
+  color: var(--pg-text-muted);
+  margin-top: 1px;
+}
+
+.pg-upload-action {
+  margin-left: auto;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--pg-brand);
+  flex-shrink: 0;
+}
+
+/* ==============================
+   双区容器
+============================== */
+.pg-dual-zones {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* ==============================
+   单个区域
+============================== */
+.pg-photo-zone {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: flex var(--pg-transition-slow);
+  flex: 1;
+}
+
+.pg-photo-zone + .pg-photo-zone {
+  border-top: 1px solid var(--pg-border);
+}
+
+/* 区域标题行 */
+.pg-zone-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 12px 5px;
+  flex-shrink: 0;
+}
+
+.pg-zone-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.pg-zone-unselected .pg-zone-title {
+  color: var(--pg-text-muted);
+}
+
+.pg-zone-selected .pg-zone-title {
+  color: var(--pg-selected);
+}
+
+.pg-zone-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 99px;
+  font-size: 10px;
+  font-weight: 700;
+  background: var(--pg-surface-2);
+  color: var(--pg-text-secondary);
+}
+
+.pg-zone-badge-selected {
+  background: var(--pg-selected-bg);
+  color: var(--pg-selected);
+}
+
+.pg-zone-action {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--pg-text-muted);
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: var(--pg-radius-sm);
+  border: none;
+  background: none;
+  transition: all var(--pg-transition-fast);
+}
+
+.pg-zone-action:hover:not(:disabled) {
+  background: var(--pg-surface-2);
+  color: var(--pg-text-secondary);
+}
+
+.pg-zone-action:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.pg-zone-action-danger {
+  color: var(--pg-danger);
+}
+
+.pg-zone-action-danger:hover:not(:disabled) {
+  background: rgba(224, 85, 85, 0.1);
+  color: var(--pg-danger);
+}
+
+/* 区域内容：可滚动图片网格 */
+.pg-zone-grid-wrap {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 12px 12px;
+  position: relative;
+}
+
+/* 拖拽进入高亮 */
+.pg-photo-zone.pg-drag-over .pg-zone-grid-wrap {
+  background: rgba(45, 107, 228, 0.04);
+}
+
+/* 空状态提示 */
+.pg-zone-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 80px;
+  color: var(--pg-text-muted);
+  font-size: 12px;
+  gap: 6px;
+  border: 1.5px dashed var(--pg-border);
+  border-radius: var(--pg-radius-lg);
+  margin: 0 0 8px;
+  transition: all var(--pg-transition-norm);
+}
+
+.pg-zone-empty-selected {
+  border-color: rgba(45, 107, 228, 0.25);
+  color: rgba(45, 107, 228, 0.5);
+}
+
+.pg-photo-zone.pg-drag-over .pg-zone-empty {
+  background: rgba(45, 107, 228, 0.06);
+  border-color: var(--pg-selected);
+  color: var(--pg-selected);
+}
+
+/* 区域网格 */
+.pg-zone-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 5px;
+}
+
+/* ==============================
+   分隔线拖拽手柄
+============================== */
+.pg-zone-divider {
+  height: 6px;
+  background: var(--pg-bg);
+  border-top: 1px solid var(--pg-border);
+  border-bottom: 1px solid var(--pg-border);
+  cursor: row-resize;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--pg-transition-fast);
+}
+
+.pg-zone-divider:hover {
+  background: var(--pg-border);
+}
+
+.pg-zone-divider-handle {
+  width: 28px;
+  height: 2px;
+  background: var(--pg-border-2);
+  border-radius: 99px;
+}
+
+/* ==============================
+   图片卡片
+============================== */
+.pg-photo-item {
+  position: relative;
+  border-radius: var(--pg-radius-sm);
+  overflow: hidden;
+  cursor: grab;
+  aspect-ratio: 1;
+  background: var(--pg-surface-2);
+  transition: transform var(--pg-transition-norm), 
+              box-shadow var(--pg-transition-norm), 
+              opacity var(--pg-transition-fast);
+  user-select: none;
+}
+
+.pg-photo-item:active {
+  cursor: grabbing;
+}
+
+.pg-photo-item.pg-dragging {
+  opacity: 0.35;
+  transform: scale(0.96);
+}
+
+.pg-photo-item:hover {
+  transform: scale(1.04);
+  box-shadow: var(--pg-shadow-md);
+}
+
+.pg-photo-item:hover .pg-photo-quick-add {
+  opacity: 1;
+}
+
+/* 图片占位 */
+.pg-photo-placeholder {
+  width: 100%;
+  height: 100%;
+}
+
+/* 快速操作按钮（hover 显示） */
+.pg-photo-quick-add {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.55));
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 4px 0;
+  opacity: 0;
+  transition: opacity var(--pg-transition-norm);
+}
+
+.pg-quick-btn {
+  font-size: 10px;
+  font-weight: 700;
+  color: white;
+  letter-spacing: 0.3px;
+  padding: 2px 6px;
+  border-radius: 99px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.15);
+  cursor: pointer;
+  transition: background var(--pg-transition-fast);
+}
+
+.pg-quick-btn:hover {
+  background: rgba(255, 255, 255, 0.35);
+}
+
+/* 序号徽章 */
+.pg-photo-order-badge {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 16px;
+  height: 16px;
+  background: var(--pg-selected);
+  border-radius: 4px;
+  font-size: 9px;
+  font-weight: 700;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 4px rgba(45, 107, 228, 0.4);
+}
+
+/* ==============================
+   拖拽幽灵（跟手的缩略图）
+============================== */
+.pg-drag-ghost {
+  position: fixed;
+  pointer-events: none;
+  z-index: 9999;
+  width: 60px;
+  height: 60px;
+  border-radius: var(--pg-radius-md);
+  box-shadow: var(--pg-shadow-lg);
+  overflow: hidden;
+  transform: translate(-50%, -50%) rotate(4deg) scale(1.1);
+  transition: none;
+  opacity: 0.92;
+}
+
+/* ==============================
+   滚动条样式
+============================== */
+.pg-zone-grid-wrap::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+.pg-zone-grid-wrap::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.pg-zone-grid-wrap::-webkit-scrollbar-thumb {
+  background: var(--pg-border-2);
+  border-radius: 99px;
+}
+
+
+/* ==============================
+   区域 B 内部排序：插入位置指示线
+============================== */
+
+/* 指示线本体：宽度与 item 相同，使用 grid 自动对齐 */
+.pg-sort-insert-indicator {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: var(--pg-radius-sm);
+  background: rgba(45, 107, 228, 0.1);
+  border: 2px dashed var(--pg-selected);
+  box-sizing: border-box;
+  pointer-events: none;
+  animation: pg-indicator-pulse 600ms ease-in-out infinite alternate;
+}
+
+@keyframes pg-indicator-pulse {
+  0%   { opacity: 0.5; background: rgba(45, 107, 228, 0.08); }
+  100% { opacity: 1;   background: rgba(45, 107, 228, 0.18); }
+}
+
+/* ==============================
+   弹入动画（用于移动后的反馈）
+============================== */
+@keyframes pg-pop-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.7);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.pg-photo-item.pg-just-moved {
+  animation: pg-pop-in 220ms cubic-bezier(.34, 1.56, .64, 1) forwards;
+}

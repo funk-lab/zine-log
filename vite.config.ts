@@ -13,6 +13,9 @@ export default defineConfig({
       "@": path.resolve(dirname, "./src"),
     },
   },
+  server: {
+    host: "0.0.0.0",
+  },
   test: {
     environment: "jsdom",
     setupFiles: "./src/test/setup.ts",

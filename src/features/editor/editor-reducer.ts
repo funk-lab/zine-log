@@ -1,4 +1,10 @@
-import { createInitialEditorState, type EditorState, type LibraryImage, type TemplateId } from "@/features/editor/types";
+import {
+  GalleryImage,
+  createInitialEditorState,
+  generateImageId,
+  type EditorState,
+  type TemplateId,
+} from "@/features/editor/types";
 
 export type EditorAction =
   | { type: "set-template"; template: TemplateId }
@@ -7,13 +13,22 @@ export type EditorAction =
   | { type: "set-body"; body: string }
   | { type: "set-accent"; accent: string }
   | { type: "set-ring-scale"; ringScale: number }
-  | { type: "append-images"; images: LibraryImage[] }
-  | { type: "toggle-image"; imageId: number }
-  | { type: "select-all-images" }
+  | { type: "set-padding"; padding: number }
+  | { type: "append-images"; images: Omit<GalleryImage, "id">[] }
+  // 与 PhotoGallery 组件回调直接对应：传入完整数组替换状态
+  | { type: "set-unselected"; images: GalleryImage[] }
+  | { type: "set-selected"; images: GalleryImage[] }
+  // 便捷操作（无需外部计算，reducer 内部处理）
+  | { type: "move-all-to-selected" }
   | { type: "clear-selection" }
+  | { type: "remove-image"; imageId: string }
+  | { type: "reorder-selected"; newOrder: string[] }
   | { type: "fill-example" };
 
-export function editorReducer(state: EditorState, action: EditorAction): EditorState {
+export function editorReducer(
+  state: EditorState,
+  action: EditorAction
+): EditorState {
   switch (action.type) {
     case "set-template":
       return { ...state, template: action.template };
@@ -27,39 +42,73 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
       return { ...state, accent: action.accent };
     case "set-ring-scale":
       return { ...state, ringScale: action.ringScale };
-    case "append-images":
+    case "set-padding":
+      return { ...state, padding: action.padding };
+    case "append-images": {
+      const newImages = action.images.map((img, index) => ({
+        ...img,
+        id: generateImageId(state.nextImageId + index),
+      }));
+
       return {
         ...state,
-        images: [...state.images, ...action.images],
+        unselected: [...state.unselected, ...newImages],
         nextImageId: state.nextImageId + action.images.length,
       };
-    case "toggle-image":
+    }
+
+    // 直接用 PhotoGallery 回调传来的完整数组替换状态
+    case "set-unselected":
+      return { ...state, unselected: action.images };
+
+    case "set-selected":
+      return { ...state, selected: action.images };
+
+    case "move-all-to-selected": {
+      if (state.unselected.length === 0) return state;
+
       return {
         ...state,
-        images: state.images.map((image) =>
-          image.id === action.imageId ? { ...image, selected: !image.selected } : image,
-        ),
+        selected: [...state.selected, ...state.unselected],
+        unselected: [],
       };
-    case "select-all-images":
+    }
+
+    case "remove-image": {
       return {
         ...state,
-        images: state.images.map((image) => ({ ...image, selected: true })),
+        unselected: state.unselected.filter((img) => img.id !== action.imageId),
+        selected: state.selected.filter((img) => img.id !== action.imageId),
       };
-    case "clear-selection":
+    }
+
+    case "reorder-selected": {
+      const idOrderMap = new Map(
+        action.newOrder.map((id, index) => [id, index])
+      );
+
+      const sortedSelected = [...state.selected].sort((a, b) => {
+        const orderA = idOrderMap.get(a.id) ?? Infinity;
+        const orderB = idOrderMap.get(b.id) ?? Infinity;
+        return orderA - orderB;
+      });
+
       return {
         ...state,
-        images: state.images.map((image) => ({ ...image, selected: false })),
+        selected: sortedSelected,
       };
-    case "fill-example":
+    }
+
+    case "clear-selection": {
+      if (state.selected.length === 0) return state;
+
       return {
         ...state,
-        template: "l-shape",
-        title: "春日河岸慢走",
-        meta: "2026.03.17 · 傍晚五点半",
-        body: "风有点凉，树影被拉得很长。\n今天没有发生特别大的事，但光线很好，适合把照片留成一页。",
-        accent: "#a55d35",
-        ringScale: 1,
+        unselected: [...state.unselected, ...state.selected],
+        selected: [],
       };
+    }
+
     default:
       return state;
   }
