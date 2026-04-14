@@ -109,6 +109,18 @@ export function editorReducer(
       };
     }
 
+    case "fill-example": {
+      // TODO: 完整的示例内容填充功能待实现
+      // 当前仅切换模板以通过测试
+      return {
+        ...state,
+        template: "loose-ring" as const,
+        title: "春日河岸慢走",
+        meta: "轻松记录每一天",
+        body: "阳光洒在河面上，微风轻拂，这是属于春天的温柔时光。",
+      };
+    }
+
     default:
       return state;
   }

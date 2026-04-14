@@ -2,9 +2,13 @@
 import React from 'react';
 
 interface TopBarProps {
+  /** TODO: 实现撤销功能 */
   onUndo?: () => void;
+  /** TODO: 实现重做功能 */
   onRedo?: () => void;
+  /** TODO: 实现全屏功能 */
   onFullscreen?: () => void;
+  /** TODO: 实现导出功能 */
   onExport?: () => void;
 }
 

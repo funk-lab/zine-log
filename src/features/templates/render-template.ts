@@ -15,7 +15,6 @@ export function currentDimensions(template: EditorState["template"]) {
 }
 
 export function renderTemplateSvg(state: EditorState) {
-  console.log(state.template);
   switch (state.template) {
     case "tight-ring":
       return buildPhotoRingTemplate(state, 1);

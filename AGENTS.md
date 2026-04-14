@@ -31,3 +31,38 @@ Pull requests should explain what changed, why it changed, and how it was verifi
 
 ## Security & Configuration Tips
 Do not commit secrets, local environments, or generated artifacts. The current ignore rules already exclude `node_modules/`, `venv/`, `env/`, `*.pyc`, and `__pycache__/`; extend them carefully when new tooling is added.
+
+## Code Quality & Refactoring Guidelines (Post-2026-04-14)
+
+### Type System
+- 统一使用 `GalleryImage` 作为图片数据类型
+- 废弃的 `LibraryImage` 类型将在后续版本中移除
+- 类型定义应与实际数据结构保持一致
+
+### Error Handling
+- 避免在生产代码中使用 `console.log` 输出调试信息
+- 错误处理应提供用户友好的反馈（如 UI 提示）
+- 保留 `console.error` 仅用于开发调试，需配合用户提示使用
+
+### Code Comments
+- 使用 `// TODO: [描述]` 标记未实现功能
+- 使用 `// FIXME: [描述]` 标记已知问题
+- 废弃代码使用 `// @deprecated [替代方案]` 标记
+
+### Testing Requirements
+- 每个功能模块需有对应的单元测试（`.test.ts`）
+- 核心功能测试覆盖率目标 > 80%
+- 新增功能必须包含测试用例
+
+### Module Organization (src/features)
+- `editor/` - 编辑器核心功能（Reducer + 组件）
+- `export/` - 导出功能（PDF/PNG/SVG）
+- `preview3d/` - 3D预览（React Three Fiber）
+- `rendering/` - 渲染工具（SVG转Canvas）
+- `templates/` - 模板渲染
+
+### File Naming Conventions
+- React 组件: PascalCase (e.g., `PhotoGallery.tsx`)
+- 工具函数: camelCase (e.g., `editor-reducer.ts`)
+- 测试文件: 与被测文件同名 + `.test.ts`
+- 样式文件: 与组件同名 + `.css`

@@ -12,8 +12,8 @@ import {
   renderTemplateSvg,
 } from "../templates/render-template";
 import { editorReducer, initialEditorState } from "./editor-reducer";
-import { filesToLibraryImages } from "./lib/file";
-import { GalleryImage, TemplateId } from "./types";
+import { filesToGalleryImages } from "./lib/file";
+import { GalleryImage, TemplateId, generateImageId } from "./types";
 import CanvasPanel from "./components/CanvasPanel";
 import PhotoGallery from "./components/PhotoGallery";
 import RightPanel from "./components/RightPanel";
@@ -40,21 +40,21 @@ export const Editor: React.FC<EditorProps> = ({
 
   const dimensions = useMemo(
     () => currentDimensions(deferredState.template),
-    [deferredState.template]
+    [deferredState.template],
   );
   const svgMarkup = useMemo(
     () => renderTemplateSvg(deferredState),
-    [deferredState]
+    [deferredState],
   );
 
   const handleUpload = useCallback(
     async (files: FileList | null) => {
       const fileList = Array.from(files ?? []);
       if (!fileList.length) return;
-      const images = await filesToLibraryImages(fileList, state.nextImageId);
+      const images = await filesToGalleryImages(fileList, state.nextImageId);
       dispatch({ type: "append-images", images });
     },
-    [state.nextImageId]
+    [state.nextImageId],
   );
 
   const handleDownloadPng = useCallback(async () => {
@@ -95,9 +95,10 @@ export const Editor: React.FC<EditorProps> = ({
     dispatch({ type: "set-accent", accent });
   }, []);
 
-  const handleRingScaleChange = useCallback((ringScale: number) => {
-    dispatch({ type: "set-ring-scale", ringScale });
-  }, []);
+  // TODO: ringScale 控制在 UI 中未实现，暂保留 reducer 支持
+  // const handleRingScaleChange = useCallback((ringScale: number) => {
+  //   dispatch({ type: "set-ring-scale", ringScale });
+  // }, []);
 
   const handlePaddingChange = useCallback((padding: number) => {
     dispatch({ type: "set-padding", padding });
@@ -107,7 +108,7 @@ export const Editor: React.FC<EditorProps> = ({
     (files: FileList | null) => {
       void handleUpload(files);
     },
-    [handleUpload]
+    [handleUpload],
   );
 
   return (
@@ -144,10 +145,8 @@ export const Editor: React.FC<EditorProps> = ({
         {/* 右侧：工具栏 */}
         <RightPanel
           accent={state.accent}
-          ringScale={state.ringScale}
           padding={state.padding}
           onAccentChange={handleAccentChange}
-          onRingScaleChange={handleRingScaleChange}
           onPaddingChange={handlePaddingChange}
           onSaveDraft={onSaveDraft}
           onExport={onExport}

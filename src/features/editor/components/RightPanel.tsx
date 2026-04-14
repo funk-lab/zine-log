@@ -15,10 +15,12 @@ export type RightTab = "design";
 interface RightPanelProps {
   accent?: string;
   onAccentChange?: (color: string) => void;
+  /** TODO: 实现环形比例控制 */
   ringScale?: number;
   onRingScaleChange?: (scale: number) => void;
   padding?: number;
   onPaddingChange?: (padding: number) => void;
+  /** TODO: 实现草稿保存功能 */
   onSaveDraft?: () => void;
   onExport?: () => void;
 }
@@ -26,6 +28,9 @@ interface RightPanelProps {
 export const RightPanel: React.FC<RightPanelProps> = ({
   accent = "#D4B896",
   onAccentChange,
+  // TODO: ringScale 控制暂未实现
+  // ringScale = 1.5,
+  // onRingScaleChange,
   padding = 2,
   onPaddingChange,
   onSaveDraft,
@@ -77,9 +82,13 @@ export const RightPanel: React.FC<RightPanelProps> = ({
                   title={c.name}
                 />
               ))}
+              {/* TODO: 实现自定义颜色选择器 */}
               <div
                 className="color-swatch color-swatch-custom"
-                onClick={() => {}}
+                onClick={() => {
+                  // eslint-disable-next-line no-console
+                  console.log("TODO: 打开颜色选择器");
+                }}
                 title="自定义"
               />
             </div>

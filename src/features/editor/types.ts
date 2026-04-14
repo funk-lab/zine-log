@@ -1,13 +1,8 @@
 export type TemplateId = "tight-ring" | "loose-ring";
-export interface LibraryImage {
-  id: number;
-  src: string;
-  name: string;
-  selected: boolean;
-}
+
 /**
  * 图库图片项
- * 移除 selected 字段，改为通过所在数组区分状态
+ * 通过所在数组（unselected/selected）区分状态
  */
 export interface GalleryImage {
   id: string;
@@ -21,6 +16,17 @@ export interface GalleryImage {
   mimeType?: string;
   /** 可选：文件大小（字节） */
   size?: number;
+}
+
+/**
+ * @deprecated 使用 GalleryImage 替代
+ * 保留此类型用于兼容旧代码，将在后续版本中移除
+ */
+export interface LibraryImage {
+  id: number;
+  src: string;
+  name: string;
+  selected: boolean;
 }
 
 /**
