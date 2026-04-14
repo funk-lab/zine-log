@@ -20,8 +20,6 @@ interface RightPanelProps {
   onRingScaleChange?: (scale: number) => void;
   padding?: number;
   onPaddingChange?: (padding: number) => void;
-  /** TODO: 实现草稿保存功能 */
-  onSaveDraft?: () => void;
   onExport?: () => void;
 }
 
@@ -33,7 +31,6 @@ export const RightPanel: React.FC<RightPanelProps> = ({
   // onRingScaleChange,
   padding = 2,
   onPaddingChange,
-  onSaveDraft,
   onExport,
 }) => {
   const [activeTab, setActiveTab] = useState<RightTab>("design");
@@ -114,9 +111,6 @@ export const RightPanel: React.FC<RightPanelProps> = ({
 
       {/* 底部操作 */}
       <div className="right-footer">
-        <button className="btn-full btn-secondary-full" onClick={onSaveDraft}>
-          存草稿
-        </button>
         <button className="btn-full btn-primary-full" onClick={onExport}>
           生成作品
         </button>

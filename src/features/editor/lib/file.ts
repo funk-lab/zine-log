@@ -1,5 +1,4 @@
 import type { GalleryImage } from "@/features/editor/types";
-import { generateImageId } from "@/features/editor/types";
 
 export async function fileToDataUrl(file: File) {
   return new Promise<string>((resolve, reject) => {
@@ -21,7 +20,6 @@ export async function fileToDataUrl(file: File) {
 
 export async function filesToGalleryImages(
   files: File[],
-  nextImageId: number
 ): Promise<Omit<GalleryImage, "id">[]> {
   const dataUrls = await Promise.all(files.map((file) => fileToDataUrl(file)));
 
@@ -29,22 +27,5 @@ export async function filesToGalleryImages(
     src,
     name: files[index].name,
     uploadedAt: Date.now(),
-  }));
-}
-
-/**
- * @deprecated 使用 filesToGalleryImages 替代
- */
-export async function filesToLibraryImages(
-  files: File[],
-  nextImageId: number
-): Promise<{ id: number; src: string; name: string; selected: boolean }[]> {
-  const dataUrls = await Promise.all(files.map((file) => fileToDataUrl(file)));
-
-  return dataUrls.map((src, index) => ({
-    id: nextImageId + index,
-    src,
-    name: files[index].name,
-    selected: true,
   }));
 }

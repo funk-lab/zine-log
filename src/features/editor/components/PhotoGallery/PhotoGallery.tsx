@@ -16,6 +16,8 @@ export interface PhotoGalleryProps {
   /** 上传按钮点击回调 */
   // onUpload?: () => void;
   onUpload: (files: FileList | null) => void;
+  /** 删除图片回调 */
+  onPhotoDelete?: (photoId: string) => void;
   /** 自定义类名 */
   className?: string;
   /** 自定义样式 */
@@ -38,7 +40,7 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
     "unselected" | "selected" | null
   >(null);
   const [ghostPos, setGhostPos] = useState<{ x: number; y: number } | null>(
-    null
+    null,
   );
   const [ghostImg, setGhostImg] = useState<string>("");
   const [ghostColor, setGhostColor] = useState<string>("");
@@ -69,7 +71,7 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
     (
       e: React.DragEvent,
       photo: GalleryImage,
-      fromZone: "unselected" | "selected"
+      fromZone: "unselected" | "selected",
     ) => {
       draggingFromZoneRef.current = fromZone;
       setDraggingId(photo.id);
@@ -84,7 +86,7 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
       e.dataTransfer.setData("photoId", photo.id);
       e.dataTransfer.setData("fromZone", fromZone);
     },
-    []
+    [],
   );
 
   const handleDrag = useCallback(
@@ -93,7 +95,7 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
         setGhostPos({ x: e.clientX, y: e.clientY });
       }
     },
-    [draggingId]
+    [draggingId],
   );
 
   const clearDragState = useCallback(() => {
@@ -114,7 +116,7 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
         setSortInsertIndex(null);
       }
     },
-    []
+    [],
   );
 
   const handleZoneDragLeave = useCallback((e: React.DragEvent) => {
@@ -142,7 +144,7 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
         onUnselectedChange?.([...unselected, photo]);
       }
     },
-    [unselected, selected, onUnselectedChange, onSelectedChange]
+    [unselected, selected, onUnselectedChange, onSelectedChange],
   );
 
   /**
@@ -164,7 +166,7 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
       const insertBefore = e.clientX < midX ? overIndex : overIndex + 1;
       setSortInsertIndex(insertBefore);
     },
-    []
+    [],
   );
 
   /**
@@ -225,7 +227,13 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
 
       clearDragState();
     },
-    [selected, unselected, onSelectedChange, onUnselectedChange, clearDragState]
+    [
+      selected,
+      unselected,
+      onSelectedChange,
+      onUnselectedChange,
+      clearDragState,
+    ],
   );
 
   const handleZoneDrop = useCallback(
@@ -254,7 +262,7 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
         moveItem(photoId, targetZone);
       }
     },
-    [selected, moveItem, onSelectedChange, clearDragState]
+    [selected, moveItem, onSelectedChange, clearDragState],
   );
 
   // ==================== 快捷操作 ====================
@@ -263,7 +271,19 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
     (photoId: string, targetZone: "unselected" | "selected") => {
       moveItem(photoId, targetZone);
     },
-    [moveItem]
+    [moveItem],
+  );
+
+  const handleDeletePhoto = useCallback(
+    (isSelectedZone: boolean, photoId: string) => {
+      if (isSelectedZone) {
+        onSelectedChange?.(selected.filter((p) => p.id !== photoId));
+      } else {
+        onUnselectedChange?.(unselected.filter((p) => p.id !== photoId));
+      }
+      // onPhotoDelete?.(photoId);
+    },
+    [onUnselectedChange, unselected, onSelectedChange, selected],
   );
 
   const handleMoveAllToSelected = useCallback(() => {
@@ -308,7 +328,7 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
 
         const newUnselectedHeight = Math.max(
           minHeight,
-          startUnselectedHeight + dy
+          startUnselectedHeight + dy,
         );
         const newSelectedHeight = Math.max(minHeight, startSelectedHeight - dy);
 
@@ -346,7 +366,7 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
   const renderGalleryImage = (
     photo: GalleryImage,
     index: number,
-    zone: "unselected" | "selected"
+    zone: "unselected" | "selected",
   ) => {
     const isSelectedZone = zone === "selected";
     const buttonText = isSelectedZone ? "移除 ↑" : "加入 ↓";
@@ -365,8 +385,7 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
 
     const itemDragHandlers = isSelectedZone
       ? {
-          onDragOver: (e: React.DragEvent) =>
-            handleSortItemDragOver(e, index),
+          onDragOver: (e: React.DragEvent) => handleSortItemDragOver(e, index),
           onDrop: (e: React.DragEvent) => handleSortItemDrop(e, index),
         }
       : {};
@@ -374,9 +393,7 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
     return (
       <React.Fragment key={photo.id}>
         {/* 在 item 左侧插入指示线 */}
-        {showInsertBefore && (
-          <div className="pg-sort-insert-indicator" />
-        )}
+        {showInsertBefore && <div className="pg-sort-insert-indicator" />}
         <div
           className={`pg-photo-item ${
             draggingId === photo.id ? "pg-dragging" : ""
@@ -391,6 +408,18 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
           {isSelectedZone && (
             <div className="pg-photo-order-badge">{index + 1}</div>
           )}
+          <div className="pg-photo-delete-btn-unselected">
+            <span
+              className="pg-delete-btn"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDeletePhoto(isSelectedZone, photo.id);
+              }}
+              title="删除"
+            >
+              ×
+            </span>
+          </div>
           <div className="pg-photo-quick-add">
             <span
               className="pg-quick-btn"
@@ -404,9 +433,7 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
           </div>
         </div>
         {/* 在最后一个 item 右侧插入指示线 */}
-        {showInsertAfter && (
-          <div className="pg-sort-insert-indicator" />
-        )}
+        {showInsertAfter && <div className="pg-sort-insert-indicator" />}
       </React.Fragment>
     );
   };
@@ -508,7 +535,7 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
             ) : (
               <div className="pg-zone-grid">
                 {unselected.map((photo, index) =>
-                  renderGalleryImage(photo, index, "unselected")
+                  renderGalleryImage(photo, index, "unselected"),
                 )}
               </div>
             )}
@@ -575,7 +602,7 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
             ) : (
               <div className="pg-zone-grid">
                 {selected.map((photo, index) =>
-                  renderGalleryImage(photo, index, "selected")
+                  renderGalleryImage(photo, index, "selected"),
                 )}
               </div>
             )}

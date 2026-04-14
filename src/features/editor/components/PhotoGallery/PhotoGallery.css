@@ -394,6 +394,41 @@
   box-shadow: 0 1px 4px rgba(45, 107, 228, 0.4);
 }
 
+/* 删除按钮（未选中区域） */
+.pg-photo-delete-btn-unselected {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  opacity: 0;
+  transition: opacity var(--pg-transition-norm);
+}
+
+.pg-photo-item:hover .pg-photo-delete-btn-unselected {
+  opacity: 1;
+}
+
+.pg-delete-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 50%;
+  font-size: 14px;
+  font-weight: 700;
+  color: white;
+  cursor: pointer;
+  transition: background var(--pg-transition-fast);
+  border: none;
+  padding: 0;
+  line-height: 1.2;
+}
+
+.pg-delete-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
 /* ==============================
    拖拽幽灵（跟手的缩略图）
 ============================== */

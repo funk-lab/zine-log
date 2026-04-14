@@ -3,40 +3,28 @@ import React, {
   useDeferredValue,
   useMemo,
   useReducer,
+  useRef,
 } from "react";
 import "./Editor.css";
 
-import { downloadPng, downloadPdf, downloadSvg } from "../export/lib/exporters";
+import { downloadPdf, downloadPng } from "../export/lib/exporters";
 import {
   currentDimensions,
   renderTemplateSvg,
 } from "../templates/render-template";
 import { editorReducer, initialEditorState } from "./editor-reducer";
 import { filesToGalleryImages } from "./lib/file";
-import { GalleryImage, TemplateId, generateImageId } from "./types";
+import { GalleryImage, TemplateId } from "./types";
 import CanvasPanel from "./components/CanvasPanel";
 import PhotoGallery from "./components/PhotoGallery";
 import RightPanel from "./components/RightPanel";
 import StatusBar from "./components/StatusBar";
 import TopBar from "./components/TopBar";
 
-interface EditorProps {
-  onUndo?: () => void;
-  onRedo?: () => void;
-  onFullscreen?: () => void;
-  onExport?: () => void;
-  onSaveDraft?: () => void;
-}
-
-export const Editor: React.FC<EditorProps> = ({
-  onUndo,
-  onRedo,
-  onFullscreen,
-  onExport,
-  onSaveDraft,
-}) => {
+export const Editor: React.FC = () => {
   const [state, dispatch] = useReducer(editorReducer, initialEditorState);
   const deferredState = useDeferredValue(state);
+  const appRef = useRef<HTMLDivElement>(null);
 
   const dimensions = useMemo(
     () => currentDimensions(deferredState.template),
@@ -47,36 +35,25 @@ export const Editor: React.FC<EditorProps> = ({
     [deferredState],
   );
 
-  const handleUpload = useCallback(
-    async (files: FileList | null) => {
-      const fileList = Array.from(files ?? []);
-      if (!fileList.length) return;
-      const images = await filesToGalleryImages(fileList, state.nextImageId);
-      dispatch({ type: "append-images", images });
-    },
-    [state.nextImageId],
-  );
+  const handleUpload = useCallback(async (files: FileList | null) => {
+    const fileList = Array.from(files ?? []);
+    if (!fileList.length) return;
+    const images = await filesToGalleryImages(fileList);
+    dispatch({ type: "append-images", images });
+  }, []);
 
-  const handleDownloadPng = useCallback(async () => {
-    try {
-      await downloadPng(state);
-    } catch (error) {
+  const handleDownloadPng = useCallback(() => {
+    downloadPng(state).catch((error) => {
       console.error(error);
       window.alert("PNG 导出失败，请换一张图片或改用 SVG 导出。");
-    }
+    });
   }, [state]);
 
-  const handleDownloadPdf = useCallback(async () => {
-    try {
-      await downloadPdf(state);
-    } catch (error) {
+  const handleDownloadPdf = useCallback(() => {
+    downloadPdf(state).catch((error) => {
       console.error(error);
       window.alert("PDF 导出失败，请刷新页面后重试。");
-    }
-  }, [state]);
-
-  const handleDownloadSvg = useCallback(() => {
-    downloadSvg(state);
+    });
   }, [state]);
 
   const handleSelectChange = useCallback((images: GalleryImage[]) => {
@@ -111,15 +88,35 @@ export const Editor: React.FC<EditorProps> = ({
     [handleUpload],
   );
 
+  const handleFullscreen = useCallback(() => {
+    try {
+      const elem = appRef.current;
+      if (!elem) return;
+
+      if (!document.fullscreenElement) {
+        void elem.requestFullscreen().catch((err: Error) => {
+          console.error("全屏请求失败:", err);
+          window.alert("无法进入全屏模式，请检查浏览器权限");
+        });
+      } else {
+        void document.exitFullscreen().catch((err: Error) => {
+          console.error("退出全屏失败:", err);
+        });
+      }
+    } catch (error) {
+      console.error("全屏操作出错:", error);
+    }
+  }, []);
+
+  const handlePhotoDelete = useCallback((photoId: string) => {
+    // 可选：在这里添加额外的删除后处理逻辑
+    console.log("图片已删除:", photoId);
+  }, []);
+
   return (
-    <div id="app">
+    <div id="app" ref={appRef}>
       {/* 顶部导航 */}
-      <TopBar
-        onUndo={onUndo}
-        onRedo={onRedo}
-        onFullscreen={onFullscreen}
-        onExport={onExport}
-      />
+      <TopBar onFullscreen={handleFullscreen} onExport={handleDownloadPdf} />
 
       {/* 三栏主体 */}
       <div className="workspace">
@@ -130,6 +127,7 @@ export const Editor: React.FC<EditorProps> = ({
           onUnselectedChange={handleUnSelectChange}
           onSelectedChange={handleSelectChange}
           onUpload={handleUploadChange}
+          onPhotoDelete={handlePhotoDelete}
         />
 
         {/* 中间：画布 */}
@@ -148,8 +146,7 @@ export const Editor: React.FC<EditorProps> = ({
           padding={state.padding}
           onAccentChange={handleAccentChange}
           onPaddingChange={handlePaddingChange}
-          onSaveDraft={onSaveDraft}
-          onExport={onExport}
+          onExport={handleDownloadPng}
         />
       </div>
 

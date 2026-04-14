@@ -66,20 +66,20 @@ export interface TemplateMeta {
 export function createInitialEditorState(): EditorState {
   // ?inline 告知 Vite 将图片以 base64 data URL 内联，而非输出文件路径
   // eager:true 保证同步可用，不会触发副作用，不受 StrictMode 双执行影响
-  const assetModules = import.meta.glob<{ default: string }>("/asset/*.png", {
-    eager: true,
-    query: "?inline",
-    import: "default",
-  });
+  // const assetModules = import.meta.glob<{ default: string }>("/asset/*.png", {
+  //   eager: true,
+  //   query: "?inline",
+  //   import: "default",
+  // });
 
-  const unselected: GalleryImage[] = Object.entries(assetModules).map(
-    ([path, src], index) => ({
-      id: generateImageId(index + 1),
-      src: src as unknown as string,
-      name: path.split("/").pop() ?? path,
-      uploadedAt: Date.now(),
-    })
-  );
+  // const unselected: GalleryImage[] = Object.entries(assetModules).map(
+  //   ([path, src], index) => ({
+  //     id: generateImageId(index + 1),
+  //     src: src as unknown as string,
+  //     name: path.split("/").pop() ?? path,
+  //     uploadedAt: Date.now(),
+  //   })
+  // );
 
   return {
     template: "tight-ring",
@@ -89,9 +89,9 @@ export function createInitialEditorState(): EditorState {
     accent: "#d7c3ab",
     ringScale: 1.5,
     padding: 2,
-    unselected,
+    unselected: [],
     selected: [],
-    nextImageId: unselected.length + 1,
+    nextImageId: 1,
   };
 }
 /**
