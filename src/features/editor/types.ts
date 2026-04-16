@@ -1,13 +1,70 @@
 export type TemplateId = "tight-ring" | "loose-ring";
 
-/**
- * 图库图片项
- * 通过所在数组（unselected/selected）区分状态
- */
-export interface GalleryImage {
+/** 适配模式 */
+export type FitMode = "cover" | "contain" | "fill";
+
+/** 旋转角度（仅支持 90° 整数倍） */
+export type RotateDeg = 0 | 90 | 180 | 270;
+
+// ── 基础图片属性 ────────────────────────────────────────────────────────────
+
+export interface BaseImage {
   id: string;
   src: string;
   name: string;
+}
+
+// ── 图片编辑状态 ────────────────────────────────────────────────────────────
+
+export interface ImageEdit {
+  rotate: RotateDeg;
+  fitMode: FitMode;
+  /** 缩放比例 0.5 - 3.0，默认 1.0 */
+  zoom: number;
+  /** 水平翻转 */
+  flipX: boolean;
+  /** 垂直翻转 */
+  flipY: boolean;
+  /** 水平偏移（像素），默认 0 */
+  offsetX: number;
+  /** 垂直偏移（像素），默认 0 */
+  offsetY: number;
+  /** 亮度 -100 到 100，默认 0 */
+  brightness: number;
+  /** 对比度 -100 到 100，默认 0 */
+  contrast: number;
+  /** 饱和度 -100 到 100，默认 0 */
+  saturate: number;
+  /** 灰度模式 */
+  grayscale: boolean;
+  /** 圆角半径（像素），默认 0 */
+  borderRadius: number;
+}
+
+/** 默认编辑状态 */
+export const DEFAULT_IMAGE_EDIT: Readonly<ImageEdit> = {
+  rotate: 0,
+  fitMode: "cover",
+  zoom: 1,
+  flipX: false,
+  flipY: false,
+  offsetX: 0,
+  offsetY: 0,
+  brightness: 0,
+  contrast: 0,
+  saturate: 0,
+  grayscale: false,
+  borderRadius: 0,
+};
+
+// ── 图库图片项 ──────────────────────────────────────────────────────────────
+
+/**
+ * 图库图片项 - 统一的图片类型
+ * 包含基础属性、编辑状态和元数据
+ * 通过所在数组（unselected/selected）区分选中状态
+ */
+export interface GalleryImage extends BaseImage, ImageEdit {
   /** 可选：占位渐变颜色（用于加载前显示） */
   color?: string;
   /** 可选：上传时间戳 */
@@ -16,17 +73,8 @@ export interface GalleryImage {
   mimeType?: string;
   /** 可选：文件大小（字节） */
   size?: number;
-}
-
-/**
- * @deprecated 使用 GalleryImage 替代
- * 保留此类型用于兼容旧代码，将在后续版本中移除
- */
-export interface LibraryImage {
-  id: number;
-  src: string;
-  name: string;
-  selected: boolean;
+  /** 可选：显示用的替代文本 */
+  alt?: string;
 }
 
 /**

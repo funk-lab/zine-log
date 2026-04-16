@@ -4,6 +4,7 @@ import {
   generateImageId,
   type EditorState,
   type TemplateId,
+  type ImageEdit,
 } from "@/features/editor/types";
 
 export type EditorAction =
@@ -23,7 +24,9 @@ export type EditorAction =
   | { type: "clear-selection" }
   | { type: "remove-image"; imageId: string }
   | { type: "reorder-selected"; newOrder: string[] }
-  | { type: "fill-example" };
+  | { type: "fill-example" }
+  // 更新图片编辑状态
+  | { type: "update-image-edit"; imageId: string; edit: ImageEdit };
 
 export function editorReducer(
   state: EditorState,
@@ -96,6 +99,33 @@ export function editorReducer(
       return {
         ...state,
         selected: sortedSelected,
+      };
+    }
+
+    case "update-image-edit": {
+      const updateImageWithEdit = (img: GalleryImage): GalleryImage => {
+        if (img.id !== action.imageId) return img;
+        return {
+          ...img,
+          rotate: action.edit.rotate,
+          fitMode: action.edit.fitMode,
+          zoom: action.edit.zoom,
+          flipX: action.edit.flipX,
+          flipY: action.edit.flipY,
+          offsetX: action.edit.offsetX,
+          offsetY: action.edit.offsetY,
+          brightness: action.edit.brightness,
+          contrast: action.edit.contrast,
+          saturate: action.edit.saturate,
+          grayscale: action.edit.grayscale,
+          borderRadius: action.edit.borderRadius,
+        };
+      };
+
+      return {
+        ...state,
+        unselected: state.unselected.map(updateImageWithEdit),
+        selected: state.selected.map(updateImageWithEdit),
       };
     }
 

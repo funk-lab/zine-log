@@ -1,13 +1,11 @@
 import type { EditorState } from "@/features/editor/types";
 import {
-  ARTBOARD_HEIGHT,
-  ARTBOARD_WIDTH,
   GRID_RING_HEIGHT,
   GRID_RING_WIDTH,
 } from "@/features/templates/lib/svg";
 import { buildPhotoRingTemplate } from "@/features/templates/renderers/photo-ring";
 
-export function currentDimensions(template: EditorState["template"]) {
+export function currentDimensions() {
   return {
     width: GRID_RING_WIDTH,
     height: GRID_RING_HEIGHT,

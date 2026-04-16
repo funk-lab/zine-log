@@ -4,6 +4,7 @@ import React, {
   useMemo,
   useReducer,
   useRef,
+  useState,
 } from "react";
 import "./Editor.css";
 
@@ -14,25 +15,36 @@ import {
 } from "../templates/render-template";
 import { editorReducer, initialEditorState } from "./editor-reducer";
 import { filesToGalleryImages } from "./lib/file";
-import { GalleryImage, TemplateId } from "./types";
+import {
+  GalleryImage,
+  TemplateId,
+  type ImageEdit,
+  DEFAULT_IMAGE_EDIT,
+} from "./types";
 import CanvasPanel from "./components/CanvasPanel";
 import PhotoGallery from "./components/PhotoGallery";
 import RightPanel from "./components/RightPanel";
 import StatusBar from "./components/StatusBar";
 import TopBar from "./components/TopBar";
+import { EditSidebar } from "./components/EditSidebar";
+import type { ImageItem } from "./components/EditSidebar/types";
 
 export const Editor: React.FC = () => {
   const [state, dispatch] = useReducer(editorReducer, initialEditorState);
   const deferredState = useDeferredValue(state);
   const appRef = useRef<HTMLDivElement>(null);
 
-  const dimensions = useMemo(
-    () => currentDimensions(deferredState.template),
-    [deferredState.template],
+  // EditSidebar 状态
+  const [selectedSlotIndex, setSelectedSlotIndex] = useState<number | null>(
+    null
   );
+  const [editState, setEditState] = useState<ImageEdit>(DEFAULT_IMAGE_EDIT);
+  const [editsMap, setEditsMap] = useState<Map<number, ImageEdit>>(new Map());
+
+  const dimensions = useMemo(() => currentDimensions(), []);
   const svgMarkup = useMemo(
     () => renderTemplateSvg(deferredState),
-    [deferredState],
+    [deferredState]
   );
 
   const handleUpload = useCallback(async (files: FileList | null) => {
@@ -85,7 +97,7 @@ export const Editor: React.FC = () => {
     (files: FileList | null) => {
       void handleUpload(files);
     },
-    [handleUpload],
+    [handleUpload]
   );
 
   const handleFullscreen = useCallback(() => {
@@ -113,6 +125,88 @@ export const Editor: React.FC = () => {
     console.log("图片已删除:", photoId);
   }, []);
 
+  // EditSidebar 回调：双击 slot 打开侧边栏
+  const handleSlotDoubleClick = useCallback(
+    (index: number) => {
+      setSelectedSlotIndex(index);
+      const savedEdit = editsMap.get(index);
+      setEditState(savedEdit ?? DEFAULT_IMAGE_EDIT);
+    },
+    [editsMap]
+  );
+
+  // 关闭侧边栏
+  const handleCloseSidebar = useCallback(() => {
+    setSelectedSlotIndex(null);
+  }, []);
+
+  // 应用编辑 - 更新本地状态并通过 reducer 更新全局
+  const handleApplyEdit = useCallback(
+    (newEdit: ImageEdit) => {
+      if (selectedSlotIndex === null) return;
+
+      // 更新本地编辑状态
+      setEditState(newEdit);
+
+      // 更新 editsMap
+      setEditsMap((prev) => {
+        const next = new Map(prev);
+        next.set(selectedSlotIndex, newEdit);
+        return next;
+      });
+
+      // 更新全局 selected 中的图片编辑状态
+      const imageId = state.selected[selectedSlotIndex]?.id;
+      if (imageId) {
+        dispatch({ type: "update-image-edit", imageId, edit: newEdit });
+      }
+    },
+    [selectedSlotIndex, state.selected]
+  );
+
+  // 重置当前编辑
+  const handleReset = useCallback(() => {
+    setEditState(DEFAULT_IMAGE_EDIT);
+    if (selectedSlotIndex !== null) {
+      setEditsMap((prev) => {
+        const next = new Map(prev);
+        next.set(selectedSlotIndex, DEFAULT_IMAGE_EDIT);
+        return next;
+      });
+      // 同时重置全局状态
+      const imageId = state.selected[selectedSlotIndex]?.id;
+      if (imageId) {
+        dispatch({
+          type: "update-image-edit",
+          imageId,
+          edit: DEFAULT_IMAGE_EDIT,
+        });
+      }
+    }
+  }, [selectedSlotIndex, state.selected]);
+
+  // 将 GalleryImage 转换为 ImageItem 供 EditSidebar 使用
+  const selectedImageItem: ImageItem | null = useMemo(() => {
+    if (
+      selectedSlotIndex === null ||
+      selectedSlotIndex >= state.selected.length
+    ) {
+      return null;
+    }
+    const image = state.selected[selectedSlotIndex];
+    if (!image?.src) return null;
+    return {
+      id: String(selectedSlotIndex),
+      file: new File([], image.name || `image-${selectedSlotIndex}.jpg`),
+      blob: new Blob(),
+      objUrl: image.src,
+      w: 0,
+      h: 0,
+      origSize: 0,
+      compSize: 0,
+    };
+  }, [selectedSlotIndex, state.selected]);
+
   return (
     <div id="app" ref={appRef}>
       {/* 顶部导航 */}
@@ -138,6 +232,10 @@ export const Editor: React.FC = () => {
           svgMarkup={svgMarkup}
           width={dimensions.width}
           height={dimensions.height}
+          selected={state.selected}
+          ringScale={state.ringScale}
+          padding={state.padding}
+          onSlotDoubleClick={handleSlotDoubleClick}
         />
 
         {/* 右侧：工具栏 */}
@@ -157,6 +255,15 @@ export const Editor: React.FC = () => {
         canvasRatio="3:4"
         templateName={state.template}
         autoSaved={true}
+      />
+
+      {/* 图片编辑侧边栏 */}
+      <EditSidebar
+        image={selectedImageItem}
+        edit={editState}
+        onClose={handleCloseSidebar}
+        onApply={handleApplyEdit}
+        onReset={handleReset}
       />
     </div>
   );

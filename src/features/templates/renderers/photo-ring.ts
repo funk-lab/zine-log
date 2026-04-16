@@ -38,13 +38,15 @@ export function buildPhotoRingTemplate(state: EditorState, gap = 1) {
       const x = offsetX + (gridX - minGridX) * scaledCell;
       const y = offsetY + (gridY - minGridY) * scaledCell;
 
+      const image = selectedImages[index];
       return gridSlotMarkup({
-        href: selectedImages[index]?.src ?? "",
+        href: image?.src ?? "",
         x: Math.round(x * 100) / 100,
         y: Math.round(y * 100) / 100,
         size: Math.round(scaledCell * 100) / 100,
         slotId: `photo-ring-slot-${index}`,
         padding: state.padding,
+        edit: image,
       });
     })
     .join("");

@@ -40,7 +40,7 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
     "unselected" | "selected" | null
   >(null);
   const [ghostPos, setGhostPos] = useState<{ x: number; y: number } | null>(
-    null,
+    null
   );
   const [ghostImg, setGhostImg] = useState<string>("");
   const [ghostColor, setGhostColor] = useState<string>("");
@@ -71,7 +71,7 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
     (
       e: React.DragEvent,
       photo: GalleryImage,
-      fromZone: "unselected" | "selected",
+      fromZone: "unselected" | "selected"
     ) => {
       draggingFromZoneRef.current = fromZone;
       setDraggingId(photo.id);
@@ -86,7 +86,7 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
       e.dataTransfer.setData("photoId", photo.id);
       e.dataTransfer.setData("fromZone", fromZone);
     },
-    [],
+    []
   );
 
   const handleDrag = useCallback(
@@ -95,7 +95,7 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
         setGhostPos({ x: e.clientX, y: e.clientY });
       }
     },
-    [draggingId],
+    [draggingId]
   );
 
   const clearDragState = useCallback(() => {
@@ -106,9 +106,23 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
     draggingFromZoneRef.current = null;
   }, []);
 
+  /** 检查是否为外部文件拖入 */
+  const isExternalFileDrag = useCallback((e: React.DragEvent) => {
+    return e.dataTransfer.types.includes("Files");
+  }, []);
+
   const handleZoneDragOver = useCallback(
     (e: React.DragEvent, zone: "unselected" | "selected") => {
       e.preventDefault();
+
+      // 外部文件拖入
+      if (isExternalFileDrag(e)) {
+        e.dataTransfer.dropEffect = "copy";
+        setDragOverZone(zone);
+        return;
+      }
+
+      // 内部图片拖拽
       e.dataTransfer.dropEffect = "move";
       setDragOverZone(zone);
       // 离开已选区域时，清除排序指示器
@@ -116,7 +130,7 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
         setSortInsertIndex(null);
       }
     },
-    [],
+    [isExternalFileDrag]
   );
 
   const handleZoneDragLeave = useCallback((e: React.DragEvent) => {
@@ -144,7 +158,7 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
         onUnselectedChange?.([...unselected, photo]);
       }
     },
-    [unselected, selected, onUnselectedChange, onSelectedChange],
+    [unselected, selected, onUnselectedChange, onSelectedChange]
   );
 
   /**
@@ -166,7 +180,7 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
       const insertBefore = e.clientX < midX ? overIndex : overIndex + 1;
       setSortInsertIndex(insertBefore);
     },
-    [],
+    []
   );
 
   /**
@@ -227,18 +241,23 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
 
       clearDragState();
     },
-    [
-      selected,
-      unselected,
-      onSelectedChange,
-      onUnselectedChange,
-      clearDragState,
-    ],
+    [selected, unselected, onSelectedChange, onUnselectedChange, clearDragState]
   );
 
   const handleZoneDrop = useCallback(
     (e: React.DragEvent, targetZone: "unselected" | "selected") => {
       e.preventDefault();
+
+      // 处理外部文件拖入
+      if (isExternalFileDrag(e)) {
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+          onUpload(files);
+        }
+        setDragOverZone(null);
+        return;
+      }
+
       const photoId = e.dataTransfer.getData("photoId");
       const fromZone = e.dataTransfer.getData("fromZone") as
         | "unselected"
@@ -262,7 +281,7 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
         moveItem(photoId, targetZone);
       }
     },
-    [selected, moveItem, onSelectedChange, clearDragState],
+    [selected, moveItem, onSelectedChange, clearDragState, isExternalFileDrag, onUpload]
   );
 
   // ==================== 快捷操作 ====================
@@ -271,7 +290,7 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
     (photoId: string, targetZone: "unselected" | "selected") => {
       moveItem(photoId, targetZone);
     },
-    [moveItem],
+    [moveItem]
   );
 
   const handleDeletePhoto = useCallback(
@@ -283,7 +302,7 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
       }
       // onPhotoDelete?.(photoId);
     },
-    [onUnselectedChange, unselected, onSelectedChange, selected],
+    [onUnselectedChange, unselected, onSelectedChange, selected]
   );
 
   const handleMoveAllToSelected = useCallback(() => {
@@ -328,7 +347,7 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
 
         const newUnselectedHeight = Math.max(
           minHeight,
-          startUnselectedHeight + dy,
+          startUnselectedHeight + dy
         );
         const newSelectedHeight = Math.max(minHeight, startSelectedHeight - dy);
 
@@ -366,7 +385,7 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
   const renderGalleryImage = (
     photo: GalleryImage,
     index: number,
-    zone: "unselected" | "selected",
+    zone: "unselected" | "selected"
   ) => {
     const isSelectedZone = zone === "selected";
     const buttonText = isSelectedZone ? "移除 ↑" : "加入 ↓";
@@ -530,12 +549,13 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
                   <circle cx="8.5" cy="8.5" r="1.5" />
                   <path d="M21 15l-5-5L5 21" />
                 </svg>
-                拖拽图片到此处
+                <span>拖拽图片到此处</span>
+                <span className="pg-zone-empty-hint">或从文件夹拖入文件</span>
               </div>
             ) : (
               <div className="pg-zone-grid">
                 {unselected.map((photo, index) =>
-                  renderGalleryImage(photo, index, "unselected"),
+                  renderGalleryImage(photo, index, "unselected")
                 )}
               </div>
             )}
@@ -580,7 +600,7 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
               onClick={handleClearSelected}
               disabled={selected.length === 0}
             >
-              清空 ×
+              全部移除 ×
             </button>
           </div>
           <div className="pg-zone-grid-wrap">
@@ -597,12 +617,13 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
                   <polyline points="20 6 9 17 4 12" />
                   <path d="M12 2a10 10 0 1 0 10 10" />
                 </svg>
-                从上方拖拽图片到此处
+                <span>从上方拖拽图片到此处</span>
+                <span className="pg-zone-empty-hint">或从文件夹拖入文件</span>
               </div>
             ) : (
               <div className="pg-zone-grid">
                 {selected.map((photo, index) =>
-                  renderGalleryImage(photo, index, "selected"),
+                  renderGalleryImage(photo, index, "selected")
                 )}
               </div>
             )}

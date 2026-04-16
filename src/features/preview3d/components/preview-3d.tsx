@@ -2,6 +2,8 @@ import { Suspense, lazy, memo, useMemo } from "react";
 
 import { extractImagePreviewLayout } from "@/features/preview3d/lib/extract-image-preview-layout";
 import { buildStripModelFromRegions } from "@/features/preview3d/model/build-strip-model";
+import { buildSpiralModel } from "@/features/preview3d/model/build-spiral-model";
+
 import { usePreviewTextureSource } from "@/features/preview3d/lib/use-preview-texture-source";
 
 const PreviewSceneCanvas = lazy(async () =>
@@ -17,6 +19,10 @@ interface Preview3DProps {
   width: number;
   height: number;
   accent: string;
+  // 新：统一算法参数
+  count?: number;
+  gap?: number;
+  scale?: number;
 }
 
 function Preview3DComponent({
@@ -24,15 +30,27 @@ function Preview3DComponent({
   width,
   height,
   accent,
+  count,
+  gap,
+  scale,
 }: Preview3DProps) {
   const previewLayout = useMemo(
     () => extractImagePreviewLayout(svgMarkup),
     [svgMarkup]
   );
-  const model = useMemo(
-    () => buildStripModelFromRegions(width, height, previewLayout.regions),
-    [height, previewLayout.regions, width]
-  );
+
+  // 当提供 count/gap/scale 时使用新的统一算法
+  // TODO: 旋转的顺序有问题，暂时不用
+  const useSpiralModel =
+    count !== undefined && gap !== undefined && scale !== undefined;
+
+  const model = useMemo(() => {
+    // if (useSpiralModel) {
+    //   return buildSpiralModel(count, gap, scale, width, height);
+    // }
+    // 回退：使用旧方法（从 SVG 解析）
+    return buildStripModelFromRegions(width, height, previewLayout.regions);
+  }, [width, height, previewLayout.regions]);
 
   const { canvas, isLoading, error } = usePreviewTextureSource(
     previewLayout.svgMarkup,

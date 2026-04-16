@@ -1,7 +1,7 @@
-export const ARTBOARD_WIDTH = 1200;
-export const ARTBOARD_HEIGHT = 1600;
-export const GRID_RING_WIDTH = 900;
-export const GRID_RING_HEIGHT = 1000;
+import type { ImageEdit } from "@/features/editor/types";
+
+export const GRID_RING_WIDTH = 880;
+export const GRID_RING_HEIGHT = 760;
 
 export function escapeHtml(value: string) {
   return value
@@ -144,6 +144,67 @@ interface GridSlotMarkupOptions {
   slotId: string;
   /** 图片内边距（px），默认 2 */
   padding?: number;
+  /** 图片编辑状态，用于生成 transform */
+  edit?: Partial<ImageEdit>;
+}
+
+/**
+ * 根据图片编辑状态生成 SVG transform 属性
+ * 支持 rotate、zoom、flipX、offsetX/Y
+ */
+function getSvgImageTransform(
+  edit: Partial<ImageEdit> | undefined,
+  cx: number,
+  cy: number,
+  size: number
+): string {
+  if (!edit) return "";
+
+  const {
+    rotate = 0,
+    zoom = 1,
+    flipX = false,
+    flipY = false,
+    offsetX = 0,
+    offsetY = 0,
+  } = edit;
+
+  // 如果没有变换，返回空
+  if (!rotate && zoom === 1 && !flipX && !flipY && !offsetX && !offsetY) {
+    return "";
+  }
+
+  const transforms: string[] = [];
+
+  // 1. 先移动到中心点（用于旋转和缩放）
+  transforms.push(`translate(${cx}, ${cy})`);
+
+  // 2. 旋转（围绕中心）
+  if (rotate) {
+    transforms.push(`rotate(${rotate})`);
+  }
+
+  // 3. 缩放 + 翻转
+  let scaleX = zoom;
+  let scaleY = zoom;
+  if (flipX) scaleX = -scaleX;
+  if (flipY) scaleY = -scaleY;
+  if (scaleX !== 1 || scaleY !== 1) {
+    transforms.push(`scale(${scaleX}, ${scaleY})`);
+  }
+
+  // 4. 偏移（像素转换为比例，然后乘以缩放后的尺寸）
+  if (offsetX || offsetY) {
+    // offset 范围 -50~50，表示最大偏移 50%
+    const tx = (offsetX / 100) * size * zoom;
+    const ty = (offsetY / 100) * size * zoom;
+    transforms.push(`translate(${tx}, ${ty})`);
+  }
+
+  // 5. 移回原位置
+  transforms.push(`translate(${-cx}, ${-cy})`);
+
+  return transforms.join(" ");
 }
 
 export function gridSlotMarkup({
@@ -153,6 +214,7 @@ export function gridSlotMarkup({
   size,
   slotId,
   padding = 2,
+  edit,
 }: GridSlotMarkupOptions) {
   if (!href) {
     return "";
@@ -161,12 +223,23 @@ export function gridSlotMarkup({
   const imageX = x + padding;
   const imageY = y + padding;
   const imageSize = size - padding * 2;
+  const centerX = imageX + imageSize / 2;
+  const centerY = imageY + imageSize / 2;
+
+  // 生成 transform
+  const transform = getSvgImageTransform(edit, centerX, centerY, imageSize);
+  const transformAttr = transform ? ` transform="${transform}"` : "";
+
+  // 使用嵌套 <g> 确保 transform 后的内容被 clipPath 正确裁剪
+  // 避免偏移后的图片内容显示到其他卡片上
   return `
     <clipPath id="${slotId}">
       <rect x="${imageX}" y="${imageY}" width="${imageSize}" height="${imageSize}" />
     </clipPath>
     <rect x="${x}" y="${y}" width="${size}" height="${size}" fill="#ffffff" data-slot="${slotId}" />
-    <image href="${href}" x="${imageX}" y="${imageY}" width="${imageSize}" height="${imageSize}" preserveAspectRatio="xMidYMid slice" clip-path="url(#${slotId})" />
+    <g clip-path="url(#${slotId})">
+      <image href="${href}" x="${imageX}" y="${imageY}" width="${imageSize}" height="${imageSize}" preserveAspectRatio="xMidYMid slice"${transformAttr} />
+    </g>
   `;
 }
 

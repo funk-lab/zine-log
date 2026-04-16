@@ -762,6 +762,7 @@ input, textarea, select { font-family: inherit; font-size: 13px; }
   font-weight: 500;
   min-width: 52px;
 }
+
 input[type="range"] {
   flex: 1;
   height: 4px;

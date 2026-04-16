@@ -6,10 +6,10 @@ import React, {
   useRef,
   useEffect,
   Suspense,
-  useMemo,
 } from "react";
-import { TemplateId } from "../types";
+import { TemplateId, GalleryImage } from "../types";
 import { Minus, Plus } from "lucide-react";
+import PhotoRing from "@/features/templates/components/PhotoRing";
 
 // 模板定义
 export interface Template {
@@ -38,6 +38,12 @@ interface CanvasPanelProps {
   accent?: string;
   width: number;
   height: number;
+  // DOM 渲染器需要的配置
+  selected: GalleryImage[];
+  ringScale: number;
+  padding: number;
+  // 双击 slot 回调
+  onSlotDoubleClick?: (index: number) => void;
 }
 
 const STAGE_PADDING = 48;
@@ -52,6 +58,10 @@ export const CanvasPanel: React.FC<CanvasPanelProps> = ({
   width,
   height,
   accent = "#D4B896",
+  selected,
+  ringScale,
+  padding,
+  onSlotDoubleClick,
 }) => {
   const viewportRef = useRef<HTMLDivElement>(null);
   const [zoom, setZoom] = useState(1);
@@ -84,15 +94,6 @@ export const CanvasPanel: React.FC<CanvasPanelProps> = ({
       return Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, next));
     });
   }, []);
-
-  const scaledCanvasStyle = useMemo(
-    () => ({
-      width: `${width * zoom}px`,
-      height: `${height * zoom}px`,
-      backgroundColor: accent,
-    }),
-    [zoom, height, width]
-  );
 
   // 选择模板并关闭遮罩
   const handleSelectTemplate = useCallback(
@@ -202,7 +203,7 @@ export const CanvasPanel: React.FC<CanvasPanelProps> = ({
               <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
               <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
             </svg>
-            画布
+            编辑
           </button>
           <button
             className={`cv-mode-btn ${mode === "preview" ? "active" : ""}`}
@@ -223,38 +224,50 @@ export const CanvasPanel: React.FC<CanvasPanelProps> = ({
           </button>
         </div>
 
-        <div className="relative xl:min-h-0 xl:flex-1 h-full">
+        <div className="relative min-h-0 flex-1 flex flex-col">
           {mode === "edit" ? (
             <>
-              {/* 画布区域 */}
+              {/* 画布区域 - DOM 渲染器 (PhotoRing) */}
               <div
                 ref={viewportRef}
                 className="h-full overflow-auto scrollbar-thin"
               >
                 <div className="mx-auto flex min-h-full min-w-fit items-center justify-center ">
-                  <div
-                    className="overflow-hidden shadow-canvas transition-[width,height] duration-150 rounded-[28px]"
-                    style={scaledCanvasStyle}
-                    dangerouslySetInnerHTML={{ __html: svgMarkup }}
+                  <PhotoRing
+                    count={selected.length || 1}
+                    gap={template === "loose-ring" ? 2 : 1}
+                    scale={ringScale}
+                    width={width}
+                    height={height}
+                    backgroundColor={accent}
+                    images={selected}
+                    padding={padding}
+                    className="shadow-canvas transition-all duration-150 rounded-[28px]"
+                    onSlotDoubleClick={onSlotDoubleClick}
                   />
                 </div>
               </div>
             </>
           ) : (
-            <Suspense
-              fallback={
-                <div className="grid h-full place-items-center rounded-[28px] border border-slate-200 bg-white text-sm text-slate-500">
-                  正在载入 3D 预览…
-                </div>
-              }
-            >
-              <Preview3D
-                svgMarkup={svgMarkup}
-                width={width}
-                height={height}
-                accent={accent}
-              />
-            </Suspense>
+            <div className="mx-auto h-full min-h-0" style={{ width, height }}>
+              <Suspense
+                fallback={
+                  <div className="grid h-full place-items-center rounded-[28px] border border-slate-200 bg-white text-sm text-slate-500">
+                    正在载入 3D 预览…
+                  </div>
+                }
+              >
+                <Preview3D
+                  svgMarkup={svgMarkup}
+                  width={width}
+                  height={height}
+                  accent={accent}
+                  count={selected.length}
+                  gap={template === "loose-ring" ? 2 : 1}
+                  scale={ringScale}
+                />
+              </Suspense>
+            </div>
           )}
         </div>
       </div>
