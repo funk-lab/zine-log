@@ -94,7 +94,9 @@ export const PhotoRing: React.FC<PhotoRingProps> = ({
     >
       {positions.map(({ x, y, size, index }: SpiralPosition) => {
         const image = images[index];
-        const hasImage = image?.src;
+        // 优先使用 blobUrl，兼容旧数据使用 src
+        const imageUrl = image?.blobUrl || image?.src;
+        const hasImage = !!imageUrl;
 
         return (
           <div
@@ -137,9 +139,9 @@ export const PhotoRing: React.FC<PhotoRingProps> = ({
             <div className={cn("relative h-full w-full overflow-hidden")}>
               {hasImage ? (
                 <img
-                  src={image.src}
+                  src={imageUrl}
                   alt={image.alt || `图片 ${index + 1}`}
-                  className="h-full w-full object-cover"
+                  className="h-full w-full"
                   loading="lazy"
                   style={getImageEditStyles(image)}
                 />

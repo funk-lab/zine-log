@@ -7,6 +7,8 @@
  * - 自动居中布局
  */
 
+import { GalleryImage } from "@/features/editor/types";
+
 // ==================== 类型定义 ====================
 
 export interface SpiralPosition {
@@ -165,7 +167,7 @@ export function generatePhotoRingSVG(
   height: number,
   baseCell: number,
   backgroundColor: string,
-  images: { src: string }[] = [],
+  images: GalleryImage[] = [],
   padding = 2
 ): string {
   const { positions } = calculateSpiralLayout(
@@ -185,14 +187,17 @@ export function generatePhotoRingSVG(
       const innerX = x + paddingPx;
       const innerY = y + paddingPx;
 
-      if (image?.src) {
+      // 优先使用 blobUrl，兼容旧数据使用 src
+      const imageUrl =
+        (image as GalleryImage & { blobUrl?: string })?.blobUrl || image?.src;
+      if (imageUrl) {
         return `
           <image
             x="${innerX}"
             y="${innerY}"
             width="${innerSize}"
             height="${innerSize}"
-            href="${image.src}"
+            href="${imageUrl}"
             preserveAspectRatio="xMidYMid slice"
           />
         `;

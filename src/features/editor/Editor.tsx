@@ -8,7 +8,6 @@ import React, {
 } from "react";
 import "./Editor.css";
 
-import { downloadPdf, downloadPng } from "../export/lib/exporters";
 import {
   currentDimensions,
   renderTemplateSvg,
@@ -27,7 +26,9 @@ import RightPanel from "./components/RightPanel";
 import StatusBar from "./components/StatusBar";
 import TopBar from "./components/TopBar";
 import { EditSidebar } from "./components/EditSidebar";
-import type { ImageItem } from "./components/EditSidebar/types";
+
+import { DownloadDialog } from "../export/lib/components/DownloadDialog";
+import { downloadAlbumPDF, downloadPdf } from "@/features/export/lib/exporters";
 
 export const Editor: React.FC = () => {
   const [state, dispatch] = useReducer(editorReducer, initialEditorState);
@@ -40,6 +41,9 @@ export const Editor: React.FC = () => {
   );
   const [editState, setEditState] = useState<ImageEdit>(DEFAULT_IMAGE_EDIT);
   const [editsMap, setEditsMap] = useState<Map<number, ImageEdit>>(new Map());
+
+  // 下载弹窗状态
+  const [isDownloadDialogOpen, setIsDownloadDialogOpen] = useState(false);
 
   const dimensions = useMemo(() => currentDimensions(), []);
   const svgMarkup = useMemo(
@@ -55,7 +59,10 @@ export const Editor: React.FC = () => {
   }, []);
 
   const handleDownloadPng = useCallback(() => {
-    downloadPng(state).catch((error) => {
+    downloadAlbumPDF(state.selected, {
+      filename: "my-album.pdf",
+      jpegQuality: 1,
+    }).catch((error) => {
       console.error(error);
       window.alert("PNG 导出失败，请换一张图片或改用 SVG 导出。");
     });
@@ -185,32 +192,23 @@ export const Editor: React.FC = () => {
     }
   }, [selectedSlotIndex, state.selected]);
 
-  // 将 GalleryImage 转换为 ImageItem 供 EditSidebar 使用
-  const selectedImageItem: ImageItem | null = useMemo(() => {
+  const selectedImage: GalleryImage | null = useMemo(() => {
     if (
       selectedSlotIndex === null ||
       selectedSlotIndex >= state.selected.length
     ) {
       return null;
     }
-    const image = state.selected[selectedSlotIndex];
-    if (!image?.src) return null;
-    return {
-      id: String(selectedSlotIndex),
-      file: new File([], image.name || `image-${selectedSlotIndex}.jpg`),
-      blob: new Blob(),
-      objUrl: image.src,
-      w: 0,
-      h: 0,
-      origSize: 0,
-      compSize: 0,
-    };
+    return state.selected[selectedSlotIndex] ?? null;
   }, [selectedSlotIndex, state.selected]);
 
   return (
     <div id="app" ref={appRef}>
       {/* 顶部导航 */}
-      <TopBar onFullscreen={handleFullscreen} onExport={handleDownloadPdf} />
+      <TopBar
+        onFullscreen={handleFullscreen}
+        onExport={() => setIsDownloadDialogOpen(true)}
+      />
 
       {/* 三栏主体 */}
       <div className="workspace">
@@ -259,11 +257,18 @@ export const Editor: React.FC = () => {
 
       {/* 图片编辑侧边栏 */}
       <EditSidebar
-        image={selectedImageItem}
+        image={selectedImage}
         edit={editState}
         onClose={handleCloseSidebar}
         onApply={handleApplyEdit}
         onReset={handleReset}
+      />
+
+      {/* 下载弹窗 */}
+      <DownloadDialog
+        isOpen={isDownloadDialogOpen}
+        onClose={() => setIsDownloadDialogOpen(false)}
+        onDownload={handleDownloadPdf}
       />
     </div>
   );

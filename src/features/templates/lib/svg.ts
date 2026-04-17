@@ -149,16 +149,18 @@ interface GridSlotMarkupOptions {
 }
 
 /**
- * 根据图片编辑状态生成 SVG transform 属性
- * 支持 rotate、zoom、flipX、offsetX/Y
+ * 根据图片编辑状态生成 SVG transform 和 preserveAspectRatio 属性
+ * 支持 rotate、zoom、flipX、offsetX/Y、fitMode
  */
 function getSvgImageTransform(
   edit: Partial<ImageEdit> | undefined,
   cx: number,
   cy: number,
   size: number
-): string {
-  if (!edit) return "";
+): { transform: string; preserveAspectRatio: string } {
+  if (!edit) {
+    return { transform: "", preserveAspectRatio: "xMidYMid slice" };
+  }
 
   const {
     rotate = 0,
@@ -167,11 +169,23 @@ function getSvgImageTransform(
     flipY = false,
     offsetX = 0,
     offsetY = 0,
+    fitMode = "cover",
   } = edit;
 
-  // 如果没有变换，返回空
+  // 根据 fitMode 设置 preserveAspectRatio
+  // cover -> xMidYMid slice (裁剪填满)
+  // contain -> xMidYMid meet (完整显示)
+  // fill -> none (拉伸填满)
+  const preserveAspectRatio =
+    fitMode === "contain"
+      ? "xMidYMid meet"
+      : fitMode === "fill"
+        ? "none"
+        : "xMidYMid slice";
+
+  // 如果没有变换，返回空 transform
   if (!rotate && zoom === 1 && !flipX && !flipY && !offsetX && !offsetY) {
-    return "";
+    return { transform: "", preserveAspectRatio };
   }
 
   const transforms: string[] = [];
@@ -204,7 +218,7 @@ function getSvgImageTransform(
   // 5. 移回原位置
   transforms.push(`translate(${-cx}, ${-cy})`);
 
-  return transforms.join(" ");
+  return { transform: transforms.join(" "), preserveAspectRatio };
 }
 
 export function gridSlotMarkup({
@@ -226,8 +240,13 @@ export function gridSlotMarkup({
   const centerX = imageX + imageSize / 2;
   const centerY = imageY + imageSize / 2;
 
-  // 生成 transform
-  const transform = getSvgImageTransform(edit, centerX, centerY, imageSize);
+  // 生成 transform 和 preserveAspectRatio
+  const { transform, preserveAspectRatio } = getSvgImageTransform(
+    edit,
+    centerX,
+    centerY,
+    imageSize
+  );
   const transformAttr = transform ? ` transform="${transform}"` : "";
 
   // 使用嵌套 <g> 确保 transform 后的内容被 clipPath 正确裁剪
@@ -238,7 +257,7 @@ export function gridSlotMarkup({
     </clipPath>
     <rect x="${x}" y="${y}" width="${size}" height="${size}" fill="#ffffff" data-slot="${slotId}" />
     <g clip-path="url(#${slotId})">
-      <image href="${href}" x="${imageX}" y="${imageY}" width="${imageSize}" height="${imageSize}" preserveAspectRatio="xMidYMid slice"${transformAttr} />
+      <image href="${href}" x="${imageX}" y="${imageY}" width="${imageSize}" height="${imageSize}" preserveAspectRatio="${preserveAspectRatio}"${transformAttr} />
     </g>
   `;
 }

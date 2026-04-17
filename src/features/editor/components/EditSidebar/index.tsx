@@ -1,10 +1,11 @@
 import React, { useEffect, useState, useCallback } from "react";
 import "./EditSidebar.css";
-import type { FitMode, ImageItem } from "./types";
+import type { FitMode } from "./types";
 import {
   type ImageEdit,
   DEFAULT_IMAGE_EDIT,
   type RotateDeg,
+  type GalleryImage,
 } from "@/features/editor/types";
 import { getImageEditStyles } from "@/features/editor/lib/image-styles";
 
@@ -14,7 +15,7 @@ import { getImageEditStyles } from "@/features/editor/lib/image-styles";
 
 export interface EditSidebarProps {
   /** 当前编辑的图片，null 表示侧栏关闭 */
-  image: ImageItem | null;
+  image: GalleryImage | null;
   /** 当前图片的编辑状态（从全局状态传入） */
   edit: ImageEdit;
   /** 侧栏开关回调 */
@@ -62,7 +63,7 @@ export const EditSidebar: React.FC<EditSidebarProps> = ({
 };
 
 interface EditSidebarContentProps {
-  image: ImageItem | null;
+  image: GalleryImage | null;
   edit: ImageEdit;
   isOpen: boolean;
   onClose: () => void;
@@ -204,12 +205,11 @@ const EditSidebarContent: React.FC<EditSidebarContentProps> = ({
           >
             {image && (
               <img
-                src={image.objUrl}
+                src={image.blobUrl || image.src}
                 alt="图片预览"
                 style={{
                   width: "100%",
                   height: "100%",
-                  objectFit: localEdit.fitMode,
                   ...getImageEditStyles(localEdit),
                 }}
               />
@@ -217,7 +217,7 @@ const EditSidebarContent: React.FC<EditSidebarContentProps> = ({
           </div>
 
           {/* 文件名 */}
-          <div className="sidebar-img-name">{image?.file.name ?? ""}</div>
+          <div className="sidebar-img-name">{image?.name ?? ""}</div>
 
           {/* 旋转 + 翻转 - 同一行 */}
           <div className="tool-section">

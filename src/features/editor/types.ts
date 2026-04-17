@@ -8,8 +8,15 @@ export type RotateDeg = 0 | 90 | 180 | 270;
 
 // ── 基础图片属性 ────────────────────────────────────────────────────────────
 
+/**
+ * 基础图片接口
+ * 
+ * ⚠️ DEPRECATED: src 字段已弃用，请使用 GalleryImage.blobUrl
+ * 保留 src 仅用于兼容旧数据，新上传的图片使用 blobUrl
+ */
 export interface BaseImage {
   id: string;
+  /** @deprecated 请使用 GalleryImage.blobUrl */
   src: string;
   name: string;
 }
@@ -63,6 +70,8 @@ export const DEFAULT_IMAGE_EDIT: Readonly<ImageEdit> = {
  * 图库图片项 - 统一的图片类型
  * 包含基础属性、编辑状态和元数据
  * 通过所在数组（unselected/selected）区分选中状态
+ * 
+ * ⚠️ 迁移提示：src 字段已弃用，请使用 blobUrl
  */
 export interface GalleryImage extends BaseImage, ImageEdit {
   /** 可选：占位渐变颜色（用于加载前显示） */
@@ -71,10 +80,20 @@ export interface GalleryImage extends BaseImage, ImageEdit {
   uploadedAt?: number;
   /** 可选：文件类型 */
   mimeType?: string;
-  /** 可选：文件大小（字节） */
+  /** 可选：文件大小（字节）- 原始文件大小 */
   size?: number;
   /** 可选：显示用的替代文本 */
   alt?: string;
+  
+  // ✅ 新增字段：压缩后的 Blob URL（推荐使用）
+  /** 压缩后的图片 Blob URL，用于显示 */
+  blobUrl?: string;
+  /** 压缩后宽度（像素） */
+  compWidth?: number;
+  /** 压缩后高度（像素） */
+  compHeight?: number;
+  /** 压缩后文件大小（字节） */
+  compSize?: number;
 }
 
 /**

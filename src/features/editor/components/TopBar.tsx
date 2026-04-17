@@ -6,7 +6,6 @@ interface TopBarProps {
   onUndo?: () => void;
   /** TODO: 实现重做功能 */
   onRedo?: () => void;
-  /** TODO: 实现全屏功能 */
   onFullscreen?: () => void;
   onExport?: () => void;
 }

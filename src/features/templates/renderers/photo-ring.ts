@@ -39,8 +39,10 @@ export function buildPhotoRingTemplate(state: EditorState, gap = 1) {
       const y = offsetY + (gridY - minGridY) * scaledCell;
 
       const image = selectedImages[index];
+      // 优先使用 blobUrl，兼容旧数据使用 src
+      const imageUrl = image?.blobUrl || image?.src || "";
       return gridSlotMarkup({
-        href: image?.src ?? "",
+        href: imageUrl,
         x: Math.round(x * 100) / 100,
         y: Math.round(y * 100) / 100,
         size: Math.round(scaledCell * 100) / 100,

@@ -1,7 +1,5 @@
 # Repository Guidelines
 
-todo
-
 ## Project Structure & Module Organization
 
 This repository is intentionally small at the moment. The tracked files are [README.md](/home/huerxiong/code/github.com/zine-log/README.md) and [.gitignore](/home/huerxiong/code/github.com/zine-log/.gitignore). Keep contributor-facing documentation at the repository root until a larger codebase exists.
