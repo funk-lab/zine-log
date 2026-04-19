@@ -320,9 +320,13 @@
   cursor: grab;
   aspect-ratio: 1;
   background: var(--pg-surface-2);
+  /* 边框确保白色图片可见 */
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  box-sizing: border-box;
   transition: transform var(--pg-transition-norm), 
               box-shadow var(--pg-transition-norm), 
-              opacity var(--pg-transition-fast);
+              opacity var(--pg-transition-fast),
+              border-color var(--pg-transition-fast);
   user-select: none;
 }
 
@@ -337,7 +341,9 @@
 
 .pg-photo-item:hover {
   transform: scale(1.04);
-  box-shadow: var(--pg-shadow-md);
+  border-color: rgba(0, 0, 0, 0.25);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12),
+              0 2px 4px rgba(0, 0, 0, 0.08);
 }
 
 .pg-photo-item:hover .pg-photo-quick-add {

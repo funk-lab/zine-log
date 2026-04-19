@@ -2,7 +2,33 @@
 
 ## 待办事项
 
-### 1. EditSidebar 拖拽调整 Offset 功能
+### 1. GalleryImage margin 属性未生效
+
+**状态**: 待排查
+**优先级**: 中
+**创建时间**: 2026-04-19
+
+#### 问题描述
+在 `ImageEdit` 和 `GalleryImage` 接口中添加了 `margin` 属性（默认 0），在 `getImageEditStyles` 函数中也添加了 margin 样式，但实际使用时 margin 没有生效。
+
+#### 相关文件
+- `src/features/editor/types.ts` - 定义了 margin 属性
+- `src/features/editor/lib/image-styles.ts` - getImageEditStyles 函数
+- `src/features/templates/components/PhotoRing.tsx` - 使用 getImageEditStyles 渲染图片
+
+#### 可能原因
+1. PhotoRing 组件中图片容器使用了 `overflow: hidden`，margin 可能被裁剪
+2. getImageEditStyles 返回的 margin 样式可能没有正确应用到 img 元素
+3. 需要检查实际的 CSS 渲染结果
+
+#### 排查步骤
+1. 检查浏览器开发者工具中 img 元素的 computed styles
+2. 确认 margin 是否被正确应用
+3. 检查 PhotoRing 的 slot 容器样式是否有冲突
+
+---
+
+### 2. EditSidebar 拖拽调整 Offset 功能
 
 **状态**: 待实现  
 **优先级**: 中  

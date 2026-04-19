@@ -142,6 +142,15 @@ const EditSidebarContent: React.FC<EditSidebarContentProps> = ({
     []
   );
 
+  // TODO: margin 未生效，暂注释
+  // const handleMarginChange = useCallback(
+  //   (e: React.ChangeEvent<HTMLInputElement>) => {
+  //     const margin = parseInt(e.target.value, 10);
+  //     setLocalEdit((prev) => ({ ...prev, margin }));
+  //   },
+  //   []
+  // );
+
   // 本地重置（不提交到全局）
   const handleLocalReset = useCallback(() => {
     setLocalEdit(DEFAULT_IMAGE_EDIT);
@@ -306,6 +315,23 @@ const EditSidebarContent: React.FC<EditSidebarContentProps> = ({
               </label>
             </div>
           </div>
+
+          {/* TODO: margin 未生效，暂注释 */}
+          {/* {/* 边距 */}
+          {/* <div className="tool-section"> */}
+          {/*   <div className="section-label"> */}
+          {/*     边距 ({localEdit.margin}px) */}
+          {/*   </div> */}
+          {/*   <input */}
+          {/*     type="range" */}
+          {/*     min="0" */}
+          {/*     max="20" */}
+          {/*     step="1" */}
+          {/*     value={localEdit.margin} */}
+          {/*     onChange={handleMarginChange} */}
+          {/*     className="w-full" */}
+          {/*   /> */}
+          {/* </div> */}
         </div>
 
         {/* 操作按钮 */}

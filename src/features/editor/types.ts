@@ -167,7 +167,7 @@ export function createInitialEditorState(): EditorState {
     body: "",
     accent: "#d7c3ab",
     ringScale: 1.5,
-    padding: 2,
+    padding: 0,
     unselected: [],
     selected: [],
     nextImageId: 1,

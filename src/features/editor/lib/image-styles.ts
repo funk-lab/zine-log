@@ -16,6 +16,7 @@ export function getImageEditStyles(edit: Partial<ImageEdit>): React.CSSPropertie
     offsetX = 0,
     offsetY = 0,
     fitMode = "cover",
+    margin = 0,
   } = edit;
 
   // 构建 transform
@@ -29,6 +30,7 @@ export function getImageEditStyles(edit: Partial<ImageEdit>): React.CSSPropertie
   return {
     objectFit: fitMode,
     transform: transforms.join(" ") || undefined,
+    margin,
   };
 }
 

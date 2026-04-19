@@ -415,6 +415,7 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
           saturate: 0,
           grayscale: false,
           borderRadius: 0,
+          margin: 0,
         };
         onUnselectedChange?.([...unselected, blankImage]);
       }

@@ -49,7 +49,6 @@ export function buildPhotoRingTemplate(state: EditorState, gap = 1) {
         y: Math.round(y * 100) / 100,
         size: Math.round(scaledCell * 100) / 100,
         slotId: `photo-ring-slot-${index}`,
-        defaultPadding: state.padding,
         edit: image,
       });
     })

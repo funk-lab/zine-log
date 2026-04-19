@@ -179,6 +179,10 @@ export const CanvasPanel: React.FC<CanvasPanelProps> = ({
                 </button>
               </div>
             </div>
+            {/* 提示信息 */}
+            <div className="pointer-events-none absolute bottom-4 left-1/2 z-10 -translate-x-1/2 select-none rounded-full bg-slate-800/70 px-3 py-1 text-xs text-slate-300 backdrop-blur sm:bottom-6">
+              双击图片进行编辑
+            </div>
           </>
         )}
         {/* 换模板按钮（遮罩关闭后显示） */}

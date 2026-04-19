@@ -91,21 +91,22 @@ export const RightPanel: React.FC<RightPanelProps> = ({
             </div>
           </div>
 
-          {/* 布局间距 */}
-          <div className="tool-section">
-            <div className="section-label">布局间距</div>
-            <div className="slider-row">
-              <span className="slider-label">图片内边距</span>
-              <input
-                type="range"
-                min="0"
-                max="20"
-                value={padding}
-                onChange={(e) => onPaddingChange?.(+e.target.value)}
-              />
-              <span className="slider-val">{padding}px</span>
-            </div>
-          </div>
+          {/* TODO: padding UI 暂注释 */}
+          {/* {/* 布局间距 */}
+          {/* <div className="tool-section"> */}
+          {/*   <div className="section-label">布局间距</div> */}
+          {/*   <div className="slider-row"> */}
+          {/*     <span className="slider-label">图片内边距</span> */}
+          {/*     <input */}
+          {/*       type="range" */}
+          {/*       min="0" */}
+          {/*       max="20" */}
+          {/*       value={padding} */}
+          {/*       onChange={(e) => onPaddingChange?.(+e.target.value)} */}
+          {/*     /> */}
+          {/*     <span className="slider-val">{padding}px</span> */}
+          {/*   </div> */}
+          {/* </div> */}
         </div>
       )}
 
