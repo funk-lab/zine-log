@@ -1,3 +1,12 @@
+// ── 模板常量 ──────────────────────────────────────────────────────────────
+
+/** 画布默认宽度（px）- 导出时使用原始尺寸 */
+export const CANVAS_WIDTH = 880;
+/** 画布默认高度（px）- 导出时使用原始尺寸 */
+export const CANVAS_HEIGHT = 760;
+/** 画布显示时的最大宽度（响应式适配） */
+export const CANVAS_MAX_WIDTH = "100%";
+
 export type TemplateId = "tight-ring" | "loose-ring";
 
 /** 适配模式 */
@@ -46,6 +55,8 @@ export interface ImageEdit {
   grayscale: boolean;
   /** 圆角半径（像素），默认 0 */
   borderRadius: number;
+  /** 图片边距（像素），默认 0 */
+  margin: number;
 }
 
 /** 默认编辑状态 */
@@ -62,6 +73,7 @@ export const DEFAULT_IMAGE_EDIT: Readonly<ImageEdit> = {
   saturate: 0,
   grayscale: false,
   borderRadius: 0,
+  margin: 0,
 };
 
 // ── 图库图片项 ──────────────────────────────────────────────────────────────

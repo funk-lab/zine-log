@@ -16,10 +16,12 @@ export interface PhotoRingProps {
   gap?: number;
   /** 缩放系数，默认为 1 */
   scale?: number;
-  /** 画板宽度，默认为 900 */
-  width?: number;
-  /** 画板高度，默认为 1000 */
-  height?: number;
+  /** 显示缩放（由 CanvasPanel 控制），默认为 1 */
+  displayZoom?: number;
+  /** 画板宽度 */
+  width: number;
+  /** 画板高度 */
+  height: number;
   /** 基础单元格大小，默认为 80 */
   baseCell?: number;
   /** 背景色 */
@@ -61,8 +63,9 @@ export const PhotoRing: React.FC<PhotoRingProps> = ({
   count,
   gap = 1,
   scale = 1,
-  width = 900,
-  height = 1000,
+  displayZoom = 1,
+  width,
+  height,
   baseCell = 80,
   backgroundColor = "#16213e",
   images = [],
@@ -71,10 +74,12 @@ export const PhotoRing: React.FC<PhotoRingProps> = ({
   onSlotClick,
   onSlotDoubleClick,
 }) => {
-  // 计算布局
+  // effectiveScale 控制槽位大小 = baseCell * scale * zoom
+  const effectiveScale = scale * displayZoom;
+
   const { positions, scaledCell } = useMemo(
-    () => calculateSpiralLayout(count, gap, scale, width, height, baseCell),
-    [count, gap, scale, width, height, baseCell]
+    () => calculateSpiralLayout(count, gap, effectiveScale, width, height, baseCell),
+    [count, gap, effectiveScale, width, height, baseCell]
   );
 
   // 图片内边距像素值
@@ -83,7 +88,7 @@ export const PhotoRing: React.FC<PhotoRingProps> = ({
   return (
     <div
       className={cn(
-        "relative overflow-hidden rounded-lg shadow-canvas",
+        "relative overflow-hidden rounded-[28px] shadow-canvas",
         className
       )}
       style={{

@@ -416,11 +416,11 @@ input, textarea, select { font-family: inherit; font-size: 13px; }
 /* 画布容器 */
 .canvas-viewport {
   flex: 1;
-  overflow: auto;
+  overflow: hidden;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
-  padding: var(--sp-8);
+  padding: var(--sp-4);
   position: relative;
 }
 

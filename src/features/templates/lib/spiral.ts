@@ -129,13 +129,9 @@ export function calculateSpiralLayout(
   const spanCols = maxGridX - minGridX + 1;
   const spanRows = maxGridY - minGridY + 1;
 
-  // 3. 自适应缩放计算
-  const padding = 48;
-  const fitCell = Math.min(
-    (width - padding) / spanCols,
-    (height - padding) / spanRows
-  );
-  const scaledCell = Math.min(fitCell, baseCell * scale);
+  // 3. 固定槽位大小 = baseCell * scale
+  // 无论图片数量多少，槽位尺寸保持一致
+  const scaledCell = baseCell * scale;
 
   // 4. 居中偏移
   const offsetX = (width - spanCols * scaledCell) / 2;
