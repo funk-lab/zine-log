@@ -333,6 +333,7 @@ input, textarea, select { font-family: inherit; font-size: 13px; }
   justify-content: center;
   overflow: hidden;
   border: 1px solid var(--clr-border);
+  padding: 2px;
 }
 
 .tpl-overlay-card.active .tpl-overlay-thumb {

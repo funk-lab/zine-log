@@ -242,7 +242,7 @@ export const Editor: React.FC = () => {
           padding={state.padding}
           onAccentChange={handleAccentChange}
           onPaddingChange={handlePaddingChange}
-          onExport={handleDownloadPng}
+          onExport={() => setIsDownloadDialogOpen(true)}
         />
       </div>
 

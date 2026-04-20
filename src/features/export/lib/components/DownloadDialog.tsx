@@ -1,6 +1,18 @@
 import React from "react";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import wechatPng from "@asset/wechat.png";
+import taobao1 from "@asset/taobao1.jpg";
+import taobao2 from "@asset/taobao2.jpg";
+
+const TaobaoImg: React.FC = () => {
+  return (
+    <div className="flex h-full w-full justify-center overflow-hidden rounded-lg">
+      <img src={taobao1} alt="淘宝店铺" className="h-full object-contain" />
+      <img src={taobao2} alt="淘宝店铺" className="h-full object-contain" />
+    </div>
+  );
+};
 
 interface DownloadDialogProps {
   /** 控制弹窗显示/隐藏 */
@@ -9,10 +21,6 @@ interface DownloadDialogProps {
   onClose: () => void;
   /** 立即下载按钮点击回调 */
   onDownload: () => void;
-  /** 微信二维码图片地址 */
-  wechatQrUrl?: string;
-  /** 淘宝店铺二维码图片地址 */
-  taobaoQrUrl?: string;
   /** 额外的类名 */
   className?: string;
 }
@@ -21,8 +29,6 @@ export const DownloadDialog: React.FC<DownloadDialogProps> = ({
   isOpen,
   onClose,
   onDownload,
-  wechatQrUrl,
-  taobaoQrUrl,
   className,
 }) => {
   // 点击遮罩关闭
@@ -44,7 +50,7 @@ export const DownloadDialog: React.FC<DownloadDialogProps> = ({
       aria-hidden="true"
     >
       <div
-        className="relative w-full max-w-[500px] rounded-2xl bg-white p-6 shadow-xl"
+        className="relative w-full max-w-[700px] rounded-2xl bg-white py-6 px-20 shadow-xl"
         role="dialog"
         aria-modal="true"
         aria-label="下载弹窗"
@@ -85,36 +91,20 @@ export const DownloadDialog: React.FC<DownloadDialogProps> = ({
           <div className="flex justify-center gap-6">
             {/* 微信二维码 */}
             <div className="flex flex-col items-center gap-2">
-              <div className="h-24 w-24 overflow-hidden rounded-lg bg-gray-100">
-                {wechatQrUrl ? (
-                  <img
-                    src={wechatQrUrl}
-                    alt="微信二维码"
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <div className="flex h-full w-full items-center justify-center text-xs text-gray-400">
-                    微信二维码
-                  </div>
-                )}
+              <div className="h-24 w-24 overflow-hidden bg-gray-100">
+                <img
+                  src={wechatPng}
+                  alt="微信二维码"
+                  className="h-full w-full object-cover"
+                />
               </div>
               <span className="text-xs text-gray-500">微信</span>
             </div>
 
             {/* 淘宝店铺二维码 */}
             <div className="flex flex-col items-center gap-2">
-              <div className="h-24 w-24 overflow-hidden rounded-lg bg-gray-100">
-                {taobaoQrUrl ? (
-                  <img
-                    src={taobaoQrUrl}
-                    alt="淘宝店铺二维码"
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <div className="flex h-full w-full items-center justify-center text-xs text-gray-400">
-                    淘宝二维码
-                  </div>
-                )}
+              <div className="h-24 overflow-hidden rounded-lg bg-gray-100">
+                <TaobaoImg />
               </div>
               <span className="text-xs text-gray-500">淘宝店铺</span>
             </div>

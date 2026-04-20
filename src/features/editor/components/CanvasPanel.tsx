@@ -1,12 +1,6 @@
 // CanvasPanel 组件 - 中间画布区
 import { Preview3D } from "@/features/preview3d/components/preview-3d";
-import React, {
-  useState,
-  useCallback,
-  useRef,
-  useMemo,
-  Suspense,
-} from "react";
+import React, { useState, useCallback, useRef, useMemo, Suspense } from "react";
 import { TemplateId, GalleryImage } from "../types";
 import { Minus, Plus } from "lucide-react";
 import PhotoRing from "@/features/templates/components/PhotoRing";
@@ -15,19 +9,19 @@ import PhotoRing from "@/features/templates/components/PhotoRing";
 export interface Template {
   id: TemplateId;
   name: string;
-  svg: React.ReactNode;
+  image: string;
 }
 
 const templates: Template[] = [
   {
     id: "tight-ring",
     name: "紧密螺旋",
-    svg: <svg className="tpl-svg" viewBox="0 0 40 40" fill="none" />,
+    image: "/asset/tight-ring.jpg",
   },
   {
     id: "loose-ring",
     name: "舒展螺旋",
-    svg: <svg className="tpl-svg" viewBox="0 0 40 40" fill="none" />,
+    image: "/asset/loose-ring.jpg",
   },
 ];
 
@@ -142,7 +136,13 @@ export const CanvasPanel: React.FC<CanvasPanelProps> = ({
                     }`}
                     onClick={() => handleSelectTemplate(t.id)}
                   >
-                    <div className="tpl-overlay-thumb">{t.svg}</div>
+                    <div className="tpl-overlay-thumb">
+                      <img
+                        src={t.image}
+                        alt={t.name}
+                        className="h-full w-full object-contain"
+                      />
+                    </div>
                     <span className="tpl-overlay-name">{t.name}</span>
                   </button>
                 ))}
