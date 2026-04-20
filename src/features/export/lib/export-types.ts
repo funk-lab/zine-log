@@ -120,6 +120,8 @@ export interface AlbumExportOptions {
   filename?: string;
   /** 图片嵌入 JPEG 质量 0-1，默认 0.88 */
   jpegQuality?: number;
+  /** Canvas 放大倍数，用于提高导出清晰度，默认 2 */
+  scaleFactor?: number;
 }
 
 

@@ -6,13 +6,13 @@ export const GRID_CONFIG: GridConfig = {
   pageSize: { width: 842, height: 595 },
 
   /** 页边距 (pt) */
-  margin: { top: 30, right: 30, bottom: 30, left: 30 },
+  margin: { top: 10, right: 10, bottom: 10, left: 10 },
 
   /** 网格：4 列 × 3 行，间距 12pt */
   grid: {
     columns: 4,
     rows: 3,
-    gutter: { h: 12, v: 12 },
+    gutter: { h: 0, v: 0 },
   },
 
   defaultFitMode: 'cover',

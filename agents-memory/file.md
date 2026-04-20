@@ -209,3 +209,77 @@ await downloadAlbumPDF(state.selected, {
 ```
 
 每页布局：4列 × 3行 = 12张图，A4横向。
+
+---
+
+## PDF 导出图片编辑效果实现记录 (2026-04-19)
+
+### 问题描述
+导出 PDF 时，图片的编辑属性（旋转、缩放、翻转、偏移、fitMode 裁剪）没有生效。
+
+### 原因分析
+1. 预览时有 slot/卡片容器提供裁剪，导出时需要类似机制
+2. Canvas 尺寸等于 slot 尺寸，但 drawImage 使用 fit.dw/dh 导致尺寸不匹配
+3. pdf-lib 没有直接的 clipRect 方法，需要用 pushGraphicsState + clip() 实现
+
+### 最终解决方案：Canvas 2D 变换
+
+采用与 SVG 预览一致的 Canvas 2D 变换逻辑：
+
+```typescript
+// 1. Canvas 尺寸等于 slot 尺寸
+const canvas = new OffscreenCanvas(slot.width, slot.height);
+const ctx2d = canvas.getContext("2d")!;
+
+// 2. 白色背景
+ctx2d.fillStyle = "white";
+ctx2d.fillRect(0, 0, slot.width, slot.height);
+
+// 3. 变换中心点（图片区域中心）
+const centerX = imageX + imageSize / 2;
+const centerY = imageY + imageSize / 2;
+ctx2d.translate(centerX, centerY);
+
+// 4. 翻转
+if (ctx.flipX) ctx2d.scale(-1, 1);
+if (ctx.flipY) ctx2d.scale(1, -1);
+
+// 5. 缩放
+if (ctx.zoom !== 1) {
+  ctx2d.scale(ctx.zoom, ctx.zoom);
+}
+
+// 6. 偏移
+const offsetXPx = (ctx.offsetX / 100) * imageSize * ctx.zoom;
+const offsetYPx = (ctx.offsetY / 100) * imageSize * ctx.zoom;
+ctx2d.translate(-centerX + offsetXPx, -centerY + offsetYPx);
+
+// 7. 裁剪（超出 imageX/imageY/imageSize/imageSize 的部分被裁剪）
+ctx2d.beginPath();
+ctx2d.rect(imageX, imageY, imageSize, imageSize);
+ctx2d.clip();
+
+// 8. 绘制图片
+ctx2d.drawImage(img, fit.sx, fit.sy, fit.sW, fit.sH, imgDrawX, imgDrawY, fit.dw, fit.dh);
+```
+
+### 核心概念
+
+| 概念 | 说明 |
+|------|------|
+| `fitMode` | cover/contain/fill 三种裁剪模式 |
+| `calcFit` | 根据 fitMode 计算源图裁剪区域和目标绘制尺寸 |
+| `ctx2d.rect() + clip()` | Canvas 裁剪，替代 SVG 的 clipPath |
+| `translate/rotate/scale` | Canvas 2D 变换实现翻转、缩放、偏移 |
+
+### 图片模糊问题
+
+**原因**：slot 尺寸是 pt 单位（~185pt），Canvas 用这么小的像素尺寸绘制 JPEG 质量会较差。
+
+**解决**：提高 JPEG 质量到 0.92+，或按比例放大 Canvas 尺寸。
+
+### 相关文件
+
+- `src/features/export/lib/album-pdf.ts` - PDF 导出核心逻辑
+- `src/features/export/lib/grid-layout.ts` - 布局计算，包含 calcFit
+- `src/features/templates/lib/svg.ts` - SVG 预览参考，实现 getSvgImageTransform

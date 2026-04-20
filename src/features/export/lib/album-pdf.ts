@@ -1,14 +1,15 @@
 /**
  * 相册式 PDF 导出
- * 使用 pdf-lib 库将多张图片按 4×3 网格布局导出为多页 PDF
+ * 使用 Canvas 2D 绘制图片（保留所有编辑效果），然后绘制到 PDF
  */
 
-import { PDFDocument } from "pdf-lib";
+import {
+  PDFDocument,
+} from "pdf-lib";
 import type { GalleryImage } from "@/features/editor/types";
-import type { OnProgress, AlbumExportOptions } from "./export-types";
+import type { OnProgress, AlbumExportOptions, Slot } from "./export-types";
 import {
   calcSlots,
-  calcFit,
   calcPageRanges,
   toPdfLibY,
   GRID_CONFIG,
@@ -26,6 +27,11 @@ export type { AlbumExportOptions, OnProgress };
 interface ExportContext {
   rotate: number;
   fitMode: "cover" | "contain" | "fill";
+  zoom: number;
+  flipX: boolean;
+  flipY: boolean;
+  offsetX: number;
+  offsetY: number;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -33,55 +39,149 @@ interface ExportContext {
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
- * 将 Blob 转为 JPEG bytes（如需要则转换格式）
- */
-async function blobToJpegBytes(
-  blob: Blob,
-  quality: number
-): Promise<Uint8Array> {
-  if (blob.type === "image/jpeg") {
-    return new Uint8Array(await blob.arrayBuffer());
-  }
-
-  // 其他格式：先用 OffscreenCanvas 转 JPEG
-  const bitmap = await createImageBitmap(blob);
-  const canvas = new OffscreenCanvas(bitmap.width, bitmap.height);
-  canvas.getContext("2d")!.drawImage(bitmap, 0, 0);
-  bitmap.close();
-
-  const jpegBlob = await canvas.convertToBlob({ type: "image/jpeg", quality });
-  return new Uint8Array(await jpegBlob.arrayBuffer());
-}
-
-/**
- * 从 GalleryImage 获取 Blob
- * 优先使用压缩后的 blobUrl，否则从 src 获取
- */
-async function fetchImageBlob(image: GalleryImage): Promise<Blob | null> {
-  // 如果有 blobUrl（压缩后的），直接使用
-  if ((image as GalleryImage & { blobUrl?: string }).blobUrl) {
-    const blobUrl = (image as GalleryImage & { blobUrl: string }).blobUrl;
-    const response = await fetch(blobUrl);
-    return response.blob();
-  }
-
-  // 否则从 src 获取（兼容旧数据）
-  if (image.src) {
-    const response = await fetch(image.src);
-    return response.blob();
-  }
-
-  return null;
-}
-
-/**
- * 获取图片的导出上下文（旋转角度、适配模式）
+ * 获取图片的导出上下文
  */
 function getExportContext(image: GalleryImage): ExportContext {
   return {
     rotate: image.rotate || 0,
     fitMode: image.fitMode || "cover",
+    zoom: image.zoom ?? 1,
+    flipX: image.flipX || false,
+    flipY: image.flipY || false,
+    offsetX: image.offsetX || 0,
+    offsetY: image.offsetY || 0,
   };
+}
+
+/**
+ * 计算 fitMode 适配参数（与 grid-layout.ts 的 calcFit 一致）
+ */
+function calcFit(
+  iw: number,
+  ih: number,
+  sw: number,
+  sh: number,
+  mode: "cover" | "contain" | "fill"
+) {
+  const ir = iw / ih;
+  const sr = sw / sh;
+
+  if (mode === "cover") {
+    if (ir > sr) {
+      // 图片更宽 -> 裁剪左右，垂直铺满
+      const sc = sh / ih;
+      const dw = iw * sc;
+      return { sx: (iw - sw / sc) / 2, sy: 0, sW: sw / sc, sH: ih, dw, dh: sh };
+    } else {
+      // 图片更高 -> 裁剪上下，水平铺满
+      const sc = sw / iw;
+      const dh = ih * sc;
+      return { sx: 0, sy: (ih - sh / sc) / 2, sW: iw, sH: sh / sc, dw: sw, dh };
+    }
+  }
+
+  if (mode === "contain") {
+    if (ir > sr) {
+      const dw = sw;
+      const dh = sw / ir;
+      return { sx: 0, sy: 0, sW: iw, sH: ih, dw, dh };
+    } else {
+      const dh = sh;
+      const dw = sh * ir;
+      return { sx: 0, sy: 0, sW: iw, sH: ih, dw, dh };
+    }
+  }
+
+  // fill: 拉伸填满
+  return { sx: 0, sy: 0, sW: iw, sH: ih, dw: sw, dh: sh };
+}
+
+/**
+ * 在 Canvas 上绘制带编辑效果的图片
+ * @param img 图片
+ * @param slot 槽位
+ * @param padding 内边距
+ * @param ctx 编辑上下文
+ * @param scaleFactor 放大倍数，用于提高导出清晰度
+ */
+function drawImageToCanvas(
+  img: ImageBitmap,
+  slot: Slot,
+  padding: number,
+  ctx: ExportContext,
+  scaleFactor: number = 2
+): OffscreenCanvas {
+  const iw = img.width;
+  const ih = img.height;
+
+  // 计算图片在 canvas 中的目标尺寸（基于 fitMode）
+  const fit = calcFit(iw, ih, slot.width, slot.height, ctx.fitMode);
+
+  // Canvas 尺寸按 scaleFactor 放大
+  const canvasW = slot.width * scaleFactor;
+  const canvasH = slot.height * scaleFactor;
+  const canvas = new OffscreenCanvas(canvasW, canvasH);
+  const ctx2d = canvas.getContext("2d")!;
+
+  // 清除画布（白色背景）
+  ctx2d.fillStyle = "white";
+  ctx2d.fillRect(0, 0, canvasW, canvasH);
+
+  // 保存状态
+  ctx2d.save();
+
+  // 计算裁剪区域（图片区域，相对于 slot，按 scaleFactor 缩放）
+  const imageX = padding * scaleFactor;
+  const imageY = padding * scaleFactor;
+  const imageSize = (slot.width - padding * 2) * scaleFactor;
+
+  // 计算图片居中位置（按 scaleFactor 缩放）
+  const imgDrawX = imageX + (imageSize - fit.dw * scaleFactor) / 2;
+  const imgDrawY = imageY + (imageSize - fit.dh * scaleFactor) / 2;
+
+  // 变换中心点（图片区域中心）
+  const centerX = imageX + imageSize / 2;
+  const centerY = imageY + imageSize / 2;
+
+  ctx2d.translate(centerX, centerY);
+
+  // 翻转
+  if (ctx.flipX) ctx2d.scale(-1, 1);
+  if (ctx.flipY) ctx2d.scale(1, -1);
+
+  // 缩放
+  if (ctx.zoom !== 1) {
+    ctx2d.scale(ctx.zoom, ctx.zoom);
+  }
+
+  // 偏移（转换为像素，按 scaleFactor 缩放）
+  const offsetXPx = (ctx.offsetX / 100) * imageSize * ctx.zoom;
+  const offsetYPx = (ctx.offsetY / 100) * imageSize * ctx.zoom;
+
+  // 移回原位置并加上偏移
+  ctx2d.translate(-centerX + offsetXPx, -centerY + offsetYPx);
+
+  // 绘制图片（超出 imageX/imageY/imageSize/imageSize 的部分会被 clip 裁剪）
+  ctx2d.beginPath();
+  ctx2d.rect(imageX, imageY, imageSize, imageSize);
+  ctx2d.clip();
+
+  // 绘制图片（所有尺寸和位置按 scaleFactor 缩放）
+  ctx2d.drawImage(
+    img,
+    fit.sx,
+    fit.sy,
+    fit.sW,
+    fit.sH,
+    imgDrawX,
+    imgDrawY,
+    fit.dw * scaleFactor,
+    fit.dh * scaleFactor
+  );
+
+  ctx2d.restore();
+
+  return canvas;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -90,17 +190,6 @@ function getExportContext(image: GalleryImage): ExportContext {
 
 /**
  * 将图片列表导出为相册式 PDF 并触发浏览器下载。
- *
- * @param images     GalleryImage 数组
- * @param opts       导出选项
- * @param onProgress 进度回调（progress: 0-1）
- *
- * @returns 生成的 PDF Blob
- *
- * @example
- * const blob = await exportAlbumPDF(selectedImages, {}, (p) => {
- *   console.log(`${Math.round(p.progress * 100)}% - ${p.message}`);
- * });
  */
 export async function exportAlbumPDF(
   images: GalleryImage[],
@@ -111,7 +200,7 @@ export async function exportAlbumPDF(
     throw new Error("没有可导出的图片，请先选择图片。");
   }
 
-  const { jpegQuality = 0.88 } = opts;
+  const { jpegQuality = 0.88, scaleFactor = 2 } = opts;
   const filename =
     opts.filename ?? `album_${new Date().toISOString().slice(0, 10)}.pdf`;
 
@@ -123,6 +212,7 @@ export async function exportAlbumPDF(
   const pdfDoc = await PDFDocument.create();
   const slots = calcSlots(GRID_CONFIG);
   const { pageSize: ps } = GRID_CONFIG;
+  const padding = 2; // 与 preview 保持一致
 
   const pageRanges = calcPageRanges(images.length, IMAGES_PER_PAGE);
   const total = images.length;
@@ -143,59 +233,50 @@ export async function exportAlbumPDF(
       );
 
       try {
-        // 1. 获取图片 Blob
-        const imageBlob = await fetchImageBlob(image);
-        if (!imageBlob) {
-          console.warn(`[exportAlbumPDF] 无法获取图片: ${image.name}`);
+        // 1. 获取图片 URL
+        const imageUrl = image.blobUrl ?? image.src;
+        if (!imageUrl) {
+          console.warn(`[exportAlbumPDF] 无法获取图片 URL: ${image.name}`);
           continue;
         }
 
-        // 2. 应用旋转（生成旋转后的 Blob）
+        // 2. 获取图片 Blob（复用 blobUrl 避免重复 fetch）
+        let imageBlob: Blob;
+        if (image.blobUrl) {
+          const response = await fetch(image.blobUrl);
+          imageBlob = await response.blob();
+        } else {
+          const response = await fetch(imageUrl);
+          imageBlob = await response.blob();
+        }
+
+        // 3. 应用旋转
         const rotatedBlob = await rotateBlobByDeg(imageBlob, ctx.rotate);
 
-        // 3. 获取旋转后的尺寸
-        const rotatedBitmap = await createImageBitmap(rotatedBlob);
-        const iw = rotatedBitmap.width;
-        const ih = rotatedBitmap.height;
+        // 4. 转为 ImageBitmap
+        const img = await createImageBitmap(rotatedBlob);
 
-        // 4. 计算裁剪 / 适配参数
-        const fit = calcFit(iw, ih, slot.width, slot.height, ctx.fitMode);
+        // 5. 在 Canvas 上绘制（带编辑效果和裁剪，按 scaleFactor 放大）
+        const canvas = drawImageToCanvas(img, slot, padding, ctx, scaleFactor);
+        img.close();
 
-        // 5. 裁剪 / 缩放到目标尺寸
-        const targetW = Math.round(fit.dw);
-        const targetH = Math.round(fit.dh);
-        const canvas = new OffscreenCanvas(targetW, targetH);
-        canvas
-          .getContext("2d")!
-          .drawImage(
-            rotatedBitmap,
-            fit.sx,
-            fit.sy,
-            fit.sW,
-            fit.sH,
-            0,
-            0,
-            targetW,
-            targetH
-          );
-        rotatedBitmap.close();
-
-        // 6. 转为 JPEG bytes
-        const intermediateBlob = await canvas.convertToBlob({
+        // 6. 转为 JPEG
+        const jpegBlob = await canvas.convertToBlob({
           type: "image/jpeg",
           quality: jpegQuality,
         });
-        const jpegBytes = await blobToJpegBytes(intermediateBlob, jpegQuality);
+        const jpegBytes = new Uint8Array(await jpegBlob.arrayBuffer());
 
         // 7. 嵌入 PDF
         const pdfImg = await pdfDoc.embedJpg(jpegBytes);
 
-        // 8. 绘制到 PDF（注意 pdf-lib Y 轴翻转）
+        // 8. 绘制到 PDF
+        const slotY = toPdfLibY(ps.height, slot.y, slot.height);
         page.drawImage(pdfImg, {
           x: slot.x,
-          y: toPdfLibY(ps.height, slot.y, fit.dh),
-          width: fit.dw,
-          height: fit.dh,
+          y: slotY,
+          width: slot.width,
+          height: slot.height,
         });
       } catch (err) {
         console.warn(`[exportAlbumPDF] 处理图片失败: ${image.name}`, err);
