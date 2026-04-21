@@ -283,3 +283,43 @@ ctx2d.drawImage(img, fit.sx, fit.sy, fit.sW, fit.sH, imgDrawX, imgDrawY, fit.dw,
 - `src/features/export/lib/album-pdf.ts` - PDF 导出核心逻辑
 - `src/features/export/lib/grid-layout.ts` - 布局计算，包含 calcFit
 - `src/features/templates/lib/svg.ts` - SVG 预览参考，实现 getSvgImageTransform
+
+---
+
+## Bug 修复记录
+
+### 2026-04-20: cover 模式下图片拉伸问题
+
+**问题描述**：PDF 导出时，`fitMode=cover` 的图片出现拉伸变形。
+
+**原因分析**：`calcFit` 函数中 `cover` 模式的 `dw`/`dh` 计算错误：
+
+```typescript
+// ❌ 错误代码
+if (ir > sr) {
+  const sc = sh / ih;
+  const dw = iw * sc;  // 错误：应该是 sw
+  return { ..., dw, dh: sh };
+} else {
+  const sc = sw / iw;
+  const dh = ih * sc;  // 错误：应该是 sh
+  return { ..., dw: sw, dh };
+}
+```
+
+在 `cover` 模式下，图片应该填满整个目标区域（`sw × sh`），超出部分通过 `sx/sy/sW/sH` 裁剪。`dw`/`dh` 必须是目标区域尺寸，而不是缩放后的图片原始尺寸。
+
+**修复方案**：
+
+```typescript
+// ✅ 正确代码
+if (ir > sr) {
+  const sc = sh / ih;
+  return { sx: (iw - sw / sc) / 2, sy: 0, sW: sw / sc, sH: ih, dw: sw, dh: sh };
+} else {
+  const sc = sw / iw;
+  return { sx: 0, sy: (ih - sh / sc) / 2, sW: iw, sH: sh / sc, dw: sw, dh: sh };
+}
+```
+
+**修复文件**：`src/features/export/lib/album-pdf.ts` (lines 67-78)

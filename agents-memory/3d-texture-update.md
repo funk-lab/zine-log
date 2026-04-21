@@ -338,4 +338,57 @@ const model = buildSpiralModel(
 
 ---
 
+## 2026-04-20 修复记录
+
+### 修复 1：offsetX/Y 计算不一致
+
+**问题**：`svg.ts` 和 `image-styles.ts` 对 `offsetX/Y` 的处理方式不同
+
+| 文件 | 原处理方式 |
+|------|-----------|
+| `svg.ts:210-216` | `(offsetX / 100) * size * zoom`（百分比） |
+| `image-styles.ts:28` | `offsetX px`（像素值） |
+
+**修复**：根据 `ImageEdit` 类型定义（`offsetX/Y` 为像素值），统一修改 `svg.ts`：
+
+```typescript
+// 之前
+const tx = (offsetX / 100) * size * zoom;
+
+// 之后
+const tx = offsetX / zoom;  // 像素值，除以 zoom 抵消缩放影响
+```
+
+**相关文件**：
+- `src/features/templates/lib/svg.ts`
+- `src/features/editor/lib/image-styles.ts`
+
+---
+
+### 修复 2：3D 预览图片偏移溢出
+
+**问题**：当图片有 `offsetX/Y` 偏移时，超出 slot 的部分显示到了其他图片上
+
+**原因**：SVG `clipPath` 默认在 `objectBoundingBox` 坐标系中应用裁剪，当图片应用 `transform` 时，裁剪区域会跟着变换
+
+**修复**：在 `gridSlotMarkup` 中添加 `clipPathUnits="userSpaceOnUse"`，确保裁剪在绝对坐标系中生效：
+
+```typescript
+// 之前
+<clipPath id="${slotId}">
+  <rect x="${imageX}" y="${imageY}" width="${imageSize}" height="${imageSize}" />
+</clipPath>
+
+// 之后
+<clipPath id="${slotId}" clipPathUnits="userSpaceOnUse">
+  <rect x="${imageX}" y="${imageY}" width="${imageSize}" height="${imageSize}" />
+</clipPath>
+```
+
+**相关文件**：
+- `src/features/templates/lib/svg.ts`
+
+---
+
 *记录时间: 2026-04-15*
+*更新: 2026-04-20*

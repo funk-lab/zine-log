@@ -154,7 +154,7 @@ export const CanvasPanel: React.FC<CanvasPanelProps> = ({
         {mode === "edit" && (
           <>
             {/* 缩放控制 */}
-            <div className="pointer-events-none absolute right-4 top-4 z-10 sm:right-6 sm:top-6 xl:right-8 xl:top-8">
+            <div className="pointer-events-none absolute right-4 top-4 z-10 sm:right-6 sm:top-4 xl:right-8 xl:top-4">
               <div className="pointer-events-auto flex items-center gap-1 rounded-xl border bg-white/92 p-1 shadow-sm backdrop-blur">
                 <button
                   type="button"

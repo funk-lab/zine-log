@@ -641,7 +641,7 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
               onClick={handleAddBlankImage}
               title="添加空白图片"
             >
-              + 空白素材
+              + 空白页
             </button>
             <button
               className="pg-zone-action"

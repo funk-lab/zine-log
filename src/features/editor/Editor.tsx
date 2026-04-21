@@ -58,10 +58,11 @@ export const Editor: React.FC = () => {
     dispatch({ type: "append-images", images });
   }, []);
 
-  const handleDownloadPng = useCallback(() => {
+  const handleDownloadAlbum = useCallback(() => {
     downloadAlbumPDF(state.selected, {
       filename: "my-album.pdf",
       jpegQuality: 1,
+      scaleFactor: 3,
     }).catch((error) => {
       console.error(error);
       window.alert("PNG 导出失败，请换一张图片或改用 SVG 导出。");
@@ -268,7 +269,7 @@ export const Editor: React.FC = () => {
       <DownloadDialog
         isOpen={isDownloadDialogOpen}
         onClose={() => setIsDownloadDialogOpen(false)}
-        onDownload={handleDownloadPdf}
+        onDownload={handleDownloadAlbum}
       />
     </div>
   );

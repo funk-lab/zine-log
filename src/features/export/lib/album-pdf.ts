@@ -3,19 +3,17 @@
  * 使用 Canvas 2D 绘制图片（保留所有编辑效果），然后绘制到 PDF
  */
 
-import {
-  PDFDocument,
-} from "pdf-lib";
+import { PDFDocument } from "pdf-lib";
 import type { GalleryImage } from "@/features/editor/types";
 import type { OnProgress, AlbumExportOptions, Slot } from "./export-types";
+import { calcSlots, calcPageRanges, toPdfLibY } from "./grid-layout";
+import { rotateBlobByDeg } from "./image-compressor";
 import {
-  calcSlots,
-  calcPageRanges,
-  toPdfLibY,
   GRID_CONFIG,
   IMAGES_PER_PAGE,
-} from "./grid-layout";
-import { rotateBlobByDeg } from "./image-compressor";
+  TIGHT_RULES,
+  type PageRule,
+} from "./constant";
 
 // 重新导出类型供外部使用
 export type { AlbumExportOptions, OnProgress };
@@ -70,13 +68,11 @@ function calcFit(
     if (ir > sr) {
       // 图片更宽 -> 裁剪左右，垂直铺满
       const sc = sh / ih;
-      const dw = iw * sc;
-      return { sx: (iw - sw / sc) / 2, sy: 0, sW: sw / sc, sH: ih, dw, dh: sh };
+      return { sx: (iw - sw / sc) / 2, sy: 0, sW: sw / sc, sH: ih, dw: sw, dh: sh };
     } else {
       // 图片更高 -> 裁剪上下，水平铺满
       const sc = sw / iw;
-      const dh = ih * sc;
-      return { sx: 0, sy: (ih - sh / sc) / 2, sW: iw, sH: sh / sc, dw: sw, dh };
+      return { sx: 0, sy: (ih - sh / sc) / 2, sW: iw, sH: sh / sc, dw: sw, dh: sh };
     }
   }
 
@@ -97,6 +93,24 @@ function calcFit(
 }
 
 /**
+ * 创建空白的 OffscreenCanvas（用于填满没有图片的 slot）
+ * @param slot 槽位
+ * @param scaleFactor 放大倍数
+ */
+function createBlankCanvas(slot: Slot, scaleFactor: number = 2): OffscreenCanvas {
+  const canvasW = slot.width * scaleFactor;
+  const canvasH = slot.height * scaleFactor;
+  const canvas = new OffscreenCanvas(canvasW, canvasH);
+  const ctx2d = canvas.getContext("2d")!;
+
+  // 白色背景
+  ctx2d.fillStyle = "white";
+  ctx2d.fillRect(0, 0, canvasW, canvasH);
+
+  return canvas;
+}
+
+/**
  * 在 Canvas 上绘制带编辑效果的图片
  * @param img 图片
  * @param slot 槽位
@@ -109,13 +123,17 @@ function drawImageToCanvas(
   slot: Slot,
   padding: number,
   ctx: ExportContext,
+  extraRotate: number = 0,
   scaleFactor: number = 2
 ): OffscreenCanvas {
   const iw = img.width;
   const ih = img.height;
-
+  console.log(padding);
+  // 计算实际图片区域尺寸（扣除 padding，与预览保持一致）
+  const contentWidth = slot.width - padding * 2;
+  const contentHeight = slot.height - padding * 2;
   // 计算图片在 canvas 中的目标尺寸（基于 fitMode）
-  const fit = calcFit(iw, ih, slot.width, slot.height, ctx.fitMode);
+  const fit = calcFit(iw, ih, contentWidth, contentHeight, ctx.fitMode);
 
   // Canvas 尺寸按 scaleFactor 放大
   const canvasW = slot.width * scaleFactor;
@@ -127,21 +145,32 @@ function drawImageToCanvas(
   ctx2d.fillStyle = "white";
   ctx2d.fillRect(0, 0, canvasW, canvasH);
 
-  // 保存状态
-  ctx2d.save();
-
   // 计算裁剪区域（图片区域，相对于 slot，按 scaleFactor 缩放）
   const imageX = padding * scaleFactor;
   const imageY = padding * scaleFactor;
-  const imageSize = (slot.width - padding * 2) * scaleFactor;
+  const imageW = contentWidth * scaleFactor;
+  const imageH = contentHeight * scaleFactor;
 
-  // 计算图片居中位置（按 scaleFactor 缩放）
-  const imgDrawX = imageX + (imageSize - fit.dw * scaleFactor) / 2;
-  const imgDrawY = imageY + (imageSize - fit.dh * scaleFactor) / 2;
+  // 计算图片绘制位置
+  // cover/fill 模式：图片填满内容区域，从 imageX/imageY 开始绘制
+  // contain 模式：需要居中绘制
+  let imgDrawX: number;
+  let imgDrawY: number;
+  if (ctx.fitMode === "contain") {
+    imgDrawX = imageX + (imageW - fit.dw * scaleFactor) / 2;
+    imgDrawY = imageY + (imageH - fit.dh * scaleFactor) / 2;
+  } else {
+    // cover/fill: 图片尺寸 >= 内容区域，直接对齐左上角，靠 clip 裁剪
+    imgDrawX = imageX;
+    imgDrawY = imageY;
+  }
 
   // 变换中心点（图片区域中心）
-  const centerX = imageX + imageSize / 2;
-  const centerY = imageY + imageSize / 2;
+  const centerX = imageX + imageW / 2;
+  const centerY = imageY + imageH / 2;
+
+  // ========== 第 1 层：编辑效果（zoom、flip、offset）==========
+  ctx2d.save();
 
   ctx2d.translate(centerX, centerY);
 
@@ -155,15 +184,14 @@ function drawImageToCanvas(
   }
 
   // 偏移（转换为像素，按 scaleFactor 缩放）
-  const offsetXPx = (ctx.offsetX / 100) * imageSize * ctx.zoom;
-  const offsetYPx = (ctx.offsetY / 100) * imageSize * ctx.zoom;
+  const offsetXPx = (ctx.offsetX / 100) * imageW * ctx.zoom;
+  const offsetYPx = (ctx.offsetY / 100) * imageH * ctx.zoom;
 
   // 移回原位置并加上偏移
   ctx2d.translate(-centerX + offsetXPx, -centerY + offsetYPx);
-
-  // 绘制图片（超出 imageX/imageY/imageSize/imageSize 的部分会被 clip 裁剪）
+  // 绘制图片（超出图片区域的部分会被 clip 裁剪）
   ctx2d.beginPath();
-  ctx2d.rect(imageX, imageY, imageSize, imageSize);
+  ctx2d.rect(imageX, imageY, imageW, imageH);
   ctx2d.clip();
 
   // 绘制图片（所有尺寸和位置按 scaleFactor 缩放）
@@ -179,7 +207,30 @@ function drawImageToCanvas(
     fit.dh * scaleFactor
   );
 
-  ctx2d.restore();
+  ctx2d.restore(); // 恢复编辑效果层
+
+  // ========== 第 2 步：应用 TIGHT_RULE 额外旋转（以 slot 中心为旋转中心）==========
+  if (extraRotate !== 0) {
+    const slotCenterX = canvasW / 2;
+    const slotCenterY = canvasH / 2;
+
+    // 创建临时 canvas 保存当前内容
+    const tempCanvas = new OffscreenCanvas(canvasW, canvasH);
+    const tempCtx = tempCanvas.getContext("2d")!;
+    tempCtx.drawImage(canvas, 0, 0);
+
+    // 清空主 canvas
+    ctx2d.fillStyle = "white";
+    ctx2d.fillRect(0, 0, canvasW, canvasH);
+
+    // 旋转并绘制
+    ctx2d.save();
+    ctx2d.translate(slotCenterX, slotCenterY);
+    ctx2d.rotate((extraRotate * Math.PI) / 180);
+    ctx2d.translate(-slotCenterX, -slotCenterY);
+    ctx2d.drawImage(tempCanvas, 0, 0);
+    ctx2d.restore();
+  }
 
   return canvas;
 }
@@ -212,7 +263,8 @@ export async function exportAlbumPDF(
   const pdfDoc = await PDFDocument.create();
   const slots = calcSlots(GRID_CONFIG);
   const { pageSize: ps } = GRID_CONFIG;
-  const padding = 2; // 与 preview 保持一致
+  // TODO: 待添加为opts
+  const padding = 0;
 
   const pageRanges = calcPageRanges(images.length, IMAGES_PER_PAGE);
   const total = images.length;
@@ -220,13 +272,42 @@ export async function exportAlbumPDF(
 
   for (let pi = 0; pi < pageRanges.length; pi++) {
     const page = pdfDoc.addPage([ps.width, ps.height]);
-    const { start, end } = pageRanges[pi];
+    const { start } = pageRanges[pi];
+    // 获取当前页的规则（如果超出定义范围，使用默认顺序）
+    const pageRules = TIGHT_RULES[pi] ?? null;
 
-    for (let si = 0; si < end - start; si++) {
-      const image = images[start + si];
+    for (let si = 0; si < IMAGES_PER_PAGE; si++) {
       const slot = slots[si];
-      const ctx = getExportContext(image);
+      // 使用当前页规则映射：获取当前 slot 位置对应的图片索引和额外旋转
+      const rule: PageRule | undefined = pageRules?.[si];
+      const imageIndex = rule ? rule.i : si;
+      const extraRotate = rule ? rule.angle : 0;
+      const image = images[start + imageIndex];
 
+      // 如果没有图片，绘制空白 slot
+      if (!image) {
+        try {
+          const blankCanvas = createBlankCanvas(slot, scaleFactor);
+          const jpegBlob = await blankCanvas.convertToBlob({
+            type: "image/jpeg",
+            quality: jpegQuality,
+          });
+          const jpegBytes = new Uint8Array(await jpegBlob.arrayBuffer());
+          const pdfImg = await pdfDoc.embedJpg(jpegBytes);
+          const slotY = toPdfLibY(ps.height, slot.y, slot.height);
+          page.drawImage(pdfImg, {
+            x: slot.x,
+            y: slotY,
+            width: slot.width,
+            height: slot.height,
+          });
+        } catch (err) {
+          console.warn(`[exportAlbumPDF] 绘制空白 slot 失败:`, err);
+        }
+        continue;
+      }
+
+      const ctx = getExportContext(image);
       report(
         0.05 + 0.9 * (processed / total),
         `导出图片 ${processed + 1} / ${total}（第 ${pi + 1} 页）`
@@ -250,14 +331,21 @@ export async function exportAlbumPDF(
           imageBlob = await response.blob();
         }
 
-        // 3. 应用旋转
+        // 3. 应用图片自身的编辑旋转（TIGHT_RULE 的额外旋转在 Canvas 绘制时通过 transform 实现）
         const rotatedBlob = await rotateBlobByDeg(imageBlob, ctx.rotate);
 
         // 4. 转为 ImageBitmap
         const img = await createImageBitmap(rotatedBlob);
 
-        // 5. 在 Canvas 上绘制（带编辑效果和裁剪，按 scaleFactor 放大）
-        const canvas = drawImageToCanvas(img, slot, padding, ctx, scaleFactor);
+        // 5. 在 Canvas 上绘制（带编辑效果、额外旋转和裁剪，按 scaleFactor 放大）
+        const canvas = drawImageToCanvas(
+          img,
+          slot,
+          padding,
+          ctx,
+          extraRotate,
+          scaleFactor
+        );
         img.close();
 
         // 6. 转为 JPEG

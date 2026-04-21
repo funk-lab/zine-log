@@ -80,14 +80,13 @@ export const RightPanel: React.FC<RightPanelProps> = ({
                 />
               ))}
               {/* TODO: 实现自定义颜色选择器 */}
-              <div
+              {/* <div
                 className="color-swatch color-swatch-custom"
                 onClick={() => {
-                  // eslint-disable-next-line no-console
                   console.log("TODO: 打开颜色选择器");
                 }}
                 title="自定义"
-              />
+              /> */}
             </div>
           </div>
 

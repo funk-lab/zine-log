@@ -142,6 +142,10 @@ const EditSidebarContent: React.FC<EditSidebarContentProps> = ({
     []
   );
 
+  const handleResetOffset = useCallback(() => {
+    setLocalEdit((prev) => ({ ...prev, offsetX: 0, offsetY: 0 }));
+  }, []);
+
   // TODO: margin 未生效，暂注释
   // const handleMarginChange = useCallback(
   //   (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -287,7 +291,16 @@ const EditSidebarContent: React.FC<EditSidebarContentProps> = ({
 
           {/* 位置偏移 */}
           <div className="tool-section">
-            <div className="section-label">位置偏移</div>
+            <div className="flex items-center justify-between">
+              <div className="section-label">位置偏移</div>
+              <button
+                className="section-label hover:underline"
+                onClick={handleResetOffset}
+                title="将 X 和 Y 偏移重置为 0"
+              >
+                重置
+              </button>
+            </div>
             <div className="space-y-2">
               <label className="flex items-center gap-2 text-sm">
                 <span className="slider-label">X:</span>

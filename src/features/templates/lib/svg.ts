@@ -207,11 +207,11 @@ function getSvgImageTransform(
     transforms.push(`scale(${scaleX}, ${scaleY})`);
   }
 
-  // 4. 偏移（像素转换为比例，然后乘以缩放后的尺寸）
+  // 4. 偏移（像素值，在缩放后的坐标系中）
   if (offsetX || offsetY) {
-    // offset 范围 -50~50，表示最大偏移 50%
-    const tx = (offsetX / 100) * size * zoom;
-    const ty = (offsetY / 100) * size * zoom;
+    // offset 是像素值，需要除以 zoom 来抵消缩放影响
+    const tx = offsetX / zoom;
+    const ty = offsetY / zoom;
     transforms.push(`translate(${tx}, ${ty})`);
   }
 
@@ -251,8 +251,9 @@ export function gridSlotMarkup({
 
   // 使用嵌套 <g> 确保 transform 后的内容被 clipPath 正确裁剪
   // 避免偏移后的图片内容显示到其他卡片上
+  // 注意：clipPathUnits="userSpaceOnUse" 确保裁剪在绝对坐标系中生效，不受 transform 影响
   return `
-    <clipPath id="${slotId}">
+    <clipPath id="${slotId}" clipPathUnits="userSpaceOnUse">
       <rect x="${imageX}" y="${imageY}" width="${imageSize}" height="${imageSize}" />
     </clipPath>
     <rect x="${x}" y="${y}" width="${size}" height="${size}" fill="#ffffff" data-slot="${slotId}" />
