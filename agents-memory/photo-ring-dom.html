@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Photo Ring - DOM 版本</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #1a1a2e;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      padding: 20px;
+    }
+
+    .container {
+      text-align: center;
+    }
+
+    h1 {
+      color: #fff;
+      margin-bottom: 10px;
+      font-size: 24px;
+    }
+
+    .controls {
+      margin-bottom: 20px;
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .controls label {
+      color: #aaa;
+      font-size: 14px;
+    }
+
+    .controls input[type="range"] {
+      width: 100px;
+    }
+
+    .controls input[type="number"] {
+      width: 60px;
+      padding: 5px;
+      border-radius: 4px;
+      border: 1px solid #444;
+      background: #2a2a3e;
+      color: #fff;
+    }
+
+    .controls button {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 4px;
+      background: #e94560;
+      color: #fff;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background 0.2s;
+    }
+
+    .controls button:hover {
+      background: #ff6b6b;
+    }
+
+    /* 画板容器 - 对应 SVG viewBox */
+    .artboard {
+      position: relative;
+      width: 900px;
+      height: 1000px;
+      background: #16213e;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    }
+
+    /* 图片槽位 - 对应 gridSlotMarkup */
+    .photo-slot {
+      position: absolute;
+      background: #0f3460;
+      border-radius: 4px;
+      overflow: hidden;
+      transition: transform 0.2s, box-shadow 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .photo-slot:hover {
+      transform: scale(1.05);
+      box-shadow: 0 5px 20px rgba(233, 69, 96, 0.4);
+      z-index: 10;
+    }
+
+    .photo-slot img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .photo-slot .placeholder {
+      color: #533483;
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    /* 序号标记 */
+    .slot-index {
+      position: absolute;
+      top: 4px;
+      left: 4px;
+      background: rgba(0, 0, 0, 0.6);
+      color: #fff;
+      font-size: 12px;
+      padding: 2px 6px;
+      border-radius: 3px;
+    }
+
+    /* 坐标显示 */
+    .slot-coord {
+      position: absolute;
+      bottom: 4px;
+      right: 4px;
+      background: rgba(0, 0, 0, 0.6);
+      color: #aaa;
+      font-size: 10px;
+      padding: 1px 4px;
+      border-radius: 2px;
+      font-family: monospace;
+    }
+
+    .info {
+      margin-top: 20px;
+      color: #888;
+      font-size: 14px;
+    }
+
+    /* 响应式 */
+    @media (max-width: 950px) {
+      .artboard {
+        width: 100%;
+        max-width: 600px;
+        height: auto;
+        aspect-ratio: 9/10;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔲 Photo Ring - 方形螺旋布局</h1>
+    
+    <div class="controls">
+      <label>
+        图片数量:
+        <input type="number" id="countInput" value="12" min="1" max="50">
+      </label>
+      <label>
+        间隙系数:
+        <input type="range" id="gapInput" value="1" min="1" max="3" step="1">
+        <span id="gapValue">1</span>
+      </label>
+      <label>
+        缩放:
+        <input type="range" id="scaleInput" value="1" min="0.5" max="2" step="0.1">
+        <span id="scaleValue">1</span>
+      </label>
+      <button onclick="generate()">重新生成</button>
+    </div>
+
+    <div class="artboard" id="artboard">
+      <!-- 图片槽位将通过 JS 动态插入 -->
+    </div>
+
+    <div class="info">
+      <p>核心算法：逆时针方形螺旋 | 方向顺序：上 → 左 → 下 → 右</p>
+    </div>
+  </div>
+
+  <script>
+    // ==================== 核心算法（与 TypeScript 版本一致）====================
+
+    /**
+     * 生成方形螺旋坐标
+     * @param count 需要生成的坐标数量
+     * @param gap 螺旋的紧密程度（步长增长系数）
+     * @returns [x, y] 坐标数组
+     */
+    function generateSpiralPositions(count, gap = 1) {
+      if (count <= 0) return [];
+
+      // 方向顺序：上、左、下、右（逆时针）
+      const directions = [
+        [0, 1],   // 上
+        [-1, 0],  // 左
+        [0, -1],  // 下
+        [1, 0]    // 右
+      ];
+
+      const positions = [[0, 0]];
+      let x = 0, y = 0;
+      let directionIndex = 0;
+      let currentSegmentLength = gap;
+
+      while (positions.length < count) {
+        const [dx, dy] = directions[directionIndex % 4];
+        const stepsToTake = Math.min(currentSegmentLength, count - positions.length);
+
+        for (let i = 0; i < stepsToTake; i++) {
+          x += dx;
+          y += dy;
+          positions.push([x, y]);
+        }
+
+        directionIndex++;
+        // 每完成2个方向，步长增加
+        if (directionIndex % 2 === 0) {
+          currentSegmentLength += gap;
+        }
+      }
+
+      return positions;
+    }
+
+    // ==================== 布局渲染 ====================
+
+    const ARTBOARD_WIDTH = 900;
+    const ARTBOARD_HEIGHT = 1000;
+    const BASE_CELL = 80;
+
+    function buildPhotoRingTemplate(count, gap = 1, scale = 1) {
+      const artboard = document.getElementById('artboard');
+      artboard.innerHTML = '';
+
+      if (count <= 0) return;
+
+      // 1. 生成螺旋坐标
+      const spiralPositions = generateSpiralPositions(count, gap);
+
+      // 2. 计算边界框
+      const gridXs = spiralPositions.map(([x]) => x);
+      const gridYs = spiralPositions.map(([, y]) => y);
+      const minGridX = Math.min(...gridXs, 0);
+      const maxGridX = Math.max(...gridXs, 0);
+      const minGridY = Math.min(...gridYs, 0);
+      const maxGridY = Math.max(...gridYs, 0);
+      
+      const spanCols = maxGridX - minGridX + 1;
+      const spanRows = maxGridY - minGridY + 1;
+
+      // 3. 自适应缩放计算
+      const padding = 48;
+      const fitCell = Math.min(
+        (ARTBOARD_WIDTH - padding) / spanCols,
+        (ARTBOARD_HEIGHT - padding) / spanRows
+      );
+      const scaledCell = Math.min(fitCell, BASE_CELL * scale);
+
+      // 4. 居中偏移
+      const offsetX = (ARTBOARD_WIDTH - spanCols * scaledCell) / 2;
+      const offsetY = (ARTBOARD_HEIGHT - spanRows * scaledCell) / 2;
+
+      // 5. 渲染每个槽位
+      spiralPositions.forEach(([gridX, gridY], index) => {
+        const x = offsetX + (gridX - minGridX) * scaledCell;
+        const y = offsetY + (gridY - minGridY) * scaledCell;
+
+        const slot = document.createElement('div');
+        slot.className = 'photo-slot';
+        slot.style.left = `${x}px`;
+        slot.style.top = `${y}px`;
+        slot.style.width = `${scaledCell}px`;
+        slot.style.height = `${scaledCell}px`;
+        slot.innerHTML = `
+          <span class="slot-index">${index + 1}</span>
+          <span class="placeholder">${index + 1}</span>
+          <span class="slot-coord">${gridX},${gridY}</span>
+        `;
+
+        artboard.appendChild(slot);
+      });
+    }
+
+    // ==================== 交互控制 ====================
+
+    function generate() {
+      const count = parseInt(document.getElementById('countInput').value);
+      const gap = parseInt(document.getElementById('gapInput').value);
+      const scale = parseFloat(document.getElementById('scaleInput').value);
+      buildPhotoRingTemplate(count, gap, scale);
+    }
+
+    // 滑块值显示
+    document.getElementById('gapInput').addEventListener('input', (e) => {
+      document.getElementById('gapValue').textContent = e.target.value;
+    });
+
+    document.getElementById('scaleInput').addEventListener('input', (e) => {
+      document.getElementById('scaleValue').textContent = e.target.value;
+    });
+
+    // 初始化
+    generate();
+  </script>
+</body>
+</html>

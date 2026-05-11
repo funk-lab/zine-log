@@ -1,33 +1,27 @@
 // CanvasPanel 组件 - 中间画布区
 import { Preview3D } from "@/features/preview3d/components/preview-3d";
-import React, {
-  useState,
-  useCallback,
-  useRef,
-  useEffect,
-  Suspense,
-  useMemo,
-} from "react";
-import { TemplateId } from "../types";
+import React, { useState, useCallback, useRef, useMemo, Suspense } from "react";
+import { TemplateId, GalleryImage } from "../types";
 import { Minus, Plus } from "lucide-react";
+import PhotoRing from "@/features/templates/components/PhotoRing";
 
 // 模板定义
 export interface Template {
   id: TemplateId;
   name: string;
-  svg: React.ReactNode;
+  image: string;
 }
 
 const templates: Template[] = [
   {
     id: "tight-ring",
     name: "紧密螺旋",
-    svg: <svg className="tpl-svg" viewBox="0 0 40 40" fill="none" />,
+    image: "/asset/tight-ring.jpg",
   },
   {
     id: "loose-ring",
     name: "舒展螺旋",
-    svg: <svg className="tpl-svg" viewBox="0 0 40 40" fill="none" />,
+    image: "/asset/loose-ring.jpg",
   },
 ];
 
@@ -38,9 +32,15 @@ interface CanvasPanelProps {
   accent?: string;
   width: number;
   height: number;
+  // DOM 渲染器需要的配置
+  selected: GalleryImage[];
+  ringScale: number;
+  padding: number;
+  // 双击 slot 回调
+  onSlotDoubleClick?: (index: number) => void;
 }
 
-const STAGE_PADDING = 48;
+const STAGE_PADDING = 56;
 const MIN_ZOOM = 0.2; // 20%
 const MAX_ZOOM = 1.5; // 150%
 const ZOOM_STEP = 0.1; // 每次 10%
@@ -52,6 +52,10 @@ export const CanvasPanel: React.FC<CanvasPanelProps> = ({
   width,
   height,
   accent = "#D4B896",
+  selected,
+  ringScale,
+  padding,
+  onSlotDoubleClick,
 }) => {
   const viewportRef = useRef<HTMLDivElement>(null);
   const [zoom, setZoom] = useState(1);
@@ -59,21 +63,39 @@ export const CanvasPanel: React.FC<CanvasPanelProps> = ({
   // 一级遮罩：首次进入显示模板选择，选完后隐藏
   const [showOverlay, setShowOverlay] = useState(true);
 
-  // 适合窗口：计算初始缩放
+  // 计算画布的显示尺寸（基于容器初始尺寸，一次性计算）
+  const displaySize = useMemo(() => {
+    const container = viewportRef.current;
+    if (!container) {
+      return { displayWidth: width, displayHeight: height };
+    }
+
+    const containerWidth = container.clientWidth - STAGE_PADDING * 2;
+    const containerHeight = container.clientHeight - STAGE_PADDING * 2;
+
+    // 按宽度计算
+    const byWidth = {
+      displayWidth: containerWidth,
+      displayHeight: (containerWidth * height) / width,
+    };
+
+    // 按高度计算
+    const byHeight = {
+      displayWidth: (containerHeight * width) / height,
+      displayHeight: containerHeight,
+    };
+
+    // 选择不会超出容器的尺寸
+    if (byWidth.displayHeight <= containerHeight) {
+      return byWidth;
+    }
+    return byHeight;
+  }, [width, height]); // 只在画布尺寸变化时重新计算
+
+  // 适合窗口：重置缩放
   const fitToWindow = useCallback(() => {
-    const element = viewportRef.current;
-    if (!element) return;
-
-    const availableWidth = element.clientWidth - STAGE_PADDING;
-    const availableHeight = element.clientHeight - STAGE_PADDING;
-    const scale = Math.min(availableWidth / width, availableHeight / height);
-    setZoom(Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, scale)));
-  }, [width, height]);
-
-  // 首次加载时适合窗口
-  useEffect(() => {
-    fitToWindow();
-  }, [fitToWindow]);
+    setZoom(1);
+  }, []);
 
   const zoomLabel = `${Math.round(zoom * 100)}%`;
 
@@ -84,15 +106,6 @@ export const CanvasPanel: React.FC<CanvasPanelProps> = ({
       return Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, next));
     });
   }, []);
-
-  const scaledCanvasStyle = useMemo(
-    () => ({
-      width: `${width * zoom}px`,
-      height: `${height * zoom}px`,
-      backgroundColor: accent,
-    }),
-    [zoom, height, width]
-  );
 
   // 选择模板并关闭遮罩
   const handleSelectTemplate = useCallback(
@@ -123,7 +136,13 @@ export const CanvasPanel: React.FC<CanvasPanelProps> = ({
                     }`}
                     onClick={() => handleSelectTemplate(t.id)}
                   >
-                    <div className="tpl-overlay-thumb">{t.svg}</div>
+                    <div className="tpl-overlay-thumb">
+                      <img
+                        src={t.image}
+                        alt={t.name}
+                        className="h-full w-full object-contain"
+                      />
+                    </div>
                     <span className="tpl-overlay-name">{t.name}</span>
                   </button>
                 ))}
@@ -135,7 +154,7 @@ export const CanvasPanel: React.FC<CanvasPanelProps> = ({
         {mode === "edit" && (
           <>
             {/* 缩放控制 */}
-            <div className="pointer-events-none absolute right-4 top-4 z-10 sm:right-6 sm:top-6 xl:right-8 xl:top-8">
+            <div className="pointer-events-none absolute right-4 top-4 z-10 sm:right-6 sm:top-4 xl:right-8 xl:top-4">
               <div className="pointer-events-auto flex items-center gap-1 rounded-xl border bg-white/92 p-1 shadow-sm backdrop-blur">
                 <button
                   type="button"
@@ -159,6 +178,10 @@ export const CanvasPanel: React.FC<CanvasPanelProps> = ({
                   <Plus className="h-4 w-4" />
                 </button>
               </div>
+            </div>
+            {/* 提示信息 */}
+            <div className="pointer-events-none absolute bottom-4 left-1/2 z-10 -translate-x-1/2 select-none rounded-full bg-slate-800/70 px-3 py-1 text-xs text-slate-300 backdrop-blur sm:bottom-6">
+              双击图片进行编辑
             </div>
           </>
         )}
@@ -202,7 +225,7 @@ export const CanvasPanel: React.FC<CanvasPanelProps> = ({
               <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
               <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
             </svg>
-            画布
+            编辑
           </button>
           <button
             className={`cv-mode-btn ${mode === "preview" ? "active" : ""}`}
@@ -223,38 +246,63 @@ export const CanvasPanel: React.FC<CanvasPanelProps> = ({
           </button>
         </div>
 
-        <div className="relative xl:min-h-0 xl:flex-1 h-full">
+        <div className="relative min-h-0 flex-1 flex flex-col">
           {mode === "edit" ? (
             <>
-              {/* 画布区域 */}
+              {/* 画布区域 - DOM 渲染器 (PhotoRing) */}
+              {/* 使用 overflow-auto 允许缩放后滚动查看 */}
               <div
                 ref={viewportRef}
-                className="h-full overflow-auto scrollbar-thin"
+                className="h-full w-full overflow-auto scrollbar-thin"
               >
-                <div className="mx-auto flex min-h-full min-w-fit items-center justify-center ">
-                  <div
-                    className="overflow-hidden shadow-canvas transition-[width,height] duration-150 rounded-[28px]"
-                    style={scaledCanvasStyle}
-                    dangerouslySetInnerHTML={{ __html: svgMarkup }}
+                {/* 内容区域：根据 zoom 缩放 */}
+                <div className="min-h-full min-w-full flex items-center justify-center p-4">
+                  <PhotoRing
+                    count={selected.length || 1}
+                    gap={template === "loose-ring" ? 2 : 1}
+                    scale={ringScale}
+                    displayZoom={zoom}
+                    width={displaySize.displayWidth}
+                    height={displaySize.displayHeight}
+                    backgroundColor={accent}
+                    images={selected}
+                    padding={padding}
+                    className="transition-all duration-150"
+                    onSlotDoubleClick={onSlotDoubleClick}
                   />
                 </div>
               </div>
             </>
           ) : (
-            <Suspense
-              fallback={
-                <div className="grid h-full place-items-center rounded-[28px] border border-slate-200 bg-white text-sm text-slate-500">
-                  正在载入 3D 预览…
-                </div>
-              }
+            <div
+              ref={viewportRef}
+              className="h-full w-full flex items-center justify-center"
             >
-              <Preview3D
-                svgMarkup={svgMarkup}
-                width={width}
-                height={height}
-                accent={accent}
-              />
-            </Suspense>
+              <div
+                style={{
+                  width: displaySize.displayWidth,
+                  height: displaySize.displayHeight,
+                }}
+              >
+                <Suspense
+                  fallback={
+                    <div className="grid h-full place-items-center rounded-[28px] border border-slate-200 bg-white text-sm text-slate-500">
+                      正在载入 3D 预览…
+                    </div>
+                  }
+                >
+                  <Preview3D
+                    svgMarkup={svgMarkup}
+                    width={width}
+                    height={height}
+                    accent={accent}
+                    count={selected.length}
+                    gap={template === "loose-ring" ? 2 : 1}
+                    scale={ringScale}
+                  />
+                </Suspense>
+              </div>
+            </div>
           )}
         </div>
       </div>

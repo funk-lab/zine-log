@@ -11,6 +11,7 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(dirname, "./src"),
+      "@asset": path.resolve(dirname, "./asset"),
     },
   },
   server: {

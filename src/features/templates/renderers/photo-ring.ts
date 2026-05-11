@@ -1,14 +1,16 @@
 import { type EditorState } from "@/features/editor/types";
 import {
-  GRID_RING_HEIGHT,
-  GRID_RING_WIDTH,
+  CANVAS_HEIGHT,
+  CANVAS_WIDTH,
+} from "@/features/editor/types";
+import {
   generateSpiralPositions,
   gridSlotMarkup,
 } from "@/features/templates/lib/svg";
 
 export function buildPhotoRingTemplate(state: EditorState, gap = 1) {
-  const width = GRID_RING_WIDTH;
-  const height = GRID_RING_HEIGHT;
+  const width = CANVAS_WIDTH;
+  const height = CANVAS_HEIGHT;
   const baseCell = 80;
   const selectedImages = state.selected;
 
@@ -38,13 +40,16 @@ export function buildPhotoRingTemplate(state: EditorState, gap = 1) {
       const x = offsetX + (gridX - minGridX) * scaledCell;
       const y = offsetY + (gridY - minGridY) * scaledCell;
 
+      const image = selectedImages[index];
+      // 优先使用 blobUrl，兼容旧数据使用 src
+      const imageUrl = image?.blobUrl || image?.src || "";
       return gridSlotMarkup({
-        href: selectedImages[index]?.src ?? "",
+        href: imageUrl,
         x: Math.round(x * 100) / 100,
         y: Math.round(y * 100) / 100,
         size: Math.round(scaledCell * 100) / 100,
         slotId: `photo-ring-slot-${index}`,
-        padding: state.padding,
+        edit: image,
       });
     })
     .join("");

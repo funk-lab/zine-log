@@ -97,7 +97,8 @@ describe("editorReducer", () => {
 
     expect(nextState.title).toContain("春日河岸慢走");
     expect(nextState.unselected).toHaveLength(1);
-    expect(nextState.template).toBe("l-shape");
+    // TODO: 当添加更多模板后，可能需要调整期望的模板值
+    expect(nextState.template).toBe("loose-ring");
   });
 });
 

@@ -1,0 +1,331 @@
+/* ──────────────────────────────────────────────────────
+   EditSidebar — 独立样式文件
+   参考 PhotoGallery.css pg-panel-* 和 Editor.css btn-* 设计
+   ────────────────────────────────────────────────────── */
+
+/* ── 遮罩 ── */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(26, 23, 20, 0.4);
+  z-index: 99;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+.sidebar-overlay.show {
+  display: block;
+}
+
+/* ── 侧栏主体 ── */
+.edit-sidebar {
+  position: fixed;
+  top: 0;
+  right: -340px;
+  width: 320px;
+  height: 100vh;
+  background: var(--clr-surface);
+  border-left: 1px solid var(--clr-border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  font-family: 'PingFang SC', 'Microsoft YaHei', system-ui, -apple-system, sans-serif;
+  font-size: 13px;
+  color: var(--clr-text-primary);
+  -webkit-font-smoothing: antialiased;
+  box-shadow: -4px 0 24px rgba(26, 23, 20, 0.08);
+  transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 100;
+}
+.edit-sidebar.open {
+  right: 0;
+}
+
+/* ── 头部 ── */
+.sidebar-header {
+  padding: 16px 16px 12px;
+  border-bottom: 1px solid var(--clr-border);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.sidebar-header h3 {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--clr-text-muted);
+  letter-spacing: 0.2px;
+  text-transform: uppercase;
+}
+.sidebar-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  color: var(--clr-text-muted);
+  border-radius: var(--r-md);
+  transition: all var(--t-fast);
+}
+.sidebar-close:hover {
+  color: var(--clr-text-primary);
+  background: var(--clr-surface-2);
+}
+
+/* ── 预览缩略图 ── */
+/* 样式直接在组件中内联定义，与 PhotoRing 保持一致 */
+
+/* ── 内容区域 ── */
+.sidebar-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ── 文件名 ── */
+.sidebar-img-name {
+  font-size: 13px;
+  color: var(--clr-text-secondary);
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 0 4px;
+}
+
+/* ── 工具区块（参考 RightPanel tool-section） ── */
+.tool-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+
+.section-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--clr-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+.section-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--clr-border);
+}
+
+/* ── 旋转按钮 ── */
+.rotate-btns {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--sp-2);
+}
+.btn-rotate {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 4px;
+  background: var(--clr-surface-2);
+  border: 1.5px solid var(--clr-border);
+  border-radius: var(--r-md);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--clr-text-primary);
+  transition: all var(--t-fast);
+}
+.btn-rotate span {
+  font-size: 18px;
+  line-height: 1;
+}
+.btn-rotate:hover {
+  border-color: var(--clr-border-2);
+  background: var(--clr-surface);
+}
+.btn-rotate.active {
+  border-color: var(--clr-brand);
+  background: var(--clr-brand-light);
+  color: var(--clr-brand);
+}
+
+/* ── 适配模式按钮 ── */
+.fit-btns {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--sp-2);
+}
+.btn-fit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 4px;
+  background: var(--clr-surface-2);
+  border: 1.5px solid var(--clr-border);
+  border-radius: var(--r-md);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--clr-text-primary);
+  transition: all var(--t-fast);
+}
+.btn-fit span {
+  font-size: 20px;
+  line-height: 1;
+}
+.btn-fit:hover {
+  border-color: var(--clr-border-2);
+  background: var(--clr-surface);
+}
+.btn-fit.active {
+  border-color: var(--clr-brand);
+  background: var(--clr-brand-light);
+  color: var(--clr-brand);
+}
+
+/* ── 操作按钮组 ── */
+.sidebar-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  padding: 16px;
+  border-top: 1px solid var(--clr-border);
+  flex-shrink: 0;
+}
+
+/* ── 按钮样式（参考 Editor.css btn-*） ── */
+
+/* 基础按钮 */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  padding: 9px 18px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--clr-border);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--t-fast);
+  white-space: nowrap;
+  background: var(--clr-surface);
+  color: var(--clr-text-primary);
+}
+.btn:hover {
+  background: var(--clr-surface-2);
+}
+.btn:active {
+  transform: scale(0.97);
+}
+
+/* 主要按钮 - 品牌色 */
+.btn-primary {
+  background: var(--clr-brand);
+  color: var(--clr-surface);
+  border-color: var(--clr-brand);
+}
+.btn-primary:hover {
+  background: var(--clr-brand-hover);
+  border-color: var(--clr-brand-hover);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+.btn-primary:disabled {
+  background: var(--clr-surface-2);
+  color: var(--clr-text-muted);
+  border-color: var(--clr-border);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* 幽灵按钮 */
+.btn-ghost {
+  background: var(--clr-surface);
+  color: var(--clr-text-primary);
+  border: 1px solid var(--clr-border);
+}
+.btn-ghost:hover {
+  background: var(--clr-surface-2);
+  border-color: var(--clr-border-2);
+}
+
+/* 危险按钮 */
+.btn-danger {
+  background: #DC2626;
+  color: var(--clr-surface);
+  border-color: #DC2626;
+}
+.btn-danger:hover {
+  background: #B91C1C;
+  border-color: #B91C1C;
+}
+
+/* 小号按钮 */
+.btn-sm {
+  padding: 6px 12px;
+  font-size: 12px;
+  border-radius: var(--r-sm);
+}
+
+/* 块级按钮 */
+.btn-block {
+  width: 100%;
+}
+
+/* 图标按钮 */
+.btn-icon {
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--r-md);
+  color: var(--clr-text-secondary);
+  transition: all var(--t-fast);
+  padding: 0;
+}
+.btn-icon:hover {
+  background: var(--clr-surface-2);
+  color: var(--clr-text-primary);
+}
+
+/* ── 滑块样式 ── */
+/* 复用 Editor.css 中定义的 input[type="range"] 样式 */
+.slider-label {
+  font-size: 12px;
+  color: var(--clr-text-secondary);
+  font-weight: 500;
+  min-width: 52px;
+}
+.slider-val {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--clr-text-primary);
+  min-width: 30px;
+  text-align: right;
+}
+/* ── 滚动条样式 ── */
+.sidebar-content::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+.sidebar-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+.sidebar-content::-webkit-scrollbar-thumb {
+  background: var(--clr-border-2);
+  border-radius: 99px;
+}

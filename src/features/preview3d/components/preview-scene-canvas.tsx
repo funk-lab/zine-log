@@ -1,6 +1,7 @@
 import { memo } from "react";
 import { Canvas } from "@react-three/fiber";
 import { ContactShadows, OrbitControls } from "@react-three/drei";
+import * as THREE from "three";
 
 import { FoldedStrip } from "@/features/preview3d/components/folded-strip";
 import type { PreviewStripModel } from "@/features/preview3d/model/types";
@@ -18,7 +19,7 @@ function PreviewSceneCanvasComponent({
 }: PreviewSceneCanvasProps) {
   return (
     <Canvas
-      shadows
+      shadows={{ type: THREE.PCFShadowMap }}
       dpr={[1, 2]}
       camera={{ position: [0.4, 4.1, 8.8], fov: 24 }}
       gl={{ antialias: true, alpha: true }}

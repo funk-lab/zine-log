@@ -16,6 +16,8 @@ export interface PhotoGalleryProps {
   /** 上传按钮点击回调 */
   // onUpload?: () => void;
   onUpload: (files: FileList | null) => void;
+  /** 删除图片回调 */
+  onPhotoDelete?: (photoId: string) => void;
   /** 自定义类名 */
   className?: string;
   /** 自定义样式 */
@@ -74,7 +76,8 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
       draggingFromZoneRef.current = fromZone;
       setDraggingId(photo.id);
       setGhostColor(photo.color || "#ccc");
-      setGhostImg(photo.src || "");
+      // 优先使用 blobUrl，兼容旧数据使用 src
+      setGhostImg(photo.blobUrl || photo.src || "");
 
       // 使用空白图片隐藏默认拖影
       const blank = document.createElement("canvas");
@@ -104,9 +107,23 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
     draggingFromZoneRef.current = null;
   }, []);
 
+  /** 检查是否为外部文件拖入 */
+  const isExternalFileDrag = useCallback((e: React.DragEvent) => {
+    return e.dataTransfer.types.includes("Files");
+  }, []);
+
   const handleZoneDragOver = useCallback(
     (e: React.DragEvent, zone: "unselected" | "selected") => {
       e.preventDefault();
+
+      // 外部文件拖入
+      if (isExternalFileDrag(e)) {
+        e.dataTransfer.dropEffect = "copy";
+        setDragOverZone(zone);
+        return;
+      }
+
+      // 内部图片拖拽
       e.dataTransfer.dropEffect = "move";
       setDragOverZone(zone);
       // 离开已选区域时，清除排序指示器
@@ -114,7 +131,7 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
         setSortInsertIndex(null);
       }
     },
-    []
+    [isExternalFileDrag]
   );
 
   const handleZoneDragLeave = useCallback((e: React.DragEvent) => {
@@ -151,8 +168,12 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
    */
   const handleSortItemDragOver = useCallback(
     (e: React.DragEvent, overIndex: number) => {
-      // 只有来自 selected 区的拖拽才触发排序
-      if (draggingFromZoneRef.current !== "selected") return;
+      // 只有拖拽目标是 selected 区时才触发排序（无论是区域内还是跨区域）
+      if (
+        draggingFromZoneRef.current !== "selected" &&
+        draggingFromZoneRef.current !== "unselected"
+      )
+        return;
       e.preventDefault();
       e.stopPropagation();
       e.dataTransfer.dropEffect = "move";
@@ -164,7 +185,7 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
       const insertBefore = e.clientX < midX ? overIndex : overIndex + 1;
       setSortInsertIndex(insertBefore);
     },
-    []
+    [setDragOverZone, setSortInsertIndex]
   );
 
   /**
@@ -191,9 +212,9 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
           clearDragState();
           return;
         }
-        const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-        const midX = rect.left + rect.width / 2;
-        let insertBefore = e.clientX < midX ? overIndex : overIndex + 1;
+
+        // 使用 sortInsertIndex（拖拽悬停时计算的位置），确保与视觉指示一致
+        let insertBefore = sortInsertIndex ?? overIndex;
 
         // 移除被拖拽项后，调整插入位置
         const newSelected = [...selected];
@@ -212,9 +233,15 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
           clearDragState();
           return;
         }
+
+        // 使用 sortInsertIndex（拖拽悬停时计算的位置），确保与视觉指示一致
+        let insertBefore = sortInsertIndex ?? overIndex + 1;
+        // 如果是从右侧拖入，默认插入到当前 item 之后
         const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
         const midX = rect.left + rect.width / 2;
-        let insertBefore = e.clientX < midX ? overIndex : overIndex + 1;
+        if (sortInsertIndex === null) {
+          insertBefore = e.clientX < midX ? overIndex : overIndex + 1;
+        }
         insertBefore = Math.max(0, Math.min(insertBefore, selected.length));
 
         const newSelected = [...selected];
@@ -225,25 +252,80 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
 
       clearDragState();
     },
-    [selected, unselected, onSelectedChange, onUnselectedChange, clearDragState]
+    [
+      selected,
+      unselected,
+      onSelectedChange,
+      onUnselectedChange,
+      clearDragState,
+      sortInsertIndex,
+    ]
   );
 
   const handleZoneDrop = useCallback(
     (e: React.DragEvent, targetZone: "unselected" | "selected") => {
       e.preventDefault();
+
+      // 处理外部文件拖入
+      if (isExternalFileDrag(e)) {
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+          onUpload(files);
+        }
+        setDragOverZone(null);
+        return;
+      }
+
       const photoId = e.dataTransfer.getData("photoId");
       const fromZone = e.dataTransfer.getData("fromZone") as
         | "unselected"
         | "selected";
 
-      // 如果落到 selected 区域背景（非 item）且来自 selected，视作追加到末尾排序
+      // 如果落到 selected 区域背景（非 item）且来自 selected，使用 sortInsertIndex 排序
       if (targetZone === "selected" && fromZone === "selected" && photoId) {
         const dragIndex = selected.findIndex((p) => p.id === photoId);
         if (dragIndex !== -1) {
+          // 如果有 sortInsertIndex，使用它；否则追加到末尾
+          if (sortInsertIndex !== null) {
+            let insertBefore = sortInsertIndex;
+            const newSelected = [...selected];
+            const [draggedItem] = newSelected.splice(dragIndex, 1);
+            if (dragIndex < insertBefore) insertBefore -= 1;
+            insertBefore = Math.max(
+              0,
+              Math.min(insertBefore, newSelected.length)
+            );
+            newSelected.splice(insertBefore, 0, draggedItem);
+            onSelectedChange?.(newSelected);
+          } else {
+            // 没有 sortInsertIndex，追加到末尾
+            const newSelected = [...selected];
+            const [draggedItem] = newSelected.splice(dragIndex, 1);
+            newSelected.push(draggedItem);
+            onSelectedChange?.(newSelected);
+          }
+          clearDragState();
+          return;
+        }
+      }
+
+      // 从区域 A 拖拽到区域 B 的空白处，且 sortInsertIndex 有值时，插入到指定位置
+      if (
+        targetZone === "selected" &&
+        fromZone === "unselected" &&
+        photoId &&
+        sortInsertIndex !== null
+      ) {
+        const photo = unselected.find((p) => p.id === photoId);
+        if (photo) {
+          const insertBefore = Math.max(
+            0,
+            Math.min(sortInsertIndex, selected.length)
+          );
           const newSelected = [...selected];
-          const [draggedItem] = newSelected.splice(dragIndex, 1);
-          newSelected.push(draggedItem);
+          newSelected.splice(insertBefore, 0, photo);
           onSelectedChange?.(newSelected);
+          onUnselectedChange?.(unselected.filter((p) => p.id !== photoId));
           clearDragState();
           return;
         }
@@ -254,7 +336,17 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
         moveItem(photoId, targetZone);
       }
     },
-    [selected, moveItem, onSelectedChange, clearDragState]
+    [
+      selected,
+      unselected,
+      moveItem,
+      onSelectedChange,
+      onUnselectedChange,
+      clearDragState,
+      isExternalFileDrag,
+      onUpload,
+      sortInsertIndex,
+    ]
   );
 
   // ==================== 快捷操作 ====================
@@ -264,6 +356,18 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
       moveItem(photoId, targetZone);
     },
     [moveItem]
+  );
+
+  const handleDeletePhoto = useCallback(
+    (isSelectedZone: boolean, photoId: string) => {
+      if (isSelectedZone) {
+        onSelectedChange?.(selected.filter((p) => p.id !== photoId));
+      } else {
+        onUnselectedChange?.(unselected.filter((p) => p.id !== photoId));
+      }
+      // onPhotoDelete?.(photoId);
+    },
+    [onUnselectedChange, unselected, onSelectedChange, selected]
   );
 
   const handleMoveAllToSelected = useCallback(() => {
@@ -277,6 +381,46 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
     onUnselectedChange?.([...unselected, ...selected]);
     onSelectedChange?.([]);
   }, [unselected, selected, onUnselectedChange, onSelectedChange]);
+
+  /** 添加空白图片到待选素材 */
+  const handleAddBlankImage = useCallback(() => {
+    const canvas = document.createElement("canvas");
+    canvas.width = 400;
+    canvas.height = 400;
+    const ctx = canvas.getContext("2d");
+    if (ctx) {
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+    canvas.toBlob((blob) => {
+      if (blob) {
+        const blankImage: GalleryImage = {
+          id: `img_${Date.now()}_blank`,
+          src: "",
+          blobUrl: URL.createObjectURL(blob),
+          name: `空白图片_${unselected.length + 1}.png`,
+          uploadedAt: Date.now(),
+          mimeType: "image/png",
+          size: blob.size,
+          color: "#ffffff",
+          rotate: 0,
+          fitMode: "cover",
+          zoom: 1,
+          flipX: false,
+          flipY: false,
+          offsetX: 0,
+          offsetY: 0,
+          brightness: 0,
+          contrast: 0,
+          saturate: 0,
+          grayscale: false,
+          borderRadius: 0,
+          margin: 0,
+        };
+        onUnselectedChange?.([...unselected, blankImage]);
+      }
+    }, "image/png");
+  }, [unselected, onUnselectedChange]);
 
   // ==================== 分隔线拖拽调整高度 ====================
 
@@ -365,8 +509,7 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
 
     const itemDragHandlers = isSelectedZone
       ? {
-          onDragOver: (e: React.DragEvent) =>
-            handleSortItemDragOver(e, index),
+          onDragOver: (e: React.DragEvent) => handleSortItemDragOver(e, index),
           onDrop: (e: React.DragEvent) => handleSortItemDrop(e, index),
         }
       : {};
@@ -374,9 +517,7 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
     return (
       <React.Fragment key={photo.id}>
         {/* 在 item 左侧插入指示线 */}
-        {showInsertBefore && (
-          <div className="pg-sort-insert-indicator" />
-        )}
+        {showInsertBefore && <div className="pg-sort-insert-indicator" />}
         <div
           className={`pg-photo-item ${
             draggingId === photo.id ? "pg-dragging" : ""
@@ -387,10 +528,27 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
           onDragEnd={clearDragState}
           {...itemDragHandlers}
         >
-          <img src={photo.src} alt="候选图片" draggable="false" />
+          {/* 优先使用 blobUrl，兼容旧数据使用 src */}
+          <img
+            src={photo.blobUrl || photo.src}
+            alt="候选图片"
+            draggable="false"
+          />
           {isSelectedZone && (
             <div className="pg-photo-order-badge">{index + 1}</div>
           )}
+          <div className="pg-photo-delete-btn-unselected">
+            <span
+              className="pg-delete-btn"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDeletePhoto(isSelectedZone, photo.id);
+              }}
+              title="删除"
+            >
+              ×
+            </span>
+          </div>
           <div className="pg-photo-quick-add">
             <span
               className="pg-quick-btn"
@@ -404,9 +562,7 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
           </div>
         </div>
         {/* 在最后一个 item 右侧插入指示线 */}
-        {showInsertAfter && (
-          <div className="pg-sort-insert-indicator" />
-        )}
+        {showInsertAfter && <div className="pg-sort-insert-indicator" />}
       </React.Fragment>
     );
   };
@@ -482,6 +638,13 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
             </div>
             <button
               className="pg-zone-action"
+              onClick={handleAddBlankImage}
+              title="添加空白图片"
+            >
+              + 空白页
+            </button>
+            <button
+              className="pg-zone-action"
               onClick={handleMoveAllToSelected}
               disabled={unselected.length === 0}
             >
@@ -503,7 +666,8 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
                   <circle cx="8.5" cy="8.5" r="1.5" />
                   <path d="M21 15l-5-5L5 21" />
                 </svg>
-                拖拽图片到此处
+                <span>拖拽图片到此处</span>
+                <span className="pg-zone-empty-hint">或从文件夹拖入文件</span>
               </div>
             ) : (
               <div className="pg-zone-grid">
@@ -553,7 +717,7 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
               onClick={handleClearSelected}
               disabled={selected.length === 0}
             >
-              清空 ×
+              全部移除 ×
             </button>
           </div>
           <div className="pg-zone-grid-wrap">
@@ -570,7 +734,8 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
                   <polyline points="20 6 9 17 4 12" />
                   <path d="M12 2a10 10 0 1 0 10 10" />
                 </svg>
-                从上方拖拽图片到此处
+                <span>从上方拖拽图片到此处</span>
+                <span className="pg-zone-empty-hint">或从文件夹拖入文件</span>
               </div>
             ) : (
               <div className="pg-zone-grid">

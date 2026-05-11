@@ -15,20 +15,22 @@ export type RightTab = "design";
 interface RightPanelProps {
   accent?: string;
   onAccentChange?: (color: string) => void;
+  /** TODO: 实现环形比例控制 */
   ringScale?: number;
   onRingScaleChange?: (scale: number) => void;
   padding?: number;
   onPaddingChange?: (padding: number) => void;
-  onSaveDraft?: () => void;
   onExport?: () => void;
 }
 
 export const RightPanel: React.FC<RightPanelProps> = ({
   accent = "#D4B896",
   onAccentChange,
+  // TODO: ringScale 控制暂未实现
+  // ringScale = 1.5,
+  // onRingScaleChange,
   padding = 2,
   onPaddingChange,
-  onSaveDraft,
   onExport,
 }) => {
   const [activeTab, setActiveTab] = useState<RightTab>("design");
@@ -77,37 +79,38 @@ export const RightPanel: React.FC<RightPanelProps> = ({
                   title={c.name}
                 />
               ))}
-              <div
+              {/* TODO: 实现自定义颜色选择器 */}
+              {/* <div
                 className="color-swatch color-swatch-custom"
-                onClick={() => {}}
+                onClick={() => {
+                  console.log("TODO: 打开颜色选择器");
+                }}
                 title="自定义"
-              />
+              /> */}
             </div>
           </div>
 
-          {/* 布局间距 */}
-          <div className="tool-section">
-            <div className="section-label">布局间距</div>
-            <div className="slider-row">
-              <span className="slider-label">图片内边距</span>
-              <input
-                type="range"
-                min="0"
-                max="20"
-                value={padding}
-                onChange={(e) => onPaddingChange?.(+e.target.value)}
-              />
-              <span className="slider-val">{padding}px</span>
-            </div>
-          </div>
+          {/* TODO: padding UI 暂注释 */}
+          {/* {/* 布局间距 */}
+          {/* <div className="tool-section"> */}
+          {/*   <div className="section-label">布局间距</div> */}
+          {/*   <div className="slider-row"> */}
+          {/*     <span className="slider-label">图片内边距</span> */}
+          {/*     <input */}
+          {/*       type="range" */}
+          {/*       min="0" */}
+          {/*       max="20" */}
+          {/*       value={padding} */}
+          {/*       onChange={(e) => onPaddingChange?.(+e.target.value)} */}
+          {/*     /> */}
+          {/*     <span className="slider-val">{padding}px</span> */}
+          {/*   </div> */}
+          {/* </div> */}
         </div>
       )}
 
       {/* 底部操作 */}
       <div className="right-footer">
-        <button className="btn-full btn-secondary-full" onClick={onSaveDraft}>
-          存草稿
-        </button>
         <button className="btn-full btn-primary-full" onClick={onExport}>
           生成作品
         </button>
