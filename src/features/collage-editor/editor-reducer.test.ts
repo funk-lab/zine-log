@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { editorReducer, initialEditorState } from "@/features/editor/editor-reducer";
+import {
+  editorReducer,
+  initialEditorState,
+} from "@/features/collage-editor/editor-reducer";
 
 describe("editorReducer", () => {
   it("appends uploaded images to unselected zone and advances nextImageId", () => {
@@ -64,7 +67,9 @@ describe("editorReducer", () => {
       ],
     });
 
-    const nextState = editorReducer(withImages, { type: "move-all-to-selected" });
+    const nextState = editorReducer(withImages, {
+      type: "move-all-to-selected",
+    });
 
     expect(nextState.unselected).toHaveLength(0);
     expect(nextState.selected).toHaveLength(2);
@@ -101,4 +106,3 @@ describe("editorReducer", () => {
     expect(nextState.template).toBe("loose-ring");
   });
 });
-

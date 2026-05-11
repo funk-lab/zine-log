@@ -1,5 +1,9 @@
-import type { FitMode, ImageEdit, RotateDeg } from "@/features/editor/types";
-import { DEFAULT_IMAGE_EDIT } from "@/features/editor/types";
+import type {
+  FitMode,
+  ImageEdit,
+  RotateDeg,
+} from "@/features/collage-editor/types";
+import { DEFAULT_IMAGE_EDIT } from "@/features/collage-editor/types";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // 图片编辑状态管理（非破坏性：只存参数，导出时才应用）
@@ -195,9 +199,11 @@ export function createEditManagerActions(
 
     setZoom: (id: string, zoom: number) => mutate((m) => m.setZoom(id, zoom)),
 
-    setFlipX: (id: string, flip: boolean) => mutate((m) => m.setFlipX(id, flip)),
+    setFlipX: (id: string, flip: boolean) =>
+      mutate((m) => m.setFlipX(id, flip)),
 
-    setFlipY: (id: string, flip: boolean) => mutate((m) => m.setFlipY(id, flip)),
+    setFlipY: (id: string, flip: boolean) =>
+      mutate((m) => m.setFlipY(id, flip)),
 
     setOffsetX: (id: string, offset: number) =>
       mutate((m) => m.setOffsetX(id, offset)),

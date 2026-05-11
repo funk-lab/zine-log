@@ -1,8 +1,5 @@
-import { type EditorState } from "@/features/editor/types";
-import {
-  CANVAS_HEIGHT,
-  CANVAS_WIDTH,
-} from "@/features/editor/types";
+import { type EditorState } from "@/features/collage-editor/types";
+import { CANVAS_HEIGHT, CANVAS_WIDTH } from "@/features/collage-editor/types";
 import {
   generateSpiralPositions,
   gridSlotMarkup,

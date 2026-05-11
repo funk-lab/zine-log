@@ -4,7 +4,7 @@
  */
 
 import { PDFDocument } from "pdf-lib";
-import type { GalleryImage } from "@/features/editor/types";
+import type { GalleryImage } from "@/features/collage-editor/types";
 import type { OnProgress, AlbumExportOptions, Slot } from "./export-types";
 import { calcSlots, calcPageRanges, toPdfLibY } from "./grid-layout";
 import { rotateBlobByDeg } from "./image-compressor";
@@ -68,11 +68,25 @@ function calcFit(
     if (ir > sr) {
       // 图片更宽 -> 裁剪左右，垂直铺满
       const sc = sh / ih;
-      return { sx: (iw - sw / sc) / 2, sy: 0, sW: sw / sc, sH: ih, dw: sw, dh: sh };
+      return {
+        sx: (iw - sw / sc) / 2,
+        sy: 0,
+        sW: sw / sc,
+        sH: ih,
+        dw: sw,
+        dh: sh,
+      };
     } else {
       // 图片更高 -> 裁剪上下，水平铺满
       const sc = sw / iw;
-      return { sx: 0, sy: (ih - sh / sc) / 2, sW: iw, sH: sh / sc, dw: sw, dh: sh };
+      return {
+        sx: 0,
+        sy: (ih - sh / sc) / 2,
+        sW: iw,
+        sH: sh / sc,
+        dw: sw,
+        dh: sh,
+      };
     }
   }
 
@@ -97,7 +111,10 @@ function calcFit(
  * @param slot 槽位
  * @param scaleFactor 放大倍数
  */
-function createBlankCanvas(slot: Slot, scaleFactor: number = 2): OffscreenCanvas {
+function createBlankCanvas(
+  slot: Slot,
+  scaleFactor: number = 2
+): OffscreenCanvas {
   const canvasW = slot.width * scaleFactor;
   const canvasH = slot.height * scaleFactor;
   const canvas = new OffscreenCanvas(canvasW, canvasH);

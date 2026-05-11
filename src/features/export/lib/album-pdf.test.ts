@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import type { GalleryImage } from "@/features/editor/types";
+import type { GalleryImage } from "@/features/collage-editor/types";
 
 // Mock canvas and ImageBitmap
 const mockCanvas = {
@@ -141,8 +141,10 @@ describe("album-pdf", () => {
       // Image: 1200x800, Slot: 200x100
       // Image ratio (1.5) > Slot ratio (2) means image is taller
       // Should crop top/bottom, fit width
-      const iw = 1200, ih = 800;
-      const sw = 200, sh = 100;
+      const iw = 1200,
+        ih = 800;
+      const sw = 200,
+        sh = 100;
 
       // cover: wider image -> crop sides
       // taller image -> crop top/bottom
@@ -158,8 +160,10 @@ describe("album-pdf", () => {
     });
 
     it("should handle contain mode", () => {
-      const iw = 1200, ih = 800;
-      const sw = 200, sh = 100;
+      const iw = 1200,
+        ih = 800;
+      const sw = 200,
+        sh = 100;
       const ir = iw / ih; // 1.5
 
       // contain: fit within slot, maintain aspect ratio
@@ -169,8 +173,10 @@ describe("album-pdf", () => {
     });
 
     it("should handle fill mode", () => {
-      const iw = 1200, ih = 800;
-      const sw = 200, sh = 100;
+      const iw = 1200,
+        ih = 800;
+      const sw = 200,
+        sh = 100;
 
       // fill: stretch to fill slot
       expect(sw).toBe(200);

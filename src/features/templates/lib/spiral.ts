@@ -7,7 +7,7 @@
  * - 自动居中布局
  */
 
-import { GalleryImage } from "@/features/editor/types";
+import { GalleryImage } from "@/features/collage-editor/types";
 
 // ==================== 类型定义 ====================
 

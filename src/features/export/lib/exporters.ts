@@ -1,4 +1,7 @@
-import type { EditorState, GalleryImage } from "@/features/editor/types";
+import type {
+  EditorState,
+  GalleryImage,
+} from "@/features/collage-editor/types";
 import { base64ToBytes, createPdfBytes } from "@/features/export/lib/pdf";
 import { rasterizeSvgToCanvas } from "@/features/rendering/lib/rasterize-svg";
 import {
@@ -98,11 +101,11 @@ export async function downloadPdf(state: EditorState) {
 /**
  * 导出相册式 PDF（多页网格布局）
  * 每页 4×3 = 12 张图片，A4 横向
- * 
+ *
  * @param images 要导出的图片列表
  * @param opts 导出选项
  * @param onProgress 进度回调
- * 
+ *
  * @example
  * await downloadAlbumPDF(state.selected, { filename: 'my-album.pdf' });
  */

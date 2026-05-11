@@ -1,4 +1,4 @@
-import type { ImageEdit } from "@/features/editor/types";
+import type { ImageEdit } from "@/features/collage-editor/types";
 
 export const GRID_RING_WIDTH = 880;
 export const GRID_RING_HEIGHT = 760;
@@ -180,8 +180,8 @@ function getSvgImageTransform(
     fitMode === "contain"
       ? "xMidYMid meet"
       : fitMode === "fill"
-        ? "none"
-        : "xMidYMid slice";
+      ? "none"
+      : "xMidYMid slice";
 
   // 如果没有变换，返回空 transform
   if (!rotate && zoom === 1 && !flipX && !flipY && !offsetX && !offsetY) {

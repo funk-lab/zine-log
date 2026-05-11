@@ -1,4 +1,4 @@
-import type { ImageEdit } from "@/features/editor/types";
+import type { ImageEdit } from "@/features/collage-editor/types";
 
 /**
  * 根据编辑状态生成图片 CSS 样式
@@ -7,7 +7,9 @@ import type { ImageEdit } from "@/features/editor/types";
  * @param edit 图片编辑状态
  * @returns CSS 样式对象
  */
-export function getImageEditStyles(edit: Partial<ImageEdit>): React.CSSProperties {
+export function getImageEditStyles(
+  edit: Partial<ImageEdit>
+): React.CSSProperties {
   const {
     rotate = 0,
     zoom = 1,
@@ -25,7 +27,8 @@ export function getImageEditStyles(edit: Partial<ImageEdit>): React.CSSPropertie
   if (zoom !== 1) transforms.push(`scale(${zoom})`);
   if (flipX) transforms.push("scaleX(-1)");
   if (flipY) transforms.push("scaleY(-1)");
-  if (offsetX || offsetY) transforms.push(`translate(${offsetX}px, ${offsetY}px)`);
+  if (offsetX || offsetY)
+    transforms.push(`translate(${offsetX}px, ${offsetY}px)`);
 
   return {
     objectFit: fitMode,

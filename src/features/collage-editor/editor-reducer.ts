@@ -5,7 +5,7 @@ import {
   type EditorState,
   type TemplateId,
   type ImageEdit,
-} from "@/features/editor/types";
+} from "@/features/collage-editor/types";
 
 export type EditorAction =
   | { type: "set-template"; template: TemplateId }

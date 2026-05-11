@@ -2,8 +2,12 @@
 // 公共类型定义
 // ─────────────────────────────────────────────────────────────────────────────
 
-import type { FitMode } from "@/features/editor/types";
-export type { FitMode, RotateDeg, ImageEdit } from "@/features/editor/types";
+import type { FitMode } from "@/features/collage-editor/types";
+export type {
+  FitMode,
+  RotateDeg,
+  ImageEdit,
+} from "@/features/collage-editor/types";
 
 // ── 布局配置 ────────────────────────────────────────────────────────────────
 

@@ -1,6 +1,6 @@
 import React, { useState, useRef, useCallback, useEffect } from "react";
 import "./PhotoGallery.css";
-import { GalleryImage } from "@/features/editor/types";
+import { GalleryImage } from "@/features/collage-editor/types";
 
 // ==================== 类型定义 ====================
 

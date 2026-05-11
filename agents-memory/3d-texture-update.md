@@ -26,7 +26,7 @@ SVG markup → rasterizeSvgToCanvas → Canvas → Three.js Texture → FoldedPa
 
 ```typescript
 // 新增 lib/rasterize-dom.ts
-import html2canvas from 'html2canvas';
+import html2canvas from "html2canvas";
 
 export async function rasterizeDomToCanvas(
   element: HTMLElement,
@@ -55,10 +55,10 @@ export function usePreviewTextureSource(
 ) {
   useEffect(() => {
     if (!photoRingRef.current) return;
-    
+
     rasterizeDomToCanvas(photoRingRef.current, width, height, {
       scale: PREVIEW_TEXTURE_SCALE,
-    }).then(canvas => {
+    }).then((canvas) => {
       setState({ canvas, error: null });
     });
   }, [photoRingRef, width, height]);
@@ -111,16 +111,11 @@ export function usePreviewTextureSource(
 
 ```typescript
 // 编辑器
-<PhotoRing 
-  count={count} 
-  gap={gap} 
-  scale={scale}
-  onSlotClick={handleEdit}
-/>
+<PhotoRing count={count} gap={gap} scale={scale} onSlotClick={handleEdit} />;
 
 // 3D 预览（保留原有逻辑）
 const svgMarkup = buildPhotoRingTemplate(state);
-<Preview3D svgMarkup={svgMarkup} />
+<Preview3D svgMarkup={svgMarkup} />;
 ```
 
 #### 优点
@@ -157,30 +152,32 @@ const svgMarkup = buildPhotoRingTemplate(state);
 export function useSpiralLayout(count, gap, scale, width, height) {
   const positions = generateSpiralPositions(count, gap);
   // ... 计算边界框、缩放、偏移
-  return { 
+  return {
     positions: [
       { x, y, size, gridX, gridY, index, transform },
       // ...
-    ]
+    ],
   };
 }
 
 // 2. 3D 管线：为每张图片生成独立 texture
 async function generateImageTextures(images, positions) {
-  return Promise.all(images.map(async (img, i) => {
-    // 创建临时 canvas，绘制单张图片（含旋转/缩放效果）
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    
-    // 应用变换：旋转、缩放等
-    applyTransform(ctx, positions[i].transform);
-    
-    // 绘制图片
-    const image = await loadImage(img.src);
-    ctx.drawImage(image, 0, 0, positions[i].size, positions[i].size);
-    
-    return new THREE.CanvasTexture(canvas);
-  }));
+  return Promise.all(
+    images.map(async (img, i) => {
+      // 创建临时 canvas，绘制单张图片（含旋转/缩放效果）
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+
+      // 应用变换：旋转、缩放等
+      applyTransform(ctx, positions[i].transform);
+
+      // 绘制图片
+      const image = await loadImage(img.src);
+      ctx.drawImage(image, 0, 0, positions[i].size, positions[i].size);
+
+      return new THREE.CanvasTexture(canvas);
+    })
+  );
 }
 
 // 3. FoldedStrip 接收 texture 数组
@@ -190,7 +187,7 @@ interface FoldedStripProps {
 }
 
 // 4. FoldedPanel 使用对应 texture
-<FoldedPanel panel={panel} texture={textures[index]} />
+<FoldedPanel panel={panel} texture={textures[index]} />;
 ```
 
 #### 优点
@@ -235,13 +232,13 @@ export function buildSpiralModel(
 ): PreviewStripModel {
   // 1. 使用核心算法生成螺旋坐标
   const spiralPositions = generateSpiralPositions(count, gap);
-  
+
   // 2. 计算边界框（与 DOM 相同逻辑）
   const bounds = calculateSpiralBounds(spiralPositions);
-  
+
   // 3. 计算单元格大小（与 DOM 相同逻辑）
   const cellSize = calculateCellSize(spanCols, spanRows, ...);
-  
+
   // 4. 构建面板和铰链
   // ...
 }
@@ -289,15 +286,15 @@ const model = buildSpiralModel(
 
 ## 方案对比
 
-| 维度 | 方案 1 (html2canvas) | 方案 2 (双渲染) | 方案 5 (独立纹理) |
-|------|---------------------|----------------|------------------|
-| **改动量** | 中 | 小 | 大 |
-| **新增依赖** | 是 (~100KB) | 否 | 否 |
-| **性能** | 截图有开销 | 最优 | 显存占用增加 |
-| **一致性** | 高 | 中（两套渲染） | 高 |
-| **DOM 交互** | 有限 | 完整 | 有限 |
-| **单图更新** | 需重截图 | 需重生成 SVG | 仅更新单张 |
-| **实现复杂度** | 中 | 低 | 高 |
+| 维度           | 方案 1 (html2canvas) | 方案 2 (双渲染) | 方案 5 (独立纹理) |
+| -------------- | -------------------- | --------------- | ----------------- |
+| **改动量**     | 中                   | 小              | 大                |
+| **新增依赖**   | 是 (~100KB)          | 否              | 否                |
+| **性能**       | 截图有开销           | 最优            | 显存占用增加      |
+| **一致性**     | 高                   | 中（两套渲染）  | 高                |
+| **DOM 交互**   | 有限                 | 完整            | 有限              |
+| **单图更新**   | 需重截图             | 需重生成 SVG    | 仅更新单张        |
+| **实现复杂度** | 中                   | 低              | 高                |
 
 ---
 
@@ -306,11 +303,13 @@ const model = buildSpiralModel(
 ### 推荐选择
 
 1. **短期/保守选择：方案 2 (双渲染)**
+
    - 保持现有 3D 管线稳定
    - 快速实现 DOM 编辑器
    - 风险最低
 
 2. **长期/完整方案：方案 5 (独立纹理)**
+
    - 架构最清晰
    - 支持更复杂的单图变换
    - 为后续功能扩展留空间
@@ -344,10 +343,10 @@ const model = buildSpiralModel(
 
 **问题**：`svg.ts` 和 `image-styles.ts` 对 `offsetX/Y` 的处理方式不同
 
-| 文件 | 原处理方式 |
-|------|-----------|
-| `svg.ts:210-216` | `(offsetX / 100) * size * zoom`（百分比） |
-| `image-styles.ts:28` | `offsetX px`（像素值） |
+| 文件                 | 原处理方式                                |
+| -------------------- | ----------------------------------------- |
+| `svg.ts:210-216`     | `(offsetX / 100) * size * zoom`（百分比） |
+| `image-styles.ts:28` | `offsetX px`（像素值）                    |
 
 **修复**：根据 `ImageEdit` 类型定义（`offsetX/Y` 为像素值），统一修改 `svg.ts`：
 
@@ -356,12 +355,13 @@ const model = buildSpiralModel(
 const tx = (offsetX / 100) * size * zoom;
 
 // 之后
-const tx = offsetX / zoom;  // 像素值，除以 zoom 抵消缩放影响
+const tx = offsetX / zoom; // 像素值，除以 zoom 抵消缩放影响
 ```
 
 **相关文件**：
+
 - `src/features/templates/lib/svg.ts`
-- `src/features/editor/lib/image-styles.ts`
+- `src/features/collage-editor/lib/image-styles.ts`
 
 ---
 
@@ -386,9 +386,10 @@ const tx = offsetX / zoom;  // 像素值，除以 zoom 抵消缩放影响
 ```
 
 **相关文件**：
+
 - `src/features/templates/lib/svg.ts`
 
 ---
 
-*记录时间: 2026-04-15*
-*更新: 2026-04-20*
+_记录时间: 2026-04-15_
+_更新: 2026-04-20_

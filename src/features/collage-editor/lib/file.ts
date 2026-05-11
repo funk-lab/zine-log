@@ -1,7 +1,7 @@
-import type { GalleryImage } from "@/features/editor/types";
+import type { GalleryImage } from "@/features/collage-editor/types";
 import { compressFile } from "@/features/export/lib/image-compressor";
 import type { CompressOptions } from "@/features/export/lib/export-types";
-import { generateImageId } from "@/features/editor/types";
+import { generateImageId } from "@/features/collage-editor/types";
 
 // TODO: 测试压缩配置开关
 const ENABLE_COMPRESSION = true; // 🔧 设为 true 启用压缩，false 关闭压缩

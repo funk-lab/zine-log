@@ -42,7 +42,7 @@ npm run test:run
 src/
   app/                    应用入口与全局样式
   components/ui/          shadcn 风格基础组件
-  features/editor/        编辑状态、文件处理、三栏 UI 组件
+  features/collage-editor/        编辑状态、文件处理、三栏 UI 组件
   features/templates/     SVG 模板生成逻辑
   features/export/        PNG / SVG / PDF 导出
   test/                   测试初始化

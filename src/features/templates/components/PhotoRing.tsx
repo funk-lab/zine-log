@@ -4,8 +4,8 @@ import {
   type SpiralPosition,
   calculateSpiralLayout,
 } from "@/features/templates/lib/spiral";
-import type { GalleryImage } from "@/features/editor/types";
-import { getImageEditStyles } from "@/features/editor/lib/image-styles";
+import type { GalleryImage } from "@/features/collage-editor/types";
+import { getImageEditStyles } from "@/features/collage-editor/lib/image-styles";
 
 // ==================== 类型定义 ====================
 
@@ -78,7 +78,15 @@ export const PhotoRing: React.FC<PhotoRingProps> = ({
   const effectiveScale = scale * displayZoom;
 
   const { positions, scaledCell } = useMemo(
-    () => calculateSpiralLayout(count, gap, effectiveScale, width, height, baseCell),
+    () =>
+      calculateSpiralLayout(
+        count,
+        gap,
+        effectiveScale,
+        width,
+        height,
+        baseCell
+      ),
     [count, gap, effectiveScale, width, height, baseCell]
   );
 

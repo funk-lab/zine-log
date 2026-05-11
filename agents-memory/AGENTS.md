@@ -66,11 +66,13 @@ Do not commit secrets, local environments, or generated artifacts. The current i
 
 ### Module Organization (src/features)
 
-- `editor/` - 编辑器核心功能（Reducer + 组件）
+- `collage-editor/` - 拼贴编辑器核心功能（Reducer + 组件）
 - `export/` - 导出功能（PDF/PNG/SVG）
 - `preview3d/` - 3D 预览（React Three Fiber）
 - `rendering/` - 渲染工具（SVG 转 Canvas）
 - `templates/` - 模板渲染
+- `homepage/` - 首页入口
+- `image-editor/` - 图片独立编辑页
 
 ### File Naming Conventions
 

@@ -6,8 +6,8 @@ import {
   DEFAULT_IMAGE_EDIT,
   type RotateDeg,
   type GalleryImage,
-} from "@/features/editor/types";
-import { getImageEditStyles } from "@/features/editor/lib/image-styles";
+} from "@/features/collage-editor/types";
+import { getImageEditStyles } from "@/features/collage-editor/lib/image-styles";
 
 // ──────────────────────────────────────────────────────────────────────────────
 // Types

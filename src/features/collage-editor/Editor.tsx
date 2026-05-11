@@ -2,7 +2,6 @@ import React, {
   useCallback,
   useDeferredValue,
   useMemo,
-  useReducer,
   useRef,
   useState,
 } from "react";
@@ -12,7 +11,7 @@ import {
   currentDimensions,
   renderTemplateSvg,
 } from "../templates/render-template";
-import { editorReducer, initialEditorState } from "./editor-reducer";
+import { useEditor } from "@/app/useEditor";
 import { filesToGalleryImages } from "./lib/file";
 import {
   GalleryImage,
@@ -31,7 +30,7 @@ import { DownloadDialog } from "../export/lib/components/DownloadDialog";
 import { downloadAlbumPDF, downloadPdf } from "@/features/export/lib/exporters";
 
 export const Editor: React.FC = () => {
-  const [state, dispatch] = useReducer(editorReducer, initialEditorState);
+  const { state, dispatch } = useEditor();
   const deferredState = useDeferredValue(state);
   const appRef = useRef<HTMLDivElement>(null);
 
@@ -51,12 +50,15 @@ export const Editor: React.FC = () => {
     [deferredState]
   );
 
-  const handleUpload = useCallback(async (files: FileList | null) => {
-    const fileList = Array.from(files ?? []);
-    if (!fileList.length) return;
-    const images = await filesToGalleryImages(fileList);
-    dispatch({ type: "append-images", images });
-  }, []);
+  const handleUpload = useCallback(
+    async (files: FileList | null) => {
+      const fileList = Array.from(files ?? []);
+      if (!fileList.length) return;
+      const images = await filesToGalleryImages(fileList);
+      dispatch({ type: "append-images", images });
+    },
+    [dispatch]
+  );
 
   const handleDownloadAlbum = useCallback(() => {
     downloadAlbumPDF(state.selected, {
@@ -76,30 +78,45 @@ export const Editor: React.FC = () => {
     });
   }, [state]);
 
-  const handleSelectChange = useCallback((images: GalleryImage[]) => {
-    dispatch({ type: "set-selected", images });
-  }, []);
+  const handleSelectChange = useCallback(
+    (images: GalleryImage[]) => {
+      dispatch({ type: "set-selected", images });
+    },
+    [dispatch]
+  );
 
-  const handleUnSelectChange = useCallback((images: GalleryImage[]) => {
-    dispatch({ type: "set-unselected", images });
-  }, []);
+  const handleUnSelectChange = useCallback(
+    (images: GalleryImage[]) => {
+      dispatch({ type: "set-unselected", images });
+    },
+    [dispatch]
+  );
 
-  const handleTemplateChange = useCallback((template: TemplateId) => {
-    dispatch({ type: "set-template", template });
-  }, []);
+  const handleTemplateChange = useCallback(
+    (template: TemplateId) => {
+      dispatch({ type: "set-template", template });
+    },
+    [dispatch]
+  );
 
-  const handleAccentChange = useCallback((accent: string) => {
-    dispatch({ type: "set-accent", accent });
-  }, []);
+  const handleAccentChange = useCallback(
+    (accent: string) => {
+      dispatch({ type: "set-accent", accent });
+    },
+    [dispatch]
+  );
 
   // TODO: ringScale 控制在 UI 中未实现，暂保留 reducer 支持
   // const handleRingScaleChange = useCallback((ringScale: number) => {
   //   dispatch({ type: "set-ring-scale", ringScale });
   // }, []);
 
-  const handlePaddingChange = useCallback((padding: number) => {
-    dispatch({ type: "set-padding", padding });
-  }, []);
+  const handlePaddingChange = useCallback(
+    (padding: number) => {
+      dispatch({ type: "set-padding", padding });
+    },
+    [dispatch]
+  );
 
   const handleUploadChange = useCallback(
     (files: FileList | null) => {
@@ -169,7 +186,7 @@ export const Editor: React.FC = () => {
         dispatch({ type: "update-image-edit", imageId, edit: newEdit });
       }
     },
-    [selectedSlotIndex, state.selected]
+    [selectedSlotIndex, state.selected, dispatch]
   );
 
   // 重置当前编辑
@@ -191,7 +208,7 @@ export const Editor: React.FC = () => {
         });
       }
     }
-  }, [selectedSlotIndex, state.selected]);
+  }, [selectedSlotIndex, state.selected, dispatch]);
 
   const selectedImage: GalleryImage | null = useMemo(() => {
     if (
