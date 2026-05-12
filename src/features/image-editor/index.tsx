@@ -5,6 +5,7 @@ import { Spin } from "antd";
 import Editor from "@/features/editor";
 import { GlobalStateContext } from "@/features/context";
 import { SKETCH_ID } from "@/features/utils/constants";
+import { GalleryImage } from "@/features/components/PhotoGallery";
 
 import Header from "./components/Header";
 import LeftSidebar from "./components/LeftSidebar";
@@ -22,6 +23,7 @@ export type ToolType =
   | "brush"
   | "emoji"
   | "image"
+  | "gallery"
   | "align"
   | "select";
 
@@ -79,6 +81,10 @@ export default function ZineEditor() {
   const [zoom, setZoom] = useState(100);
   const [canUndo, setCanUndo] = useState(false);
   const [canRedo, setCanRedo] = useState(false);
+  
+  // 照片图库状态
+  const [unselectedPhotos, setUnselectedPhotos] = useState<GalleryImage[]>([]);
+  const [selectedPhotos, setSelectedPhotos] = useState<GalleryImage[]>([]);
 
   const clickHandler = (opt: any) => {
     const { target } = opt;
@@ -189,6 +195,7 @@ export default function ZineEditor() {
       brush: "画笔",
       emoji: "表情",
       image: "图片",
+      gallery: "图册",
       align: "对齐",
       select: "选择",
     };
@@ -196,18 +203,22 @@ export default function ZineEditor() {
   };
 
   return (
-    <GlobalStateContext.Provider
-      value={useMemo(
-        () => ({
-          object: activeObject,
-          setActiveObject,
-          isReady,
-          setReady,
-          editor,
-        }),
-        [activeObject, isReady, editor]
-      )}
-    >
+      <GlobalStateContext.Provider
+        value={useMemo(
+          () => ({
+            object: activeObject,
+            setActiveObject,
+            isReady,
+            setReady,
+            editor,
+            unselectedPhotos,
+            selectedPhotos,
+            setUnselectedPhotos,
+            setSelectedPhotos,
+          }),
+          [activeObject, isReady, editor, unselectedPhotos, selectedPhotos]
+        )}
+      >
       <ZineEditorState.Provider
         value={{
           object: activeObject,

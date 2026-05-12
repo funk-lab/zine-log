@@ -27,7 +27,7 @@ import TopBar from "./components/TopBar";
 import { EditSidebar } from "./components/EditSidebar";
 
 import { DownloadDialog } from "../export/lib/components/DownloadDialog";
-import { downloadAlbumPDF, downloadPdf } from "@/features/export/lib/exporters";
+import { downloadAlbumPDF } from "@/features/export/lib/exporters";
 
 export const Editor: React.FC = () => {
   const { state, dispatch } = useEditor();
@@ -71,26 +71,16 @@ export const Editor: React.FC = () => {
     });
   }, [state]);
 
-  const handleDownloadPdf = useCallback(() => {
-    downloadPdf(state).catch((error) => {
-      console.error(error);
-      window.alert("PDF 导出失败，请刷新页面后重试。");
-    });
-  }, [state]);
+  // handleDownloadPdf 未使用，已注释
+  // const handleDownloadPdf = useCallback(() => {
+  //   downloadPdf(state).catch((error) => {
+  //     console.error(error);
+  //     window.alert("PDF 导出失败，请刷新页面后重试。");
+  //   });
+  // }, [state]);
 
-  const handleSelectChange = useCallback(
-    (images: GalleryImage[]) => {
-      dispatch({ type: "set-selected", images });
-    },
-    [dispatch]
-  );
-
-  const handleUnSelectChange = useCallback(
-    (images: GalleryImage[]) => {
-      dispatch({ type: "set-unselected", images });
-    },
-    [dispatch]
-  );
+  // PhotoGallery 现在直接使用全局状态，不需要这些回调函数
+  // handleSelectChange 和 handleUnSelectChange 已移除
 
   const handleTemplateChange = useCallback(
     (template: TemplateId) => {
@@ -145,10 +135,7 @@ export const Editor: React.FC = () => {
     }
   }, []);
 
-  const handlePhotoDelete = useCallback((photoId: string) => {
-    // 可选：在这里添加额外的删除后处理逻辑
-    console.log("图片已删除:", photoId);
-  }, []);
+  // handlePhotoDelete 不再需要，因为 PhotoGallery 现在直接使用全局状态
 
   // EditSidebar 回调：双击 slot 打开侧边栏
   const handleSlotDoubleClick = useCallback(
@@ -231,14 +218,7 @@ export const Editor: React.FC = () => {
       {/* 三栏主体 */}
       <div className="workspace">
         {/* 左侧：图库面板 */}
-        <PhotoGallery
-          unselectedPhotos={state.unselected}
-          selectedPhotos={state.selected}
-          onUnselectedChange={handleUnSelectChange}
-          onSelectedChange={handleSelectChange}
-          onUpload={handleUploadChange}
-          onPhotoDelete={handlePhotoDelete}
-        />
+        <PhotoGallery />
 
         {/* 中间：画布 */}
         <CanvasPanel

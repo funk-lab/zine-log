@@ -1,6 +1,7 @@
 import { createContext, useContext } from "react";
 import * as fabric from "fabric";
 import Editor from "@/features/editor";
+import { GalleryImage } from "@/features/components/PhotoGallery";
 
 type RoughSvgInstance = any;
 
@@ -11,6 +12,11 @@ export interface IGlobalStateContext {
   setReady?: (o: boolean) => void;
   editor?: Editor | null;
   roughSvg?: RoughSvgInstance;
+  // 照片图库状态
+  unselectedPhotos?: GalleryImage[];
+  selectedPhotos?: GalleryImage[];
+  setUnselectedPhotos?: (photos: GalleryImage[]) => void;
+  setSelectedPhotos?: (photos: GalleryImage[]) => void;
 }
 
 export const GlobalStateContext = createContext<IGlobalStateContext>({});

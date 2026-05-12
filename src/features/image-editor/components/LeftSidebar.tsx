@@ -5,6 +5,7 @@ import TextTemplate from "./left-panels/TextTemplate";
 import EmojiPicker from "./left-panels/EmojiPicker";
 import BrushSettings from "./left-panels/BrushSettings";
 import ImagePicker from "./left-panels/ImagePicker";
+import PhotoGallery from "@/features/components/PhotoGallery";
 
 export default function LeftSidebar() {
   const { currentTool, setCurrentTool, editor } = useZineEditor();
@@ -19,7 +20,7 @@ export default function LeftSidebar() {
 
   // 判断是否为"创建工具"（需要显示面板的工具）
   const isCreationTool = (tool: ToolType): boolean => {
-    return ["text", "shape", "brush", "emoji", "image"].includes(tool);
+    return ["text", "shape", "brush", "emoji", "image", "gallery"].includes(tool);
   };
 
   // 根据当前工具获取面板内容
@@ -35,6 +36,8 @@ export default function LeftSidebar() {
         return <EmojiPicker />;
       case "image":
         return <ImagePicker />;
+      case "gallery":
+        return <PhotoGallery />;
       default:
         return null;
     }
@@ -100,6 +103,28 @@ export default function LeftSidebar() {
             <path d="M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2" />
             <path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8" />
             <path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15" />
+          </svg>
+        </button>
+        {/* 图册按钮 */}
+        <button
+          className={`zine-sidebar-tool ${
+            currentTool === "gallery" ? "active" : ""
+          }`}
+          onClick={() => handleToolClick("gallery")}
+          title="图册"
+        >
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
+            <rect x="3" y="3" width="7" height="7" />
+            <rect x="14" y="3" width="7" height="7" />
+            <rect x="3" y="14" width="7" height="7" />
+            <rect x="14" y="14" width="7" height="7" />
           </svg>
         </button>
         {/* 分隔线 */}

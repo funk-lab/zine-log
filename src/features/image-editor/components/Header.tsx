@@ -1,17 +1,72 @@
+import { useState, useCallback } from "react";
 import { useZineEditor } from "../index";
+import { useGlobalState } from "@/features/context";
+import { GalleryImage } from "@/features/components/PhotoGallery";
 
 export default function Header() {
   const { canUndo, canRedo, handleUndo, handleRedo, editor } = useZineEditor();
+  const [showExportMenu, setShowExportMenu] = useState(false);
+  const { unselectedPhotos = [], setUnselectedPhotos } = useGlobalState();
 
-  const handleExport = () => {
+  // 将 dataURL 转换为 GalleryImage 并保存到 unselectedPhotos
+  const saveImageToGallery = useCallback((dataURL: string, filename: string) => {
+    if (!setUnselectedPhotos) return;
+
+    // 将 dataURL 转换为 blob
+    const byteString = atob(dataURL.split(',')[1]);
+    const mimeString = dataURL.split(',')[0].split(':')[1].split(';')[0];
+    const ab = new ArrayBuffer(byteString.length);
+    const ia = new Uint8Array(ab);
+    for (let i = 0; i < byteString.length; i++) {
+      ia[i] = byteString.charCodeAt(i);
+    }
+    const blob = new Blob([ab], { type: mimeString });
+    const blobUrl = URL.createObjectURL(blob);
+
+    const newImage: GalleryImage = {
+      id: `img_${Date.now()}`,
+      src: dataURL,
+      blobUrl: blobUrl,
+      name: filename,
+      uploadedAt: Date.now(),
+      mimeType: "image/png",
+      size: blob.size,
+      color: "#ffffff",
+      rotate: 0,
+      fitMode: "cover",
+      zoom: 1,
+      flipX: false,
+      flipY: false,
+      offsetX: 0,
+      offsetY: 0,
+      brightness: 0,
+      contrast: 0,
+      saturate: 0,
+      grayscale: false,
+      borderRadius: 0,
+      margin: 0,
+    };
+
+    setUnselectedPhotos([...unselectedPhotos, newImage]);
+  }, [unselectedPhotos, setUnselectedPhotos]);
+
+  const handleSave = () => {
     if (!editor) return;
     const dataURL = editor.export2Img();
     const link = document.createElement("a");
     link.href = dataURL;
-    link.download = `zine-export-${Date.now()}.png`;
+    link.download = `zine-save-${Date.now()}.png`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  const handleSaveAs = () => {
+    if (!editor) return;
+    const dataURL = editor.export2Img();
+    const filename = `zine-saveas-${Date.now()}.png`;
+    saveImageToGallery(dataURL, filename);
+    setShowExportMenu(false);
   };
 
   const handleFullscreen = () => {
@@ -110,21 +165,70 @@ export default function Header() {
           </svg>
         </button>
         <div className="zine-topbar-sep"></div>
-        <button className="zine-btn-export" onClick={handleExport}>
-          <svg
-            width="14"
-            height="14"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.5"
+        <div style={{ position: 'relative' }}>
+          <button
+            className="zine-btn-export"
+            onClick={() => setShowExportMenu(!showExportMenu)}
           >
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-            <polyline points="7 10 12 15 17 10" />
-            <line x1="12" y1="15" x2="12" y2="3" />
-          </svg>
-          导出作品
-        </button>
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+            >
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="7 10 12 15 17 10" />
+              <line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
+            保存 ▼
+          </button>
+          {showExportMenu && (
+            <div style={{
+              position: 'absolute',
+              top: '100%',
+              right: 0,
+              background: '#fff',
+              border: '1px solid #ccc',
+              borderRadius: '4px',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+              zIndex: 1000,
+            }}>
+              <button
+                onClick={() => {
+                  handleSave();
+                  setShowExportMenu(false);
+                }}
+                style={{
+                  display: 'block',
+                  width: '100%',
+                  padding: '8px 16px',
+                  border: 'none',
+                  background: 'none',
+                  textAlign: 'left',
+                  cursor: 'pointer',
+                }}
+              >
+                保存
+              </button>
+              <button
+                onClick={handleSaveAs}
+                style={{
+                  display: 'block',
+                  width: '100%',
+                  padding: '8px 16px',
+                  border: 'none',
+                  background: 'none',
+                  textAlign: 'left',
+                  cursor: 'pointer',
+                }}
+              >
+                另存为
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </header>
   );
