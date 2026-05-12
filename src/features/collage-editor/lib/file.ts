@@ -104,6 +104,7 @@ async function fileToGalleryImage(
       saturate: 0,
       grayscale: false,
       borderRadius: 0,
+      margin: 0,
     };
   } catch (err) {
     console.error(`[fileToGalleryImage] 处理失败: ${file.name}`, err);

@@ -144,4 +144,30 @@ dragStartRef.current = {
 
 ---
 
+### 3. 替换手写 `.d.ts` 为官方类型包
+
+**状态**: 待办
+**优先级**: 低
+**创建时间**: 2026-05-11
+
+#### 问题描述
+
+项目中为 `lodash-es` 和 `uuid` 手写创建了 `.d.ts` 声明文件（`src/types/lodash-es.d.ts`、`src/types/uuid.d.ts`），因为 `strict` 模式下 TypeScript 对无类型声明的模块报错。
+
+#### 待办事项
+
+- [ ] 安装 `@types/lodash-es` 替代 `src/types/lodash-es.d.ts`
+- [ ] 安装 `@types/uuid` 替代 `src/types/uuid.d.ts`
+- [ ] 安装 `@types/fontfaceobserver`（已写入 package.json，待执行安装）
+- [ ] 安装完成后删除对应的手写声明文件
+
+#### 相关文件
+
+- `src/types/lodash-es.d.ts`
+- `src/types/uuid.d.ts`
+- `package.json`
+
+---
+
 ## 已完成
+

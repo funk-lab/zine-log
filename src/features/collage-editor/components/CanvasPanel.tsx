@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/refs */
 // CanvasPanel 组件 - 中间画布区
 import { Preview3D } from "@/features/preview3d/components/preview-3d";
 import React, { useState, useCallback, useRef, useMemo, Suspense } from "react";

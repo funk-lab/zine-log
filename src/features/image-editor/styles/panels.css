@@ -1,0 +1,1336 @@
+/* ==============================
+   Zine Editor - Panel Specific Styles
+   各面板专用样式
+============================== */
+
+/* Size Inputs */
+.zine-size-inputs {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+
+.zine-size-inputs .zine-num-input {
+  text-align: center;
+}
+
+.zine-size-link-btn {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid var(--zine-border);
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  transition: all var(--t-fast);
+  color: var(--zine-text-muted);
+  flex-shrink: 0;
+  background: none;
+  margin-top: 28px;
+}
+
+.zine-size-link-btn:hover {
+  border-color: var(--zine-brand);
+  color: var(--zine-brand);
+}
+
+.zine-size-link-btn.linked {
+  border-color: var(--zine-brand);
+  background: var(--zine-brand-light);
+  color: var(--zine-brand);
+}
+
+.zine-size-unit {
+  font-size: 11px;
+  color: var(--zine-text-muted);
+  font-weight: 600;
+  min-width: 20px;
+}
+
+/* Crop Modes */
+.zine-crop-modes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--sp-2);
+}
+
+.zine-crop-mode-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: var(--sp-3) var(--sp-2);
+  border: 1.5px solid var(--zine-border);
+  border-radius: var(--r-md);
+  cursor: pointer;
+  transition: all var(--t-fast);
+  background: var(--zine-surface);
+}
+
+.zine-crop-mode-btn:hover {
+  border-color: var(--zine-border-2);
+  background: var(--zine-surface-2);
+}
+
+.zine-crop-mode-btn.active {
+  border-color: var(--zine-brand);
+  background: var(--zine-brand-light);
+}
+
+.zine-crop-mode-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--zine-text-muted);
+}
+
+.zine-crop-mode-btn.active .zine-crop-mode-label {
+  color: var(--zine-brand);
+}
+
+/* Crop Ratios */
+.zine-crop-ratios {
+  display: flex;
+  gap: var(--sp-2);
+  flex-wrap: wrap;
+}
+
+.zine-crop-ratio-pill {
+  padding: 4px 10px;
+  border: 1.5px solid var(--zine-border);
+  border-radius: 99px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--zine-text-muted);
+  cursor: pointer;
+  transition: all var(--t-fast);
+}
+
+.zine-crop-ratio-pill:hover {
+  border-color: var(--zine-border-2);
+  color: var(--zine-text-secondary);
+}
+
+.zine-crop-ratio-pill.active {
+  border-color: var(--zine-brand);
+  background: var(--zine-brand-light);
+  color: var(--zine-brand);
+}
+
+/* Crop Preview */
+.zine-crop-preview {
+  width: 100%;
+  height: 120px;
+  background: var(--zine-surface-2);
+  border: 1px solid var(--zine-border);
+  border-radius: var(--r-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.zine-crop-overlay {
+  position: absolute;
+  inset: 12px;
+  border: 2px dashed var(--zine-brand);
+  border-radius: 4px;
+  box-shadow: 0 0 0 999px rgba(0,0,0,0.25);
+}
+
+.zine-crop-corner {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-color: white;
+  border-style: solid;
+}
+
+.zine-crop-corner.tl { top: -1px; left: -1px; border-width: 2px 0 0 2px; }
+.zine-crop-corner.tr { top: -1px; right: -1px; border-width: 2px 2px 0 0; }
+.zine-crop-corner.bl { bottom: -1px; left: -1px; border-width: 0 0 2px 2px; }
+.zine-crop-corner.br { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; }
+
+/* Transform Group */
+.zine-transform-group {
+  display: flex;
+  gap: var(--sp-2);
+}
+
+.zine-transform-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 7px;
+  border: 1.5px solid var(--zine-border);
+  border-radius: var(--r-md);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--zine-text-secondary);
+  cursor: pointer;
+  transition: all var(--t-fast);
+  background: var(--zine-surface);
+}
+
+.zine-transform-btn:hover {
+  border-color: var(--zine-border-2);
+  background: var(--zine-surface-2);
+  color: var(--zine-text-primary);
+}
+
+/* ==============================
+   Shape Panel Specific
+============================== */
+.zine-preset-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--sp-2);
+}
+
+.zine-preset-item {
+  aspect-ratio: 1;
+  border: 1.5px solid var(--zine-border);
+  border-radius: var(--r-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--t-fast);
+  background: var(--zine-surface);
+  color: var(--zine-text-secondary);
+}
+
+.zine-preset-item:hover {
+  border-color: var(--zine-border-2);
+  background: var(--zine-surface-2);
+  transform: scale(1.05);
+}
+
+.zine-preset-item.active {
+  border-color: var(--zine-brand);
+  background: var(--zine-brand-light);
+}
+
+.zine-preset-item svg {
+  transition: color var(--t-fast);
+}
+
+.zine-preset-item.active svg {
+  color: var(--zine-brand);
+}
+
+/* Line Presets */
+.zine-line-presets {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.zine-line-preset-item {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-2) var(--sp-3);
+  border: 1.5px solid var(--zine-border);
+  border-radius: var(--r-md);
+  cursor: pointer;
+  transition: all var(--t-fast);
+  background: var(--zine-surface);
+}
+
+.zine-line-preset-item:hover {
+  border-color: var(--zine-border-2);
+  background: var(--zine-surface-2);
+}
+
+.zine-line-preset-item.active {
+  border-color: var(--zine-brand);
+  background: var(--zine-brand-light);
+}
+
+.zine-line-preview {
+  flex: 1;
+  height: 2px;
+  position: relative;
+}
+
+.zine-line-solid {
+  background: currentColor;
+}
+
+.zine-line-dashed {
+  background: repeating-linear-gradient(90deg, currentColor 0, currentColor 6px, transparent 6px, transparent 12px);
+}
+
+.zine-line-dotted {
+  background: repeating-linear-gradient(90deg, currentColor 0, currentColor 2px, transparent 2px, transparent 6px);
+}
+
+.zine-line-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--zine-text-secondary);
+  min-width: 40px;
+}
+
+.zine-line-preset-item.active .zine-line-label {
+  color: var(--zine-brand);
+}
+
+/* Border Styles */
+.zine-border-styles {
+  display: flex;
+  gap: var(--sp-2);
+}
+
+.zine-border-style-btn {
+  flex: 1;
+  height: 32px;
+  border: 1.5px solid var(--zine-border);
+  border-radius: var(--r-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--zine-text-muted);
+  transition: all var(--t-fast);
+  background: var(--zine-surface);
+}
+
+.zine-border-style-btn:hover {
+  border-color: var(--zine-border-2);
+  background: var(--zine-surface-2);
+}
+
+.zine-border-style-btn.active {
+  border-color: var(--zine-brand);
+  background: var(--zine-brand-light);
+  color: var(--zine-brand);
+}
+
+/* ==============================
+   Brush Panel Specific
+============================== */
+.zine-brush-type-row {
+  display: flex;
+  gap: var(--sp-2);
+}
+
+.zine-brush-type-btn {
+  flex: 1;
+  padding: var(--sp-3) var(--sp-2);
+  border: 1.5px solid var(--zine-border);
+  border-radius: var(--r-md);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all var(--t-fast);
+  background: var(--zine-surface);
+}
+
+.zine-brush-type-btn:hover {
+  border-color: var(--zine-border-2);
+  background: var(--zine-surface-2);
+}
+
+.zine-brush-type-btn.active {
+  border-color: var(--zine-brand);
+  background: var(--zine-brand-light);
+}
+
+.zine-brush-icon {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.zine-brush-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--zine-text-secondary);
+}
+
+.zine-brush-type-btn.active .zine-brush-label {
+  color: var(--zine-brand);
+}
+
+.zine-brush-preview {
+  width: 100%;
+  height: 56px;
+  background: var(--zine-surface-2);
+  border: 1px solid var(--zine-border);
+  border-radius: var(--r-md);
+  overflow: hidden;
+  position: relative;
+}
+
+.zine-brush-preview svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* ==============================
+   Emoji Panel Specific
+============================== */
+.zine-emoji-search {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: 6px 10px;
+  border: 1px solid var(--zine-border);
+  border-radius: var(--r-md);
+  background: var(--zine-surface-2);
+  transition: all var(--t-fast);
+}
+
+.zine-emoji-search:focus-within {
+  border-color: var(--zine-brand);
+  background: white;
+  box-shadow: 0 0 0 3px var(--zine-brand-light);
+}
+
+.zine-emoji-search input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 13px;
+  color: var(--zine-text-primary);
+  outline: none;
+}
+
+.zine-emoji-search input::placeholder {
+  color: var(--zine-text-muted);
+}
+
+.zine-emoji-categories {
+  display: flex;
+  gap: 2px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding: 2px;
+  background: var(--zine-surface-2);
+  border: 1px solid var(--zine-border);
+  border-radius: var(--r-md);
+}
+
+.zine-emoji-categories::-webkit-scrollbar {
+  display: none;
+}
+
+.zine-emoji-cat-btn {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  font-size: 16px;
+  transition: all var(--t-fast);
+  border: none;
+  background: none;
+}
+
+.zine-emoji-cat-btn:hover {
+  background: var(--zine-surface);
+}
+
+.zine-emoji-cat-btn.active {
+  background: var(--zine-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.zine-emoji-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  max-height: 200px;
+  overflow-y: auto;
+  padding: 4px;
+  margin: -4px;
+}
+
+.zine-emoji-item {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  cursor: pointer;
+  border-radius: var(--r-sm);
+  transition: all var(--t-fast);
+  margin: auto;
+}
+
+.zine-emoji-item:hover {
+  background: var(--zine-surface-2);
+  transform: scale(1.15);
+}
+
+.zine-emoji-item:active {
+  transform: scale(0.95);
+}
+
+.zine-recent-emojis {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  padding: var(--sp-2) 0;
+}
+
+.zine-recent-emoji {
+  font-size: 24px;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: var(--r-sm);
+  transition: all var(--t-fast);
+}
+
+.zine-recent-emoji:hover {
+  background: var(--zine-surface-2);
+  transform: scale(1.2);
+}
+
+/* ==============================
+   Text Panel - Preset Cards
+============================== */
+.zine-preset-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.zine-preset-card {
+  padding: var(--sp-3) var(--sp-4);
+  border: 1.5px solid var(--zine-border);
+  border-radius: var(--r-md);
+  background: var(--zine-surface);
+  cursor: pointer;
+  transition: all var(--t-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.zine-preset-card:hover {
+  border-color: var(--zine-brand);
+  background: var(--zine-brand-light);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.zine-preset-card:active {
+  transform: translateY(0);
+}
+
+/* ==============================
+   Left Sidebar - 可展开左侧面板
+============================== */
+.zine-left-sidebar {
+  display: flex;
+  flex-shrink: 0;
+  background: var(--zine-surface);
+  border-right: 1px solid var(--zine-border);
+  position: relative;
+  z-index: 50;
+  height: 100%;
+}
+
+/* 工具按钮区 - 固定宽度 */
+.zine-sidebar-tools {
+  width: 64px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--sp-3) 0;
+  gap: var(--sp-1);
+}
+
+.zine-sidebar-tool {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  border-radius: var(--r-md);
+  cursor: pointer;
+  transition: all var(--t-fast);
+  color: var(--zine-text-secondary);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  border: none;
+  background: none;
+}
+
+.zine-sidebar-tool:hover {
+  background: var(--zine-surface-2);
+  color: var(--zine-text-primary);
+}
+
+.zine-sidebar-tool.active {
+  background: var(--zine-brand-light);
+  color: var(--zine-brand);
+}
+
+.zine-sidebar-tool.active svg {
+  color: var(--zine-brand);
+}
+
+/* Tooltip */
+.zine-sidebar-tool::after {
+  content: attr(title);
+  position: absolute;
+  left: calc(100% + 10px);
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(26,23,20,0.85);
+  color: white;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: var(--r-sm);
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--t-fast);
+  backdrop-filter: blur(8px);
+  z-index: 200;
+}
+
+.zine-sidebar-tool:hover::after {
+  opacity: 1;
+}
+
+/* 分隔线 */
+.zine-sidebar-divider {
+  width: 28px;
+  height: 1px;
+  background: var(--zine-border);
+  margin: var(--sp-2) 0;
+}
+
+/* 面板区域 - 固定在右侧 */
+.zine-sidebar-panel {
+  flex: 1;
+  width: 280px;
+  border-left: 1px solid var(--zine-border);
+  overflow-y: auto;
+  background: var(--zine-surface);
+}
+
+/* 空状态 */
+.zine-left-panel-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--zine-text-muted);
+  font-size: 13px;
+}
+
+/* 面板内容通用样式 */
+.zine-left-panel-content {
+  padding: var(--sp-4);
+}
+
+.zine-left-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--sp-4);
+  padding-bottom: var(--sp-3);
+  border-bottom: 1px solid var(--zine-border);
+}
+
+.zine-left-panel-header span:first-child {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--zine-text-primary);
+}
+
+/* 区块样式 */
+.zine-left-section {
+  margin-bottom: var(--sp-4);
+}
+
+.zine-left-section-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--zine-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  margin-bottom: var(--sp-2);
+}
+
+/* 画布比例网格 - 紧凑版 */
+.zine-ratio-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+}
+
+/* 画布设置专用 - 每行两个 */
+.zine-canvas-ratio-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 4px;
+}
+
+.zine-ratio-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 6px 4px;
+  border: 1px solid var(--zine-border);
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  transition: all var(--t-fast);
+  background: var(--zine-surface);
+}
+
+.zine-ratio-item:hover {
+  border-color: var(--zine-border-2);
+  background: var(--zine-surface-2);
+}
+
+.zine-ratio-item.active {
+  border-color: var(--zine-brand);
+  background: var(--zine-brand-light);
+}
+
+.zine-ratio-thumb {
+  background: var(--zine-border);
+  border-radius: 2px;
+  transition: all var(--t-fast);
+}
+
+.zine-ratio-item.active .zine-ratio-thumb {
+  background: var(--zine-brand);
+  opacity: 0.5;
+}
+
+.zine-ratio-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--zine-text-muted);
+  line-height: 1;
+}
+
+.zine-ratio-sub {
+  font-size: 8px;
+  color: var(--zine-text-muted);
+  opacity: 0.7;
+}
+
+.zine-ratio-item.active .zine-ratio-label {
+  color: var(--zine-brand);
+}
+
+/* ==============================
+   Toggle 开关
+============================== */
+.zine-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--sp-2) 0;
+}
+
+.zine-toggle-label-text {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--zine-text-primary);
+}
+
+.zine-toggle {
+  width: 36px;
+  height: 20px;
+  background: var(--zine-border-2);
+  border-radius: 99px;
+  position: relative;
+  cursor: pointer;
+  transition: background var(--t-norm);
+  flex-shrink: 0;
+}
+
+.zine-toggle.on {
+  background: var(--zine-brand);
+}
+
+.zine-toggle::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  background: white;
+  border-radius: 50%;
+  box-shadow: var(--shadow-sm);
+  transition: left var(--t-norm);
+}
+
+.zine-toggle.on::after {
+  left: 18px;
+}
+
+/* ==============================
+   按钮样式
+============================== */
+.zine-btn-full {
+  width: 100%;
+  padding: 9px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: var(--r-md);
+  transition: all var(--t-fast);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.zine-btn-primary-full {
+  background: var(--zine-brand);
+  color: white;
+}
+
+.zine-btn-primary-full:hover {
+  background: var(--zine-brand-hover);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+.zine-btn-secondary-full {
+  background: var(--zine-surface-2);
+  color: var(--zine-text-secondary);
+  border: 1px solid var(--zine-border);
+}
+
+.zine-btn-secondary-full:hover {
+  background: var(--zine-border);
+  color: var(--zine-text-primary);
+}
+
+/* ==============================
+   Setters Container Styles
+   Setter 容器样式
+============================== */
+
+/* Setters 容器 */
+.zine-setters-container {
+  padding: var(--sp-4);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* 动态渲染 Setter 列表 */
+.zine-setters-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 4px;
+  margin-right: -4px;
+}
+
+/* 自定义滚动条样式 */
+.zine-setters-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.zine-setters-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.zine-setters-content::-webkit-scrollbar-thumb {
+  background: var(--zine-border);
+  border-radius: 3px;
+}
+
+.zine-setters-content::-webkit-scrollbar-thumb:hover {
+  background: var(--zine-border-2);
+}
+
+/* Setters 头部 */
+.zine-setters-header {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding-bottom: var(--sp-3);
+  margin-bottom: var(--sp-3);
+  border-bottom: 1px solid var(--zine-border);
+}
+
+.zine-setters-icon {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: var(--zine-brand);
+}
+
+.zine-setters-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--zine-text-primary);
+}
+
+/* 空状态 */
+.zine-setters-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--sp-8) var(--sp-4);
+  text-align: center;
+  min-height: 200px;
+}
+
+.zine-empty-icon {
+  font-size: 48px;
+  margin-bottom: var(--sp-3);
+  opacity: 0.5;
+}
+
+.zine-empty-text {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--zine-text-secondary);
+  margin-bottom: var(--sp-1);
+}
+
+.zine-empty-sub {
+  font-size: 12px;
+  color: var(--zine-text-muted);
+}
+
+/* Setter 区块 */
+.zine-setter-section {
+  margin-bottom: var(--sp-4);
+  padding-bottom: var(--sp-4);
+  border-bottom: 1px solid var(--zine-border);
+}
+
+.zine-setter-section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.zine-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  padding: var(--sp-1) 0;
+}
+
+.zine-section-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--zine-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  margin-bottom: var(--sp-2);
+}
+
+/* 表单行 */
+.zine-form-row {
+  display: flex;
+  gap: var(--sp-2);
+  flex-wrap: wrap;
+}
+
+.zine-form-group {
+  flex: 1;
+  min-width: 60px;
+}
+
+.zine-form-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--zine-text-muted);
+  margin-bottom: 4px;
+}
+
+/* 数字输入 */
+.zine-num-input {
+  width: 100%;
+  height: 32px;
+  padding: 0 8px;
+  border: 1px solid var(--zine-border);
+  border-radius: var(--r-sm);
+  font-size: 13px;
+  color: var(--zine-text-primary);
+  background: var(--zine-surface);
+  outline: none;
+  transition: all var(--t-fast);
+}
+
+.zine-num-input:focus {
+  border-color: var(--zine-brand);
+  box-shadow: 0 0 0 2px var(--zine-brand-light);
+}
+
+/* 下拉选择 */
+.zine-form-select {
+  width: 100%;
+  height: 32px;
+  padding: 0 8px;
+  border: 1px solid var(--zine-border);
+  border-radius: var(--r-sm);
+  font-size: 13px;
+  color: var(--zine-text-primary);
+  background: var(--zine-surface);
+  outline: none;
+  cursor: pointer;
+}
+
+.zine-form-select:focus {
+  border-color: var(--zine-brand);
+  box-shadow: 0 0 0 2px var(--zine-brand-light);
+}
+
+/* 滑块行 */
+.zine-slider-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+
+.zine-slider-row input[type="range"] {
+  flex: 1;
+  height: 4px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: var(--zine-border);
+  border-radius: 2px;
+  outline: none;
+}
+
+.zine-slider-row input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  background: var(--zine-brand);
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.zine-slider-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--zine-text-muted);
+  min-width: 40px;
+}
+
+.zine-slider-val {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--zine-text-secondary);
+  min-width: 40px;
+  text-align: right;
+}
+
+/* 颜色选择 */
+.zine-color-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.zine-color-dot {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  cursor: pointer;
+  position: relative;
+  transition: all var(--t-fast);
+  border: 2px solid transparent;
+}
+
+.zine-color-dot:hover {
+  transform: scale(1.1);
+}
+
+.zine-color-dot.active {
+  border-color: var(--zine-brand);
+  box-shadow: 0 0 0 2px var(--zine-brand-light);
+}
+
+.zine-color-picker-btn {
+  width: 24px;
+  height: 24px;
+  border: 2px dashed var(--zine-border);
+  border-radius: 50%;
+  cursor: pointer;
+  background: linear-gradient(45deg, transparent 45%, var(--zine-border) 45%, var(--zine-border) 55%, transparent 55%);
+}
+
+.zine-color-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.zine-color-preview {
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+  border: 1px solid var(--zine-border);
+}
+
+.zine-color-hex-input {
+  width: 70px;
+  height: 24px;
+  padding: 0 6px;
+  border: 1px solid var(--zine-border);
+  border-radius: var(--r-sm);
+  font-size: 11px;
+  font-family: monospace;
+  text-transform: uppercase;
+}
+
+/* 样式按钮组 */
+.zine-style-group {
+  display: flex;
+  gap: 4px;
+}
+
+.zine-style-btn {
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--zine-border);
+  border-radius: var(--r-sm);
+  background: var(--zine-surface);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--zine-text-secondary);
+  cursor: pointer;
+  transition: all var(--t-fast);
+}
+
+.zine-style-btn:hover {
+  border-color: var(--zine-border-2);
+  background: var(--zine-surface-2);
+}
+
+.zine-style-btn.active {
+  border-color: var(--zine-brand);
+  background: var(--zine-brand-light);
+  color: var(--zine-brand);
+}
+
+/* 对齐按钮组 */
+.zine-align-group {
+  display: flex;
+  gap: 4px;
+}
+
+.zine-align-btn {
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--zine-border);
+  border-radius: var(--r-sm);
+  background: var(--zine-surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--t-fast);
+  font-size: 12px;
+}
+
+.zine-align-btn:hover {
+  border-color: var(--zine-border-2);
+  background: var(--zine-surface-2);
+}
+
+.zine-align-btn.active {
+  border-color: var(--zine-brand);
+  background: var(--zine-brand-light);
+}
+
+/* 对齐网格（画布对齐） */
+.zine-align-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+}
+
+/* 图层操作按钮 */
+.zine-layer-actions {
+  display: flex;
+  gap: var(--sp-2);
+}
+
+.zine-layer-btn {
+  flex: 1;
+  height: 36px;
+  border: 1px solid var(--zine-border);
+  border-radius: var(--r-sm);
+  background: var(--zine-surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--t-fast);
+  font-size: 14px;
+}
+
+.zine-layer-btn:hover {
+  border-color: var(--zine-border-2);
+  background: var(--zine-surface-2);
+}
+
+.zine-layer-btn.active {
+  border-color: var(--zine-brand);
+  background: var(--zine-brand-light);
+}
+
+.zine-delete-btn:hover {
+  border-color: #ff4d4f;
+  background: #fff1f0;
+}
+
+/* 锁定按钮 */
+.zine-lock-btn {
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--zine-border);
+  border-radius: var(--r-sm);
+  background: var(--zine-surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all var(--t-fast);
+}
+
+.zine-lock-btn.active {
+  border-color: var(--zine-brand);
+  background: var(--zine-brand-light);
+}
+
+/* 效果子区块 */
+.zine-effect-subsection {
+  padding: var(--sp-2);
+  background: var(--zine-surface-2);
+  border-radius: var(--r-sm);
+}
+
+.zine-effect-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--zine-text-secondary);
+  margin-bottom: var(--sp-2);
+}
+
+/* 开关 */
+.zine-toggle {
+  position: relative;
+  width: 36px;
+  height: 20px;
+}
+
+.zine-toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.zine-toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background: var(--zine-border);
+  border-radius: 20px;
+  transition: all var(--t-fast);
+}
+
+.zine-toggle-slider:before {
+  content: "";
+  position: absolute;
+  height: 16px;
+  width: 16px;
+  left: 2px;
+  bottom: 2px;
+  background: white;
+  border-radius: 50%;
+  transition: all var(--t-fast);
+}
+
+.zine-toggle input:checked + .zine-toggle-slider {
+  background: var(--zine-brand);
+}
+
+.zine-toggle input:checked + .zine-toggle-slider:before {
+  transform: translateX(16px);
+}
+
+/* ==============================
+   Image Picker Styles
+============================== */
+.zine-image-upload-btn {
+  display: block;
+  cursor: pointer;
+}
+
+.zine-image-tip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  margin-top: 12px;
+  background: var(--zine-surface-2);
+  border-radius: var(--r-sm);
+  font-size: 11px;
+  color: var(--zine-text-muted);
+}
+
+.zine-image-tip svg {
+  flex-shrink: 0;
+  opacity: 0.6;
+}
+
+/* ==============================
+   Setter Button Group
+============================== */
+.zine-btn-group {
+  display: flex;
+  gap: var(--sp-2);
+}
+
+.zine-btn-group button {
+  flex: 1;
+}

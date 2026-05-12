@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Zine Log · 图像编辑器</title>
+<link rel="stylesheet" href="image-editor-style.css"/>
+</head>
+<body>
+<div id="app">
+
+<!-- ===== 顶部导航 ===== -->
+<header class="topbar">
+  <a class="logo" href="#">
+    <div class="logo-icon">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+        <polyline points="2 17 12 22 22 17"/>
+        <polyline points="2 12 12 17 22 12"/>
+      </svg>
+    </div>
+    <div class="logo-text">
+      <div class="logo-title">Zine Log</div>
+      <div class="logo-subtitle">图像编辑器</div>
+    </div>
+  </a>
+
+  <!-- 面包屑 -->
+  <div class="breadcrumb">
+    <span>我的相册</span>
+    <span class="breadcrumb-sep">/</span>
+    <span>春天的午后</span>
+    <span class="breadcrumb-sep">/</span>
+    <span class="breadcrumb-cur">图像编辑</span>
+  </div>
+
+  <div class="topbar-sep"></div>
+
+  <!-- 历史记录 -->
+  <div class="history-group">
+    <button class="history-btn" title="撤销 Ctrl+Z">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M3 7v6h6"/><path d="M3 13c1.3-3.6 4.8-6 9-6a10 10 0 0 1 9 9"/>
+      </svg>
+    </button>
+    <button class="history-btn" title="重做 Ctrl+Y">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 7v6h-6"/><path d="M21 13c-1.3-3.6-4.8-6-9-6a10 10 0 0 0-9 9"/>
+      </svg>
+    </button>
+  </div>
+
+  <div class="topbar-actions">
+    <button class="btn-icon" title="全屏预览">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+      </svg>
+    </button>
+    <div class="topbar-sep"></div>
+    <button class="btn-export">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <polyline points="7 10 12 15 17 10"/>
+        <line x1="12" y1="15" x2="12" y2="3"/>
+      </svg>
+      导出作品
+    </button>
+  </div>
+</header>
+
+<!-- ===== 主工作区 ===== -->
+<div class="workspace">
+
+  <!-- ===== 左侧：垂直工具栏 ===== -->
+  <div class="toolbar-left">
+
+    <!-- 画布工具 -->
+    <button class="tool-btn" data-tip="画布设置" onclick="setTool('canvas',this)" id="toolCanvas">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="3" y="3" width="18" height="18" rx="2"/>
+        <path d="M3 9h18M9 21V9"/>
+      </svg>
+      画布
+    </button>
+
+    <div class="tool-divider"></div>
+
+    <!-- 文字工具 -->
+    <button class="tool-btn active" data-tip="插入文字 T" onclick="setTool('text',this)" id="toolText">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="4 7 4 4 20 4 20 7"/>
+        <line x1="9" y1="20" x2="15" y2="20"/>
+        <line x1="12" y1="4" x2="12" y2="20"/>
+      </svg>
+      文字
+    </button>
+
+    <!-- 形状工具 -->
+    <button class="tool-btn" data-tip="形状 S" onclick="setTool('shape',this)" id="toolShape">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"/>
+      </svg>
+      形状
+    </button>
+
+    <!-- 画笔工具 -->
+    <button class="tool-btn" data-tip="画笔 B" onclick="setTool('brush',this)" id="toolBrush">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M3 17c0-1.1.9-2 2-2h.5c.3 0 .5-.2.5-.5v-1c0-.3.2-.5.5-.5.8 0 2.5.5 2.5 3.5 0 1.5-1 2.5-2.5 2.5C4.1 19 3 18.1 3 17z"/>
+        <path d="M8 16l10.5-10.5a1.5 1.5 0 0 1 2.1 2.1L10 18"/>
+      </svg>
+      画笔
+    </button>
+
+    <!-- Emoji工具 -->
+    <button class="tool-btn" data-tip="表情包 E" onclick="setTool('emoji',this)" id="toolEmoji">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="M8 13s1.5 2 4 2 4-2 4-2"/>
+        <line x1="9" y1="9" x2="9.01" y2="9"/>
+        <line x1="15" y1="9" x2="15.01" y2="9"/>
+      </svg>
+      表情
+    </button>
+
+    <div class="tool-divider"></div>
+
+    <!-- 对齐 -->
+    <button class="tool-btn" data-tip="对齐分布">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="3" y1="6" x2="21" y2="6"/>
+        <line x1="3" y1="12" x2="21" y2="12"/>
+        <line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+      对齐
+    </button>
+  </div>
+
+  <!-- ===== 中间：画布区 ===== -->
+  <main class="panel-center">
+    <!-- 画布控制栏 -->
+    <div class="canvas-topbar">
+      <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--clr-text-muted);">
+        <span id="selectedInfo" style="font-weight:500;color:var(--clr-text-secondary);">文字图层 已选中</span>
+      </div>
+
+      <div class="zoom-ctrl">
+        <button class="zoom-btn" onclick="changeZoom(-10)">−</button>
+        <span class="zoom-val" id="zoomVal">100%</span>
+        <button class="zoom-btn" onclick="changeZoom(10)">+</button>
+      </div>
+    </div>
+
+    <!-- 画布视口 -->
+    <div class="canvas-viewport">
+      <div class="canvas-guide"></div>
+      <div class="canvas-wrap" id="canvasWrap">
+        <div class="canvas-paper">
+
+          <!-- 演示内容：拼图背景 -->
+          <div class="canvas-placeholder">
+            <div class="canvas-placeholder-grid">
+              <div class="cp-cell"></div>
+              <div class="cp-cell"></div>
+              <div class="cp-cell"></div>
+              <div class="cp-cell"></div>
+              <div class="cp-cell"></div>
+              <div class="cp-cell"></div>
+              <div class="cp-cell"></div>
+            </div>
+          </div>
+
+          <!-- 演示：文字图层（已选中状态） -->
+          <div class="demo-text-layer" style="position:absolute;top:52px;left:52px;">
+            春天的午后
+            <!-- 选中框 -->
+            <div class="select-box">
+              <div class="select-corner sc-tl"></div>
+              <div class="select-corner sc-tr"></div>
+              <div class="select-corner sc-bl"></div>
+              <div class="select-corner sc-br"></div>
+              <div class="select-corner sc-tm"></div>
+              <div class="select-corner sc-bm"></div>
+              <div class="select-corner sc-ml"></div>
+              <div class="select-corner sc-mr"></div>
+            </div>
+            <!-- 类型标签 -->
+            <div class="sel-type-badge">
+              <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="4 7 4 4 20 4 20 7"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+              文字
+            </div>
+          </div>
+
+          <!-- 演示：画笔痕迹（SVG） -->
+          <div class="demo-brush">
+            <svg width="120" height="80" viewBox="0 0 120 80" fill="none">
+              <path d="M10 60 Q30 20 50 45 Q70 70 90 30 Q105 10 115 25"
+                stroke="#C8773A" stroke-width="4" stroke-linecap="round"
+                stroke-linejoin="round" opacity=".7" fill="none"/>
+              <path d="M15 70 Q40 35 65 55 Q80 65 100 40"
+                stroke="#2D6BE4" stroke-width="8" stroke-linecap="round"
+                stroke-linejoin="round" opacity=".35" fill="none"
+                stroke-dasharray="0"/>
+            </svg>
+          </div>
+
+          <!-- 演示：形状 -->
+          <div class="demo-shape"></div>
+
+          <!-- 演示：Emoji -->
+          <div class="demo-emoji">🌸</div>
+
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ===== 右侧：属性面板（单一内容区，跟随左侧工具切换） ===== -->
+  <aside class="panel-right">
+
+    <!-- 面板内容区（无 tab 条，工具按钮直接控制显示） -->
+    <div class="right-panel-body" id="panelBody">
+
+    <!-- ===== 画布面板 ===== -->
+    <div class="tab-panel" id="tab-canvas" style="display:none;">
+      <div class="panel-title-bar">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        画布设置
+      </div>
+      <div class="right-content">
+
+        <!-- 预设比例 -->
+        <div class="tool-section">
+          <div class="section-label">预设比例</div>
+          <div class="ratio-grid">
+            <div class="ratio-item active" onclick="selectRatio(this,'3:4',390,520)">
+              <div class="ratio-thumb" style="width:24px;height:32px;"></div>
+              <span class="ratio-label">3:4</span>
+              <span class="ratio-sub">竖版</span>
+            </div>
+            <div class="ratio-item" onclick="selectRatio(this,'1:1',520,520)">
+              <div class="ratio-thumb" style="width:28px;height:28px;"></div>
+              <span class="ratio-label">1:1</span>
+              <span class="ratio-sub">方形</span>
+            </div>
+            <div class="ratio-item" onclick="selectRatio(this,'4:3',520,390)">
+              <div class="ratio-thumb" style="width:32px;height:24px;"></div>
+              <span class="ratio-label">4:3</span>
+              <span class="ratio-sub">横版</span>
+            </div>
+            <div class="ratio-item" onclick="selectRatio(this,'9:16',360,640)">
+              <div class="ratio-thumb" style="width:18px;height:32px;"></div>
+              <span class="ratio-label">9:16</span>
+              <span class="ratio-sub">手机</span>
+            </div>
+            <div class="ratio-item" onclick="selectRatio(this,'16:9',640,360)">
+              <div class="ratio-thumb" style="width:32px;height:18px;"></div>
+              <span class="ratio-label">16:9</span>
+              <span class="ratio-sub">宽屏</span>
+            </div>
+            <div class="ratio-item" onclick="selectRatio(this,'A4',595,842)">
+              <div class="ratio-thumb" style="width:22px;height:31px;"></div>
+              <span class="ratio-label">A4</span>
+              <span class="ratio-sub">打印</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 自定义尺寸 -->
+        <div class="tool-section">
+          <div class="section-label">自定义尺寸</div>
+          <div class="size-inputs">
+            <div class="form-group" style="flex:1;">
+              <label class="form-label">宽 W</label>
+              <input type="number" class="num-input" id="canvasW" value="520" min="100" max="4000" oninput="syncLinkedSize('w')">
+            </div>
+            <button class="size-link-btn linked" id="sizeLinkBtn" onclick="toggleSizeLink(this)" title="锁定比例">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+              </svg>
+            </button>
+            <div class="form-group" style="flex:1;">
+              <label class="form-label">高 H</label>
+              <input type="number" class="num-input" id="canvasH" value="693" min="100" max="4000" oninput="syncLinkedSize('h')">
+            </div>
+            <span class="size-unit">px</span>
+          </div>
+          <button class="btn-full btn-secondary-full" style="margin-top:4px;" onclick="applyCanvasSize()">
+            应用尺寸
+          </button>
+        </div>
+
+        <!-- 裁切工具 -->
+        <div class="tool-section">
+          <div class="section-label">裁切模式</div>
+          <div class="crop-modes">
+            <div class="crop-mode-btn active" onclick="selectCropMode(this,'free')">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M6 2v14h14"/>
+                <path d="M2 6h14v14"/>
+              </svg>
+              <span class="crop-mode-label">自由</span>
+            </div>
+            <div class="crop-mode-btn" onclick="selectCropMode(this,'fixed')">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                <path d="M3 9h18M9 3v18"/>
+              </svg>
+              <span class="crop-mode-label">固定比例</span>
+            </div>
+            <div class="crop-mode-btn" onclick="selectCropMode(this,'circle')">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <circle cx="12" cy="12" r="9"/>
+                <line x1="12" y1="3" x2="12" y2="21" stroke-dasharray="2,2"/>
+                <line x1="3" y1="12" x2="21" y2="12" stroke-dasharray="2,2"/>
+              </svg>
+              <span class="crop-mode-label">圆形</span>
+            </div>
+            <div class="crop-mode-btn" onclick="selectCropMode(this,'perspective')">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <polygon points="4 20 8 4 20 4 16 20"/>
+              </svg>
+              <span class="crop-mode-label">透视</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 固定裁切比例 -->
+        <div class="tool-section" id="cropRatioSection">
+          <div class="section-label">裁切比例</div>
+          <div class="crop-ratios">
+            <div class="crop-ratio-pill active" onclick="selectCropRatio(this,'free')">自由</div>
+            <div class="crop-ratio-pill" onclick="selectCropRatio(this,'1:1')">1:1</div>
+            <div class="crop-ratio-pill" onclick="selectCropRatio(this,'3:4')">3:4</div>
+            <div class="crop-ratio-pill" onclick="selectCropRatio(this,'4:3')">4:3</div>
+            <div class="crop-ratio-pill" onclick="selectCropRatio(this,'9:16')">9:16</div>
+            <div class="crop-ratio-pill" onclick="selectCropRatio(this,'16:9')">16:9</div>
+          </div>
+        </div>
+
+        <!-- 裁切预览 -->
+        <div class="tool-section">
+          <div class="section-label">裁切预览</div>
+          <div class="crop-preview" id="cropPreview">
+            <div style="position:absolute;inset:0;background:linear-gradient(135deg,#8a9a6b,#9ab8d0,#c4a882);"></div>
+            <div class="crop-overlay" id="cropOverlay">
+              <div class="crop-corner tl"></div>
+              <div class="crop-corner tr"></div>
+              <div class="crop-corner bl"></div>
+              <div class="crop-corner br"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 旋转翻转 -->
+        <div class="tool-section">
+          <div class="section-label">旋转与翻转</div>
+          <div class="transform-group">
+            <button class="transform-btn" onclick="rotateCanvas(-90)">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 7v6h6"/><path d="M3 13c1.3-3.6 4.8-6 9-6a10 10 0 0 1 9 9"/>
+              </svg>
+              左转
+            </button>
+            <button class="transform-btn" onclick="rotateCanvas(90)">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 7v6h-6"/><path d="M21 13c-1.3-3.6-4.8-6-9-6a10 10 0 0 0-9 9"/>
+              </svg>
+              右转
+            </button>
+          </div>
+          <div class="transform-group" style="margin-top:var(--sp-2);">
+            <button class="transform-btn" onclick="flipCanvas('h')">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 12h18M12 3v18"/><line x1="3" y1="3" x2="3" y2="21" stroke-dasharray="3,2"/>
+              </svg>
+              水平翻转
+            </button>
+            <button class="transform-btn" onclick="flipCanvas('v')">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 12h18M12 3v18"/><line x1="3" y1="3" x2="21" y2="3" stroke-dasharray="3,2"/>
+              </svg>
+              垂直翻转
+            </button>
+          </div>
+        </div>
+
+      </div>
+      <!-- 底部按钮 -->
+      <div class="right-footer">
+        <button class="btn-full btn-secondary-full" onclick="cancelCrop()">取消裁切</button>
+        <button class="btn-full btn-primary-full" onclick="applyCrop()">应用裁切</button>
+      </div>
+    </div>
+
+    <!-- ===== 文字面板 ===== -->
+    <div class="tab-panel" id="tab-text" style="display:flex;">
+      <div class="panel-title-bar">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+        文字属性
+      </div>
+      <div class="right-content">
+
+      <!-- 当前选中指示 -->
+      <div class="panel-indicator">
+        <div class="panel-indicator-dot"></div>
+        <span class="panel-indicator-text">文字图层</span>
+        <span class="panel-indicator-sub">双击编辑内容</span>
+      </div>
+
+      <!-- 字体 -->
+      <div class="tool-section">
+        <div class="section-label">字体</div>
+        <select class="form-select">
+          <option>PingFang SC（苹方）</option>
+          <option>微软雅黑</option>
+          <option>思源黑体</option>
+          <option>思源宋体</option>
+          <option>霞鹜文楷</option>
+          <option>方正楷体</option>
+          <option>Inter</option>
+          <option>Georgia</option>
+          <option>SF Mono（等宽）</option>
+        </select>
+      </div>
+
+      <!-- 大小 + 行距 -->
+      <div class="tool-section">
+        <div class="section-label">尺寸</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">字号</label>
+            <input type="number" class="num-input" value="22" min="6" max="200">
+          </div>
+          <div class="form-group">
+            <label class="form-label">行距</label>
+            <input type="number" class="num-input" value="1.6" step="0.1" min="1" max="4">
+          </div>
+          <div class="form-group">
+            <label class="form-label">字间距</label>
+            <input type="number" class="num-input" value="0" min="-10" max="50">
+          </div>
+          <div class="form-group">
+            <label class="form-label">段间距</label>
+            <input type="number" class="num-input" value="0" min="0" max="100">
+          </div>
+        </div>
+      </div>
+
+      <!-- 样式 BIUS + 对齐 -->
+      <div class="tool-section">
+        <div class="section-label">样式与对齐</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div class="style-group">
+            <button class="style-btn bold-btn active" title="加粗" onclick="this.classList.toggle('active')">B</button>
+            <button class="style-btn italic-btn" title="斜体" onclick="this.classList.toggle('active')">I</button>
+            <button class="style-btn underline-btn" title="下划线" onclick="this.classList.toggle('active')">U</button>
+            <button class="style-btn strike-btn" title="删除线" onclick="this.classList.toggle('active')">S</button>
+          </div>
+          <div style="width:1px;height:28px;background:var(--clr-border);"></div>
+          <div class="align-group">
+            <button class="align-btn active" title="左对齐" onclick="setAlign(this)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="17" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="17" y1="18" x2="3" y2="18"/></svg>
+            </button>
+            <button class="align-btn" title="居中" onclick="setAlign(this)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="10" x2="6" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="18" y1="18" x2="6" y2="18"/></svg>
+            </button>
+            <button class="align-btn" title="右对齐" onclick="setAlign(this)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="21" y1="10" x2="7" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="21" y1="18" x2="7" y2="18"/></svg>
+            </button>
+            <button class="align-btn" title="两端对齐" onclick="setAlign(this)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="21" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="21" y1="18" x2="3" y2="18"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 颜色 -->
+      <div class="tool-section">
+        <div class="section-label">文字颜色</div>
+        <div class="color-row">
+          <div class="color-dot active" style="background:#1A1714;" onclick="setColorDot(this,'textColor','#1A1714')"></div>
+          <div class="color-dot" style="background:#FFFFFF;border:1.5px solid var(--clr-border);" onclick="setColorDot(this,'textColor','#FFFFFF')"></div>
+          <div class="color-dot" style="background:#C8773A;" onclick="setColorDot(this,'textColor','#C8773A')"></div>
+          <div class="color-dot" style="background:#2D6BE4;" onclick="setColorDot(this,'textColor','#2D6BE4')"></div>
+          <div class="color-dot" style="background:#2DA861;" onclick="setColorDot(this,'textColor','#2DA861')"></div>
+          <div class="color-dot" style="background:#E04040;" onclick="setColorDot(this,'textColor','#E04040')"></div>
+          <div class="color-dot" style="background:#9B59B6;" onclick="setColorDot(this,'textColor','#9B59B6')"></div>
+          <div class="color-picker-btn" title="自定义颜色"></div>
+          <div class="color-input-wrap">
+            <div class="color-preview" id="textColor" style="background:#1A1714;"></div>
+            <input class="color-hex-input" value="#1A1714" maxlength="7" spellcheck="false">
+          </div>
+        </div>
+      </div>
+
+      <!-- 描边 -->
+      <div class="tool-section">
+        <div class="section-label">描边</div>
+        <div class="advanced-row" id="strokeRow" onclick="toggleAdvanced('strokeRow','strokePanel')">
+          <span class="advanced-row-label">描边设置</span>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="width:32px;height:3px;background:#1A1714;border-radius:2px;border:2px solid #C8773A;"></div>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="strokeArrow"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+        </div>
+        <div class="advanced-panel" id="strokePanel" style="display:none;">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">描边颜色</label>
+              <div class="color-row" style="gap:4px;flex-wrap:nowrap;">
+                <div class="color-dot" style="background:#C8773A;width:20px;height:20px;" onclick="setColorDot(this,'strokeColor','#C8773A')"></div>
+                <div class="color-dot active" style="background:#2D2D2D;width:20px;height:20px;" onclick="setColorDot(this,'strokeColor','#2D2D2D')"></div>
+                <div class="color-dot" style="background:#2D6BE4;width:20px;height:20px;" onclick="setColorDot(this,'strokeColor','#2D6BE4')"></div>
+                <div class="color-picker-btn" style="width:20px;height:20px;" title="自定义"></div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">描边宽度</label>
+              <input type="number" class="num-input" value="1" min="0" max="20">
+            </div>
+          </div>
+          <div class="slider-row">
+            <span class="slider-label">透明度</span>
+            <input type="range" min="0" max="100" value="100" oninput="document.getElementById('strokeAlpha').textContent=this.value+'%'">
+            <span class="slider-val" id="strokeAlpha">100%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 阴影 -->
+      <div class="tool-section">
+        <div class="section-label">阴影</div>
+        <div class="advanced-row" id="shadowRow" onclick="toggleAdvanced('shadowRow','shadowPanel')">
+          <span class="advanced-row-label">阴影设置</span>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div class="shadow-preview" style="width:40px;height:18px;font-size:10px;box-shadow:2px 2px 6px rgba(0,0,0,.4);">Aa</div>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="shadowArrow"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+        </div>
+        <div class="advanced-panel" id="shadowPanel" style="display:none;">
+          <div class="toggle-row">
+            <span class="toggle-label-text">启用阴影</span>
+            <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <div class="form-group"><label class="form-label">X 偏移</label><input type="number" class="num-input" value="2"></div>
+            <div class="form-group"><label class="form-label">Y 偏移</label><input type="number" class="num-input" value="2"></div>
+            <div class="form-group"><label class="form-label">模糊半径</label><input type="number" class="num-input" value="8"></div>
+            <div class="form-group"><label class="form-label">扩散</label><input type="number" class="num-input" value="0"></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">阴影颜色</label>
+            <div class="color-row">
+              <div class="color-dot active" style="background:#1A1714;" onclick="setColorDot(this,'shadowColor','#1A1714')"></div>
+              <div class="color-dot" style="background:#C8773A;" onclick="setColorDot(this,'shadowColor','#C8773A')"></div>
+              <div class="color-dot" style="background:#2D6BE4;" onclick="setColorDot(this,'shadowColor','#2D6BE4')"></div>
+              <div class="color-picker-btn" title="自定义"></div>
+              <div class="color-input-wrap">
+                <div class="color-preview" id="shadowColor" style="background:#1A1714;opacity:.5;"></div>
+                <input class="color-hex-input" value="#1A1714" maxlength="7">
+              </div>
+            </div>
+          </div>
+          <div class="slider-row">
+            <span class="slider-label">透明度</span>
+            <input type="range" min="0" max="100" value="50" oninput="document.getElementById('shadowAlpha').textContent=this.value+'%'">
+            <span class="slider-val" id="shadowAlpha">50%</span>
+          </div>
+          <div class="shadow-preview" style="font-size:18px;font-weight:700;height:44px;text-shadow:2px 2px 8px rgba(0,0,0,.5);">Aa 春天</div>
+        </div>
+      </div>
+
+      </div>
+      <div class="right-footer">
+        <button class="btn-full btn-secondary-full">取消更改</button>
+        <button class="btn-full btn-primary-full">应用</button>
+      </div>
+    </div>
+
+    <!-- ===== 形状面板 ===== -->
+    <div class="tab-panel" id="tab-shape" style="display:none;">
+      <div class="panel-title-bar">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"/></svg>
+        形状属性
+      </div>
+      <div class="right-content">
+
+      <div class="panel-indicator">
+        <div class="panel-indicator-dot" style="background:var(--clr-selected);"></div>
+        <span class="panel-indicator-text" style="color:var(--clr-selected);">形状工具</span>
+        <span class="panel-indicator-sub" style="color:var(--clr-selected);">点击画布插入</span>
+      </div>
+
+      <div class="tool-section">
+        <div class="section-label">线条预设</div>
+        <div class="line-presets">
+          <div class="line-preset-item active" onclick="selectLinePreset(this)">
+            <span class="line-label">直线</span>
+            <div class="line-preview line-solid" style="color:#1A1714;"></div>
+          </div>
+          <div class="line-preset-item" onclick="selectLinePreset(this)">
+            <span class="line-label">虚线</span>
+            <div class="line-preview line-dashed" style="color:#1A1714;"></div>
+          </div>
+          <div class="line-preset-item" onclick="selectLinePreset(this)">
+            <span class="line-label">点线</span>
+            <div class="line-preview line-dotted" style="color:#1A1714;"></div>
+          </div>
+          <div class="line-preset-item" onclick="selectLinePreset(this)">
+            <span class="line-label">箭头</span>
+            <div class="line-preview line-solid" style="color:#1A1714;position:relative;">
+              <svg style="position:absolute;right:-2px;top:-5px;" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" color="#1A1714"><polyline points="9 18 15 12 9 6"/></svg>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tool-section">
+        <div class="section-label">图形预设</div>
+        <div class="preset-grid">
+          <div class="preset-item" onclick="selectPreset(this)" title="矩形"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="1"/></svg></div>
+          <div class="preset-item active" onclick="selectPreset(this)" title="圆形"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/></svg></div>
+          <div class="preset-item" onclick="selectPreset(this)" title="圆角矩形"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="4"/></svg></div>
+          <div class="preset-item" onclick="selectPreset(this)" title="三角形"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 3 22 21 2 21"/></svg></div>
+          <div class="preset-item" onclick="selectPreset(this)" title="菱形"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 22 12 12 22 2 12"/></svg></div>
+          <div class="preset-item" onclick="selectPreset(this)" title="六边形"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"/></svg></div>
+          <div class="preset-item" onclick="selectPreset(this)" title="五角星"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+          <div class="preset-item" onclick="selectPreset(this)" title="心形"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
+        </div>
+      </div>
+
+      <div class="tool-section">
+        <div class="section-label">填充</div>
+        <div class="color-row">
+          <div class="color-dot" style="background:transparent;border:2px dashed var(--clr-border);" title="无填充" onclick="setColorDot(this,'fillColor','transparent')"><svg style="position:absolute;" width="12" height="12" viewBox="0 0 24 24"><line x1="3" y1="3" x2="21" y2="21" stroke="#D0CBC0" stroke-width="2"/></svg></div>
+          <div class="color-dot" style="background:#FFFFFF;border:1.5px solid var(--clr-border);" onclick="setColorDot(this,'fillColor','#FFFFFF')"></div>
+          <div class="color-dot active" style="background:rgba(200,119,58,.15);border:1.5px solid var(--clr-brand);" onclick="setColorDot(this,'fillColor','rgba(200,119,58,.15)')"></div>
+          <div class="color-dot" style="background:rgba(45,107,228,.15);border:1.5px solid #2D6BE4;" onclick="setColorDot(this,'fillColor','rgba(45,107,228,.15)')"></div>
+          <div class="color-dot" style="background:#F5E8DA;" onclick="setColorDot(this,'fillColor','#F5E8DA')"></div>
+          <div class="color-dot" style="background:#1A1714;" onclick="setColorDot(this,'fillColor','#1A1714')"></div>
+          <div class="color-picker-btn" title="自定义填充色"></div>
+        </div>
+        <div class="slider-row">
+          <span class="slider-label">填充透明</span>
+          <input type="range" min="0" max="100" value="15" oninput="document.getElementById('fillAlpha').textContent=this.value+'%'">
+          <span class="slider-val" id="fillAlpha">15%</span>
+        </div>
+      </div>
+
+      <div class="tool-section">
+        <div class="section-label">边框</div>
+        <div class="color-row" style="margin-bottom:8px;">
+          <div class="color-dot active" style="background:#C8773A;" onclick="setColorDot(this,'borderColor','#C8773A')"></div>
+          <div class="color-dot" style="background:#1A1714;" onclick="setColorDot(this,'borderColor','#1A1714')"></div>
+          <div class="color-dot" style="background:#2D6BE4;" onclick="setColorDot(this,'borderColor','#2D6BE4')"></div>
+          <div class="color-dot" style="background:#2DA861;" onclick="setColorDot(this,'borderColor','#2DA861')"></div>
+          <div class="color-picker-btn" title="自定义边框色"></div>
+          <div class="color-input-wrap">
+            <div class="color-preview" id="borderColor" style="background:#C8773A;"></div>
+            <input class="color-hex-input" value="#C8773A" maxlength="7">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">边框宽度</label><input type="number" class="num-input" value="3" min="0" max="20"></div>
+          <div class="form-group"><label class="form-label">圆角</label><input type="number" class="num-input" value="0" min="0" max="100"></div>
+        </div>
+        <div class="border-styles">
+          <div class="border-style-btn active" onclick="setBorderStyle(this)">—— 实线</div>
+          <div class="border-style-btn" onclick="setBorderStyle(this)">- - 虚线</div>
+          <div class="border-style-btn" onclick="setBorderStyle(this)">··· 点线</div>
+        </div>
+      </div>
+
+      </div>
+      <div class="right-footer">
+        <button class="btn-full btn-secondary-full">取消更改</button>
+        <button class="btn-full btn-primary-full">应用</button>
+      </div>
+    </div>
+
+    <!-- ===== 画笔面板 ===== -->
+    <div class="tab-panel" id="tab-brush" style="display:none;">
+      <div class="panel-title-bar">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17c0-1.1.9-2 2-2h.5c.3 0 .5-.2.5-.5v-1c0-.3.2-.5.5-.5.8 0 2.5.5 2.5 3.5 0 1.5-1 2.5-2.5 2.5C4.1 19 3 18.1 3 17z"/><path d="M8 16l10.5-10.5a1.5 1.5 0 0 1 2.1 2.1L10 18"/></svg>
+        画笔属性
+      </div>
+      <div class="right-content">
+
+      <div class="panel-indicator">
+        <div class="panel-indicator-dot" style="background:#6B6560;"></div>
+        <span class="panel-indicator-text" style="color:#6B6560;">画笔工具</span>
+        <span class="panel-indicator-sub" style="color:#9E9890;">在画布上自由绘制</span>
+      </div>
+
+      <div class="tool-section">
+        <div class="section-label">笔型</div>
+        <div class="brush-type-row">
+          <div class="brush-type-btn active" onclick="selectBrush(this)">
+            <div class="brush-icon"><svg width="28" height="28" viewBox="0 0 28 28" fill="none"><path d="M6 22 L20 8" stroke="#C8773A" stroke-width="1.5" stroke-linecap="round"/><path d="M20 8 L22 6 C23 5 23 7 22 8 L20 10 Z" fill="#C8773A"/><circle cx="6" cy="22" r="2" fill="#C8773A"/></svg></div>
+            <span class="brush-label">铅笔</span>
+          </div>
+          <div class="brush-type-btn" onclick="selectBrush(this)">
+            <div class="brush-icon"><svg width="28" height="28" viewBox="0 0 28 28" fill="none"><path d="M5 22 Q12 12 22 8" stroke="#2D6BE4" stroke-width="5" stroke-linecap="round" opacity=".55"/><path d="M5 22 Q12 12 22 8" stroke="#2D6BE4" stroke-width="1.5" stroke-linecap="round" opacity=".9"/></svg></div>
+            <span class="brush-label">马克笔</span>
+          </div>
+        </div>
+        <div class="brush-preview">
+          <svg viewBox="0 0 240 56" preserveAspectRatio="none" fill="none">
+            <path id="brushPreviewPath" d="M20 40 Q50 15 80 28 Q110 42 140 18 Q170 5 210 30" stroke="#C8773A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          </svg>
+        </div>
+      </div>
+
+      <div class="tool-section">
+        <div class="section-label">笔迹颜色</div>
+        <div class="color-row">
+          <div class="color-dot active" style="background:#C8773A;" onclick="setBrushColor(this,'#C8773A')"></div>
+          <div class="color-dot" style="background:#1A1714;" onclick="setBrushColor(this,'#1A1714')"></div>
+          <div class="color-dot" style="background:#2D6BE4;" onclick="setBrushColor(this,'#2D6BE4')"></div>
+          <div class="color-dot" style="background:#2DA861;" onclick="setBrushColor(this,'#2DA861')"></div>
+          <div class="color-dot" style="background:#E04040;" onclick="setBrushColor(this,'#E04040')"></div>
+          <div class="color-dot" style="background:#9B59B6;" onclick="setBrushColor(this,'#9B59B6')"></div>
+          <div class="color-dot" style="background:#F5F0E8;border:1.5px solid var(--clr-border);" onclick="setBrushColor(this,'#F5F0E8')"></div>
+          <div class="color-picker-btn" title="自定义颜色"></div>
+          <div class="color-input-wrap">
+            <div class="color-preview" id="brushColor" style="background:#C8773A;"></div>
+            <input class="color-hex-input" id="brushColorHex" value="#C8773A" maxlength="7">
+          </div>
+        </div>
+      </div>
+
+      <div class="tool-section">
+        <div class="section-label">笔迹大小</div>
+        <div class="slider-row">
+          <span class="slider-label">粗细</span>
+          <input type="range" min="1" max="40" value="4" oninput="updateBrushPreview(this.value);document.getElementById('brushSzVal').textContent=this.value+'px'">
+          <span class="slider-val" id="brushSzVal">4px</span>
+        </div>
+        <div class="slider-row">
+          <span class="slider-label">透明度</span>
+          <input type="range" min="10" max="100" value="100" oninput="document.getElementById('brushAlpha').textContent=this.value+'%'">
+          <span class="slider-val" id="brushAlpha">100%</span>
+        </div>
+        <div class="slider-row">
+          <span class="slider-label">平滑度</span>
+          <input type="range" min="0" max="100" value="60" oninput="document.getElementById('brushSmooth').textContent=this.value+'%'">
+          <span class="slider-val" id="brushSmooth">60%</span>
+        </div>
+      </div>
+
+      <div class="tool-section">
+        <div class="section-label">橡皮擦</div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn-secondary-full" style="flex:1;padding:8px;font-size:12px;font-weight:600;background:var(--clr-surface-2);border:1px solid var(--clr-border);border-radius:var(--r-md);">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px;"><path d="M20 20H7L3 16l9.5-9.5 7.5 7.5L16 18"/><path d="M6.5 17.5l5-5"/></svg>
+            切换橡皮擦
+          </button>
+          <button class="btn-secondary-full" style="padding:8px;font-size:12px;font-weight:600;background:var(--clr-surface-2);border:1px solid var(--clr-border);border-radius:var(--r-md);">清空</button>
+        </div>
+      </div>
+
+      </div>
+      <div class="right-footer">
+        <button class="btn-full btn-secondary-full">取消更改</button>
+        <button class="btn-full btn-primary-full">应用</button>
+      </div>
+    </div>
+
+    <!-- ===== Emoji 面板 ===== -->
+    <div class="tab-panel" id="tab-emoji" style="display:none;">
+      <div class="panel-title-bar">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 13s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+        表情 & 贴纸
+      </div>
+      <div class="right-content">
+
+      <div class="panel-indicator">
+        <div class="panel-indicator-dot" style="background:#F59E0B;"></div>
+        <span class="panel-indicator-text" style="color:#B45309;">表情 & 贴纸</span>
+        <span class="panel-indicator-sub" style="color:#D97706;">点击插入画布</span>
+      </div>
+
+      <div class="tool-section">
+        <div class="emoji-search">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--clr-text-muted)" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" placeholder="搜索表情…" id="emojiSearch" oninput="filterEmoji(this.value)">
+        </div>
+      </div>
+
+      <div class="tool-section">
+        <div class="emoji-categories" id="emojiCats">
+          <button class="emoji-cat-btn active" data-cat="recent" onclick="setEmojiCat(this,'recent')" title="最近使用">🕐</button>
+          <button class="emoji-cat-btn" data-cat="smileys" onclick="setEmojiCat(this,'smileys')" title="表情">😀</button>
+          <button class="emoji-cat-btn" data-cat="nature" onclick="setEmojiCat(this,'nature')" title="自然">🌿</button>
+          <button class="emoji-cat-btn" data-cat="food" onclick="setEmojiCat(this,'food')" title="食物">🍎</button>
+          <button class="emoji-cat-btn" data-cat="travel" onclick="setEmojiCat(this,'travel')" title="旅行">✈️</button>
+          <button class="emoji-cat-btn" data-cat="activities" onclick="setEmojiCat(this,'activities')" title="活动">⚽</button>
+          <button class="emoji-cat-btn" data-cat="objects" onclick="setEmojiCat(this,'objects')" title="物品">💡</button>
+          <button class="emoji-cat-btn" data-cat="symbols" onclick="setEmojiCat(this,'symbols')" title="符号">❤️</button>
+        </div>
+      </div>
+
+      <div class="tool-section" id="recentSection">
+        <div class="section-label">最近使用</div>
+        <div class="recent-emojis">
+          <span class="recent-emoji" onclick="insertEmoji('🌸')">🌸</span>
+          <span class="recent-emoji" onclick="insertEmoji('✨')">✨</span>
+          <span class="recent-emoji" onclick="insertEmoji('🎯')">🎯</span>
+          <span class="recent-emoji" onclick="insertEmoji('💫')">💫</span>
+          <span class="recent-emoji" onclick="insertEmoji('🌈')">🌈</span>
+          <span class="recent-emoji" onclick="insertEmoji('🎪')">🎪</span>
+          <span class="recent-emoji" onclick="insertEmoji('🦋')">🦋</span>
+          <span class="recent-emoji" onclick="insertEmoji('🍀')">🍀</span>
+        </div>
+      </div>
+
+      <div class="tool-section">
+        <div class="section-label" id="emojiCatLabel">表情与颜文字</div>
+        <div class="emoji-grid" id="emojiGrid"></div>
+      </div>
+
+      <div class="tool-section">
+        <div class="section-label">插入大小</div>
+        <div class="slider-row">
+          <span class="slider-label">尺寸</span>
+          <input type="range" min="16" max="120" value="48" oninput="document.getElementById('emojiSz').textContent=this.value+'px'">
+          <span class="slider-val" id="emojiSz">48px</span>
+        </div>
+      </div>
+
+      </div>
+      <div class="right-footer">
+        <button class="btn-full btn-secondary-full">取消更改</button>
+        <button class="btn-full btn-primary-full">应用</button>
+      </div>
+    </div>
+
+  </aside>
+
+</div><!-- /workspace -->
+
+<!-- ===== 状态栏 ===== -->
+<footer class="statusbar">
+  <div class="status-item">
+    <div class="status-dot"></div>
+    已自动保存
+  </div>
+  <div class="status-sep"></div>
+  <div class="status-item" id="statusTool">当前工具：文字</div>
+  <div class="status-sep"></div>
+  <div class="status-item">画布 3:4 · 520×693</div>
+  <div class="status-sep"></div>
+  <div class="status-item">已选 1 个对象</div>
+</footer>
+
+</div><!-- /app -->
+
+<script src="image-editor-script.js"></script>
+</body>
+</html>

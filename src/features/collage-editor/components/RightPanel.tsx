@@ -15,7 +15,6 @@ export type RightTab = "design";
 interface RightPanelProps {
   accent?: string;
   onAccentChange?: (color: string) => void;
-  /** TODO: 实现环形比例控制 */
   ringScale?: number;
   onRingScaleChange?: (scale: number) => void;
   padding?: number;

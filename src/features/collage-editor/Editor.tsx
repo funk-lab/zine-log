@@ -12,6 +12,7 @@ import {
   renderTemplateSvg,
 } from "../templates/render-template";
 import { useEditor } from "@/app/useEditor";
+import PhotoGallery from "@/features/components/PhotoGallery";
 import { filesToGalleryImages } from "./lib/file";
 import {
   GalleryImage,
@@ -20,7 +21,6 @@ import {
   DEFAULT_IMAGE_EDIT,
 } from "./types";
 import CanvasPanel from "./components/CanvasPanel";
-import PhotoGallery from "./components/PhotoGallery";
 import RightPanel from "./components/RightPanel";
 import StatusBar from "./components/StatusBar";
 import TopBar from "./components/TopBar";

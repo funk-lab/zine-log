@@ -1,16 +1,15 @@
 // TopBar 组件 - 顶部导航栏
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
 interface TopBarProps {
-  /** TODO: 实现撤销功能 */
-  onUndo?: () => void;
-  /** TODO: 实现重做功能 */
-  onRedo?: () => void;
   onFullscreen?: () => void;
   onExport?: () => void;
 }
 
 export const TopBar: React.FC<TopBarProps> = ({ onFullscreen, onExport }) => {
+  const navigate = useNavigate();
+
   return (
     <header className="topbar">
       <a className="logo" href="#">
@@ -35,16 +34,32 @@ export const TopBar: React.FC<TopBarProps> = ({ onFullscreen, onExport }) => {
       </a>
 
       <div className="topbar-actions">
-        {/* <button className="btn-icon" title="撤销" onClick={onUndo}>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M3 7v6h6"/><path d="M3 13c1.3-3.6 4.8-6 9-6a10 10 0 0 1 9 9"/>
+        <button
+          className="btn-icon"
+          title="图片编辑器"
+          onClick={() => void navigate("/image-editor")}
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+            <circle cx="8.5" cy="8.5" r="1.5" />
+            <polyline points="21 15 16 10 5 21" />
           </svg>
         </button>
-        <button className="btn-icon" title="重做" onClick={onRedo}>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M21 7v6h-6"/><path d="M21 13c-1.3-3.6-4.8-6-9-6a10 10 0 0 0-9 9"/>
-          </svg>
-        </button> */}
+        <div
+          style={{
+            width: 1,
+            height: 20,
+            background: "var(--clr-border)",
+            margin: "0 4px",
+          }}
+        />
         <button className="btn-icon" title="全屏" onClick={onFullscreen}>
           <svg
             width="16"
